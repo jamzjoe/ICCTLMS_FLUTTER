@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/icct_lms/icct_lms.iml" filepath="$PROJECT_DIR$/icct_lms/icct_lms.iml" />
+      <module fileurl="file://$PROJECT_DIR$/icct_lms/android/icct_lms_android.iml" filepath="$PROJECT_DIR$/icct_lms/android/icct_lms_android.iml" />
+    </modules>
+  </component>
+</project>
