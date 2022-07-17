@@ -11,7 +11,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   void validateUser(){
-     Future.delayed(const Duration(seconds: 4), (){Navigator.pushReplacementNamed(context, '/'
+     Future.delayed(const Duration(seconds: 5), (){Navigator
+         .pushReplacementNamed(context, '/'
          'intro');
     });
   }
@@ -25,21 +26,22 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue[900],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
           Center(
-            child: CircleAvatar(
-              radius: 30,
-              backgroundImage: AssetImage('assets/logo_plain.png'),
+            child: Image(
+              width: 250,
+              image: AssetImage('assets/logo_white_text.png'),
             ),
           ),
           SizedBox(height: 10,),
           Center(
             child: Text('Institute of Creative Computer Technology', style:
             TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.w600,
               fontSize: 14
             ),),
@@ -48,14 +50,16 @@ class _SplashScreenState extends State<SplashScreen> {
           Center(
             child: Text('Learning Management System', style:
             TextStyle(
-                fontWeight: FontWeight.w200,
-                fontSize: 10
+              color: Colors.white,
+                fontWeight: FontWeight.w300,
+                fontSize: 12
             ),),
           ),
           SizedBox(height: 20,),
           Center(
-            child: SpinKitFoldingCube(
-              color: Colors.blueAccent,
+            child: SpinKitPouringHourGlass(
+              color: Colors.white,
+              duration: Duration(seconds: 2),
             ),
           )
         ],

@@ -18,11 +18,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
     return SafeArea(child:
     Drawer(
       child: Material(
-        color: Colors.blue,
+        color: Colors.blue[900],
         child: ListView(
           padding: const EdgeInsets.all(0),
           children: [
-            Header(),
+            const Header(),
             buildMenuItem(
                 onClicked: ()=> selectedItem(context, 0),
                text: 'Backpack',
@@ -76,22 +76,23 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
   switch(index){
     case 0:
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => BackPack(),));
+          builder: (context) => const BackPack(),));
       break;
     case 1:
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => NewsUpdates(),));
+        builder: (context) => const NewsUpdates(),));
       break;
     case 2:
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => HelpCenter(),));
+        builder: (context) => const HelpCenter(),));
       break;
     case 3:
       Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => Settings(),));
+        builder: (context) => const Settings(),));
       break;
     case 4:
-      print('logout');
+      Navigator.pushNamedAndRemoveUntil(context, '/choose_user', (route) =>
+      false,);
       break;
     case 5:
       print('deleteaccount');
@@ -116,17 +117,17 @@ class _HeaderState extends State<Header> {
     return Container(
       color: Colors.white,
       child: Padding(
-        padding: EdgeInsets.all(30),
+        padding: const EdgeInsets.fromLTRB(10, 35, 10, 35),
         child: Row(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               radius: 30,
               backgroundImage: AssetImage('assets/logo_plain.png'),
             ),
-            SizedBox(width: 10,),
+            const SizedBox(width: 10,),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: const [
                 Text('Joe Cristian Jamis', style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 17

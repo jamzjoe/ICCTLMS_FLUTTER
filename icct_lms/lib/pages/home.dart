@@ -49,13 +49,11 @@ class _HomeState extends State<Home> {
         drawer: const NavigationDrawer(),
         appBar: AppBar(
             flexibleSpace: Container(
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [Colors.blue, Colors.blueAccent]
-                  )
-              ),
+              color: Colors.blue[900]
             ),
             bottom: TabBar(
+              indicatorColor: Colors.red,
+              indicatorWeight: 3,
               tabs: [
                 Tab(icon: Icon(CupertinoIcons.home), text: 'Home',),
                 Tab(icon: Icon(CupertinoIcons.device_desktop), text: 'Class',),
