@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 
 class IntroSlider extends StatefulWidget {
@@ -12,51 +13,56 @@ class IntroSlider extends StatefulWidget {
 class _IntroSliderState extends State<IntroSlider> {
   @override
   Widget build(BuildContext context) {
-    return IntroductionScreen(
-      pages: [
-        PageViewModel(
-            title: 'Gusto mo ng murang tuition?',
-            body: 'Pero',
-            decoration: getPageDecoration(),
-            image: buildImage('assets/logo_black_text.png')),
-        PageViewModel(
-            title: 'Wala kang matutunan?',
-            body: 'Tara na sa ICCT',
-            decoration: getPageDecoration(),
-            image: buildImage('assets/logo_black_text.png'))
-      ],
-      done: Hero(
-        tag: 'joe',
-        child: ElevatedButton.icon(
-            onPressed: () {
-              goToChooseUserType();
-            },
-            icon: const Icon(CupertinoIcons.forward),
-            label: const Text('Start')),
+    return Center(
+      child: IntroductionScreen(
+        pages: [
+          PageViewModel(
+              title: 'Title 1',
+              body: 'Description 1',
+              decoration: getPageDecoration(),
+              image: buildImage('assets/i_developer.svg')),
+          PageViewModel(
+              title: 'Title 2',
+              body: 'Description 2',
+              decoration: getPageDecoration(),
+              image: buildImage('assets/i_online.svg')),
+          PageViewModel(
+              title: 'Title 3',
+              body: 'Description 3',
+              decoration: getPageDecoration(),
+              image: buildImage('assets/i_tuition.svg'))
+        ],
+        done: Hero(
+          tag: 'joe',
+          child: TextButton.icon(
+              onPressed: () {
+                goToChooseUserType();
+              },
+              icon: const Icon(CupertinoIcons.forward),
+              label: const Text('Start')),
+        ),
+        onDone: () {},
+        onSkip: () {},
+        dotsDecorator: getDotDecoration(),
+        skip: Hero(
+          tag: 'joe',
+          child: TextButton.icon(
+              onPressed: () {
+                goToChooseUserType();
+              },
+              icon: const Icon(CupertinoIcons.forward),
+              label: const Text('Skip')),
+        ),
+        showSkipButton: true,
+        skipOrBackFlex: 1,
+        next: const Icon(Icons.arrow_forward),
       ),
-      onDone: () {},
-      onSkip: () {},
-      dotsDecorator: getDotDecoration(),
-      skip: Hero(
-        tag: 'joe',
-        child: ElevatedButton.icon(
-            onPressed: () {
-              goToChooseUserType();
-            },
-            icon: const Icon(CupertinoIcons.forward),
-            label: const Text('Skip')),
-      ),
-      showSkipButton: true,
-      skipOrBackFlex: 1,
-      next: const Icon(Icons.arrow_forward),
     );
   }
 
-  Widget buildImage(String path) => Center(
-        child: Image.asset(
-          path,
-          width: 350,
-        ),
+  Widget buildImage(String path) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
+        child: SvgPicture.asset(path, width: 200,),
       );
 
   DotsDecorator getDotDecoration() => DotsDecorator(
@@ -69,8 +75,8 @@ class _IntroSliderState extends State<IntroSlider> {
         ),
       );
   PageDecoration getPageDecoration() => const PageDecoration(
-        titleTextStyle: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        bodyTextStyle: TextStyle(fontSize: 20),
+        titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        bodyTextStyle: TextStyle(fontSize: 15),
         imagePadding: EdgeInsets.all(24),
         pageColor: Colors.white,
       );
