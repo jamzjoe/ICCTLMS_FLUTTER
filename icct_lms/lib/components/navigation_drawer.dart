@@ -1,5 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:icct_lms/menu_pages/back_pack.dart';
+import 'package:icct_lms/menu_pages/help_center.dart';
+import 'package:icct_lms/menu_pages/news_and_updates.dart';
+import 'package:icct_lms/menu_pages/settings.dart';
 
 class NavigationDrawer extends StatefulWidget {
   const NavigationDrawer({Key? key}) : super(key: key);
@@ -20,18 +24,22 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
           children: [
             Header(),
             buildMenuItem(
+                onClicked: ()=> selectedItem(context, 0),
                text: 'Backpack',
-              icon: Icons.shopping_bag
+              icon: Icons.shopping_bag,
             ),
             buildMenuItem(
+                onClicked: ()=> selectedItem(context, 1),
                 text: 'News and Updates',
                 icon: Icons.newspaper
             ),
             buildMenuItem(
+                onClicked: ()=> selectedItem(context, 2),
                 text: 'Help Center',
                 icon: Icons.question_answer
             ),
             buildMenuItem(
+                onClicked: ()=> selectedItem(context, 3),
                 text: 'Settings',
                 icon: Icons.settings
             ),
@@ -39,10 +47,12 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               color: Colors.white,
             ),
             buildMenuItem(
+                onClicked: ()=> selectedItem(context, 4),
                 text: 'Logout',
                 icon: Icons.exit_to_app
             ),
             buildMenuItem(
+                onClicked: ()=> selectedItem(context, 5),
                 text: 'Delete Account',
                 icon: Icons.delete
             )
@@ -53,12 +63,40 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
     );
   }
 
-  buildMenuItem({required String text, required IconData icon}) {
+  buildMenuItem({required String text, required IconData icon, required Function() onClicked}) {
     const color = Colors.white;
     return ListTile(
+      onTap: onClicked,
       leading: Icon(icon, color: color,),
       title: Text(text, style: const TextStyle(color: color),),
     );
+  }
+
+  selectedItem(BuildContext context, int index) {
+  switch(index){
+    case 0:
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => BackPack(),));
+      break;
+    case 1:
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => NewsUpdates(),));
+      break;
+    case 2:
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => HelpCenter(),));
+      break;
+    case 3:
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => Settings(),));
+      break;
+    case 4:
+      print('logout');
+      break;
+    case 5:
+      print('deleteaccount');
+      break;
+  }
   }
 
 
