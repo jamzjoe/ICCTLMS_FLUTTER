@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:icct_lms/models/school_list.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -11,6 +13,7 @@ class _LoginState extends State<Login> {
   final emailController = TextEditingController();
   final nameController = TextEditingController();
   final passwordController = TextEditingController();
+  final schoolController = TextEditingController();
   String name = '';
   String email = '';
   String password = '';
@@ -34,13 +37,28 @@ class _LoginState extends State<Login> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    schoolController.addListener(() {
+      setState(() {
+
+      });
+    });
     emailController.addListener(() => setState(() {}));
     nameController.addListener(() => setState(() {}));
     passwordController.addListener(() => setState(() {}));
   }
 
   Map data = {};
-  bool isPasswordVisible = false;
+  bool isPasswordVisible = true;
+  List<SchoolList> schools = [
+    SchoolList('Cainta Main Campus', 'assets/logo_plain.png'),
+    SchoolList('San Mateo Campus', 'assets/logo_plain.png'),
+    SchoolList('Sumulong Campus', 'assets/logo_plain.png'),
+    SchoolList('Antipolo Campus', 'assets/logo_plain.png'),
+    SchoolList('Agono Campus', 'assets/logo_plain.png'),
+    SchoolList('Binangonan Campus', 'assets/logo_plain.png'),
+    SchoolList('Cogeo Campus', 'assets/logo_plain.png'),
+    SchoolList('Taytay Campus', 'assets/logo_plain.png'),
+  ];
   @override
   Widget build(BuildContext context) {
     data = ModalRoute.of(context)!.settings.arguments as Map;
@@ -131,7 +149,7 @@ class _LoginState extends State<Login> {
                   }),
                   decoration: InputDecoration(
                     label: const Text('Password'),
-                    hintText: '123456',
+                    hintText: '******',
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.password),
                     suffixIcon: IconButton(
@@ -147,7 +165,29 @@ class _LoginState extends State<Login> {
                   ),
                   obscureText: isPasswordVisible,
                   controller: passwordController,
-                )),
+                )
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Center(
+                    child: TextField(
+                      readOnly: true,
+                      controller: schoolController,
+                      onTap: (){
+                        chooseCampus();
+                      },
+                      decoration: InputDecoration(
+                        label: const Text('Choose Campus'),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(CupertinoIcons.house_alt_fill),
+                        suffixIcon: IconButton(onPressed: (){
+                          chooseCampus();
+                        }, icon: Icon
+                          (Icons.arrow_drop_down_circle))
+                      ),
+                    )
+                ),
                 const SizedBox(
                   height: 10,
                 ),
@@ -156,10 +196,13 @@ class _LoginState extends State<Login> {
                   children: [
                     Center(
                       child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.blue[900]
+                          ),
                           onPressed: () {
                             validateAccount();
                           },
-                          icon: const Icon(Icons.send),
+                          icon: const Icon(CupertinoIcons.forward),
                           label: const Text('Login Account')),
                     ),
                   ],
@@ -170,6 +213,9 @@ class _LoginState extends State<Login> {
                 SizedBox(
                   width: 180,
                   child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                          primary: Colors.blue[900]
+                      ),
                       onPressed: () {
                         goToRegister();
                       },
@@ -181,7 +227,7 @@ class _LoginState extends State<Login> {
                   width: 180,
                   child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.red
+                        primary: Colors.red[800]
                       ),
                       onPressed: () {
                         goToForgotPassword();
@@ -196,4 +242,47 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+
+  void chooseCampus() {
+    showModalBottomSheet(context: context, builder:
+    (context)  => buildSheet()
+    );
+  }
+
+  Widget buildSheet() => ListView(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(30.0),
+        child: Column(
+          children: [
+            Text('Choose Campus', style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold
+            ),
+            ),
+            SizedBox(height: 20,),
+            Column(
+              children: schools.map((e) => newSchools(school: e)).toList(),
+            ),
+          ],
+        ),
+      )
+    ],
+  );
+
+  Widget newSchools({required SchoolList school}) => ListTile(
+    contentPadding: EdgeInsets.all(2),
+    selectedTileColor: Colors.white24,
+    onTap: (){
+      Navigator.pop(context);
+      setState(() {
+        schoolController.text = school.schoolName;
+      });
+    },
+    leading: CircleAvatar(
+      backgroundImage: AssetImage(school.logo),
+    ),
+    title: Text(school.schoolName),
+    trailing: Icon(CupertinoIcons.arrow_right_square_fill),
+  );
 }

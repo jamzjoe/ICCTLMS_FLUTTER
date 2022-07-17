@@ -15,29 +15,41 @@ class _IntroSliderState extends State<IntroSlider> {
   Widget build(BuildContext context) {
     return Center(
       child: IntroductionScreen(
+        animationDuration: 450,
+        globalBackgroundColor: Colors.white,
+        pagesAxis: Axis.horizontal,
         pages: [
           PageViewModel(
               title: 'Title 1',
               body: 'Description 1',
               decoration: getPageDecoration(),
-              image: buildImage('assets/i_developer.svg')),
+              image: Hero(
+                  tag:'intro',
+                  child: buildImage('assets/i_developer.svg'))),
           PageViewModel(
               title: 'Title 2',
               body: 'Description 2',
               decoration: getPageDecoration(),
-              image: buildImage('assets/i_online.svg')),
+              image: Hero(
+                  tag: 'intro',
+                  child: buildImage('assets/i_online.svg'))),
           PageViewModel(
               title: 'Title 3',
               body: 'Description 3',
               decoration: getPageDecoration(),
-              image: buildImage('assets/i_tuition.svg'))
+              image: Hero(
+                  tag: 'intro',
+                  child: buildImage('assets/i_tuition.svg')))
         ],
         done: Hero(
           tag: 'joe',
-          child: TextButton.icon(
+          child: ElevatedButton.icon(
               onPressed: () {
                 goToChooseUserType();
               },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue[900]
+              ),
               icon: const Icon(CupertinoIcons.forward),
               label: const Text('Start')),
         ),
@@ -46,15 +58,17 @@ class _IntroSliderState extends State<IntroSlider> {
         dotsDecorator: getDotDecoration(),
         skip: Hero(
           tag: 'joe',
-          child: TextButton.icon(
+          child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue[900]
+              ),
               onPressed: () {
                 goToChooseUserType();
               },
-              icon: const Icon(CupertinoIcons.forward),
+              icon: const Icon(CupertinoIcons.fullscreen_exit),
               label: const Text('Skip')),
         ),
         showSkipButton: true,
-        skipOrBackFlex: 1,
         next: const Icon(Icons.arrow_forward),
       ),
     );
