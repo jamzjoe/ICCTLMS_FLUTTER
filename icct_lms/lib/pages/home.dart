@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/components/navigation_drawer.dart';
 import 'package:icct_lms/home_pages/class.dart';
+import 'package:icct_lms/home_pages/edit_profile.dart';
 import 'package:icct_lms/home_pages/home.dart';
 import 'package:icct_lms/home_pages/message.dart';
 import 'package:icct_lms/home_pages/notifications.dart';
@@ -17,7 +18,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  String name = 'Joe Cristian Jamis';
 
   @override
   void initState() {
@@ -27,14 +27,7 @@ class _HomeState extends State<Home> {
 
   Map data = {};
   int currentIndex = 0;
-  final screens = [
-    HomeScreen(),
-    ClassScreen(),
-    PlannerScreen(),
-    MessageScreen(),
-    NotificationScreen(),
 
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +35,30 @@ class _HomeState extends State<Home> {
         .of(context)!
         .settings
         .arguments as Map;
+
+
+    String name = 'Name data from main';
+    String email = 'Email data';
+    String school = 'School data';
+    String uid = 'School uid';
+
+    final screens = [
+      HomeScreen(uid: uid),
+      ClassScreen(uid: uid),
+      PlannerScreen(uid: uid),
+      MessageScreen(uid: uid),
+      NotificationScreen(uid: uid),
+
+    ];
     return DefaultTabController(
       length: 5,
       initialIndex: currentIndex,
       child: Scaffold(
-        drawer: const NavigationDrawer(),
+        drawer: NavigationDrawer(
+          name: name,
+          email: email,
+          school: school,
+          uid: uid),
         appBar: AppBar(
             flexibleSpace: Container(
               color: Colors.blue[900]
@@ -71,11 +83,17 @@ class _HomeState extends State<Home> {
             ),
             backgroundColor: Colors.blue,
             title: Text('${data['user_name']}'),
-            actions: const [
+            actions:[
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
-                child: CircleAvatar(
-                  backgroundImage: AssetImage('assets/logo_plain.png'),
+                padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+                child: InkWell(
+                  onTap: (){
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>  EditProfile(uid: uid)));
+                  },
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage('assets/logo_plain.png'),
+                  ),
                 ),
               ),
             ]),

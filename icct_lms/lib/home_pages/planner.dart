@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class PlannerScreen extends StatefulWidget {
-  const PlannerScreen( {Key? key}) : super(key: key);
-
+  const PlannerScreen( {Key? key, required this.uid}) : super(key: key);
+  final String uid;
   @override
   State<PlannerScreen> createState() => _PlannerScreenState();
 }
@@ -10,10 +10,15 @@ class PlannerScreen extends StatefulWidget {
 class _PlannerScreenState extends State<PlannerScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Text('Planner'),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const Text('Planner'),
+            Text(widget.uid)
+          ],
+        ),
       ),
     );
   }
