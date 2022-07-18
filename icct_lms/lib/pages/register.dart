@@ -57,11 +57,24 @@ class _RegisterState extends State<Register> {
             shrinkWrap: true,
             padding: EdgeInsets.all(40),
             children: [
-              const Image(
-                image: AssetImage('assets/logo_black_text.png'),
-                width: 250,
+              const Center(
+                  child: Hero(
+                    tag: 'assets/logo_black_text.png',
+                    child: Image(
+                      image: AssetImage('assets/logo_black_text.png'),
+                      width: 250,
+                    ),
+                  )),
+              const Center(
+                child: Text(
+                  'E-learning Management System',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 10,
+                      letterSpacing: 2),
+                ),
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(height: 50,),
               Text('${data['user_type']} Register', style: const TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.w700
@@ -71,7 +84,7 @@ class _RegisterState extends State<Register> {
                     fontWeight: FontWeight.w300
                 ),),
               const SizedBox(
-                height: 50,
+                height: 10,
               ),
               TextField(
                 onChanged: (value) => setState(() {
@@ -193,7 +206,8 @@ class _RegisterState extends State<Register> {
         ),
       ),
       bottomSheet: Container(
-        height: 40,
+        height: 50,
+        color: Colors.white,
         child: Center(
           child: TextButton(onPressed: (){
             Navigator.pop(context);

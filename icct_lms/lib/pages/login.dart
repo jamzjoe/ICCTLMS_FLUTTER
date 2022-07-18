@@ -72,11 +72,24 @@ class _LoginState extends State<Login> {
               shrinkWrap: true,
               padding: EdgeInsets.all(40),
               children: [
-                const Image(
-                  image: AssetImage('assets/logo_black_text.png'),
-                  width: 250,
+                const Center(
+                    child: Hero(
+                      tag: 'assets/logo_black_text.png',
+                      child: Image(
+                        image: AssetImage('assets/logo_black_text.png'),
+                        width: 250,
+                      ),
+                    )),
+                const Center(
+                  child: Text(
+                    'E-learning Management System',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 10,
+                        letterSpacing: 2),
+                  ),
                 ),
-                const SizedBox(height: 10,),
+                const SizedBox(height: 50,),
                 Text('${data['user_type']} Login', style: const TextStyle(
                     fontSize: 23,
                     fontWeight: FontWeight.w700
@@ -86,7 +99,7 @@ class _LoginState extends State<Login> {
                       fontWeight: FontWeight.w300
                   ),),
                 const SizedBox(
-                  height: 50,
+                  height: 10,
                 ),
                 TextField(
                   onChanged: (value) => setState(() {
@@ -208,20 +221,26 @@ class _LoginState extends State<Login> {
           ),
         )
       ),
-      bottomSheet: Container(
-        height: 40,
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        color: Colors.white60,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(onPressed: (){
-              Navigator.pushNamed(context, '/user_register', arguments: {
-                'user_type': data['user_type']
-              });
-            }, child: Text('No account yet?')),
-            TextButton(onPressed: (){}, child: Text('Forgot Password?')),
-          ],
+      bottomSheet: ClipRRect(
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(20), 
+            topRight: Radius.circular(20)),
+        child: Container(
+          color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextButton(onPressed: (){
+                Navigator.pushNamed(context, '/user_register', arguments: {
+                  'user_type': data['user_type']
+                });
+              }, child: Text('No account yet?')),
+              TextButton(onPressed: (){
+                Navigator.pushNamed(context, '/forgot_password', arguments: {
+                  'user_type': data['user_type']
+                });
+              }, child: Text('Forgot Password?')),
+            ],
+          ),
         ),
       ),
     );

@@ -14,11 +14,10 @@ class _SplashScreenState extends State<SplashScreen> {
   void validateUser() async{
       final prefs = await SharedPreferences.getInstance();
       final showHome = prefs.getBool('showHome') ?? false;
-     Future.delayed(const Duration(seconds: 5), (){!showHome? Navigator
-         .pushReplacementNamed(context, '/'
-         'intro') : Navigator
-         .pushReplacementNamed(context, '/'
-         'choose_user');
+     Future.delayed(const Duration(seconds: 2), (){!showHome? Navigator
+         .pushNamedAndRemoveUntil(context, '/intro', (route) => false) :
+          Navigator.pushNamedAndRemoveUntil(context, '/choose_user', (route) =>
+          false);
     });
   }
   
@@ -37,9 +36,12 @@ class _SplashScreenState extends State<SplashScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
           Center(
-            child: Image(
-              width: 250,
-              image: AssetImage('assets/logo_white_text.png'),
+            child: Hero(
+              tag: 'assets/logo_black_text.png',
+              child: Image(
+                width: 250,
+                image: AssetImage('assets/logo_white_text.png'),
+              ),
             ),
           ),
           SizedBox(height: 10,),
@@ -60,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontSize: 12
             ),),
           ),
-          SizedBox(height: 20,),
+          SizedBox(height: 100,),
           Center(
             child: SpinKitPouringHourGlassRefined(
               color: Colors.white,

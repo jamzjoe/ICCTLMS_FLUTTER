@@ -24,11 +24,14 @@ class _ChooseUserState extends State<ChooseUser> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Center(
-                  child: Image(
+               const Center(
+                  child: Hero(
+                    tag: 'assets/logo_black_text.png',
+                    child: Image(
                 image: AssetImage('assets/logo_black_text.png'),
                 width: 250,
-              )),
+              ),
+                  )),
               const Center(
                 child: Text(
                   'E-learning Management System',

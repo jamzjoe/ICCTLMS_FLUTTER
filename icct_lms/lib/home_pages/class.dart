@@ -24,10 +24,10 @@ class _ClassScreenState extends State<ClassScreen> {
         ),
       ),
       floatingActionButton: SpeedDial(
+        spaceBetweenChildren: 10,
         overlayColor: Colors.black54,
         backgroundColor: Colors.blue[900],
         animatedIcon: AnimatedIcons.menu_close,
-        animationDuration: const Duration(milliseconds: 300),
         children: [
           SpeedDialChild(
             onTap: (){
