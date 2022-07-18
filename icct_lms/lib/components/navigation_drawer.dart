@@ -27,6 +27,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
           children: [
              Header(name: widget.name, email: widget.email, uid: widget.uid,
                  school: widget.school),
+
+            const Divider(
+              thickness: 2,
+              color: Colors.white,
+            ),
             buildMenuItem(
                 onClicked: ()=> selectedItem(context, 0),
                text: 'Backpack',
@@ -48,6 +53,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 icon: Icons.settings
             ),
             const Divider(
+              thickness: 2,
               color: Colors.white,
             ),
             buildMenuItem(
@@ -121,48 +127,64 @@ class _HeaderState extends State<Header> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: Colors.blue[900],
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 35, 10, 35),
-        child: Row(
-          children: [
-            const CircleAvatar(
-              radius: 30,
-              backgroundImage: AssetImage('assets/logo_plain.png'),
-            ),
-            const SizedBox(width: 10,),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.name, style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 17
-                ),),
-                Text(widget.email, style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w300
-                ),),
-                Text(widget.school,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage('assets/logo_plain.png'),
+              ),
+              const SizedBox(width: 20,),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.name, style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 17,
+                    color: Colors.white
                   ),),
-                Row(
-                  children: [
-                    Text(widget.uid,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w300
-                      ),),
-                      buildCopy(),
-                  ],
-                ),
-              ],
-            )
-          ],
+                  Text(widget.email, style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w300,
+                      color: Colors.white
+                  ),),
+                  Text(widget.school,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.white
+                    ),),
+                  Row(
+                    children: [
+                      Text(widget.uid,
+                        style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.white
+                        ),),
+                        buildCopy(),
+                    ],
+                  ),
+
+
+                ],
+
+              )
+            ],
+
+          ),
+
+
         ),
+
       ),
+
     );
+
   }
 
   Widget buildCopy() => IconButton(onPressed: () async{
@@ -173,5 +195,5 @@ class _HeaderState extends State<Header> {
     300), ), );
     Navigator.of(context).pop();
   }, icon: const Icon(Icons
-      .copy_outlined, size: 12,));
+      .copy_outlined, size: 12, color: Colors.white,));
 }

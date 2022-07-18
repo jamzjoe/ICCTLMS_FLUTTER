@@ -25,8 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: SpeedDial(
         overlayColor: Colors.black54,
         backgroundColor: Colors.blue[900],
+        spaceBetweenChildren: 10,
         animatedIcon: AnimatedIcons.menu_close,
-        animationDuration: const Duration(milliseconds: 300),
         children: [
           SpeedDialChild(
               child: const Icon(CupertinoIcons.create),
