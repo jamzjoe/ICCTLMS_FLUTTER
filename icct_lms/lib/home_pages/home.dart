@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
-
+  const HomeScreen({Key? key, required this.uid}) : super(key: key);
+  final String uid;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -13,9 +13,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Padding(
-        padding: EdgeInsets.all(20),
-        child: Text('Home'),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const Text('Home'),
+            Text(widget.uid)
+          ],
+        ),
       ),
       floatingActionButton: SpeedDial(
         overlayColor: Colors.black54,

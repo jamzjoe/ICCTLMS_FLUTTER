@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icct_lms/home_pages/edit_profile.dart';
 import 'package:icct_lms/pages/choose_type_user.dart';
 import 'package:icct_lms/pages/forgot_password.dart';
 import 'package:icct_lms/pages/home.dart';
@@ -18,7 +19,7 @@ routes: {
   '/user_login': (context) => const Login(),
   '/user_register': (context) => const Register(),
   '/parent': (context) => const Parent(),
-  '/forgot_password': (context) => const ForgotPassword()
+  '/forgot_password': (context) => const ForgotPassword(),
 },
   ));
 }

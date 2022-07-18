@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:introduction_screen/introduction_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class IntroSlider extends StatefulWidget {
   const IntroSlider({Key? key}) : super(key: key);
@@ -10,93 +11,149 @@ class IntroSlider extends StatefulWidget {
   State<IntroSlider> createState() => _IntroSliderState();
 }
 
+
+
 class _IntroSliderState extends State<IntroSlider> {
+
+  final pageController = PageController();
+  bool isLastPage = false;
+  @override
+  void dispose() {
+    // TODO: implement initState
+    pageController.dispose();
+    super.dispose();
+
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: IntroductionScreen(
-        animationDuration: 450,
-        globalBackgroundColor: Colors.white,
-        pagesAxis: Axis.horizontal,
-        pages: [
-          PageViewModel(
-              title: 'Title 1',
-              body: 'Description 1',
-              decoration: getPageDecoration(),
-              image: Hero(
-                  tag:'intro',
-                  child: buildImage('assets/i_developer.svg'))),
-          PageViewModel(
-              title: 'Title 2',
-              body: 'Description 2',
-              decoration: getPageDecoration(),
-              image: Hero(
-                  tag: 'intro',
-                  child: buildImage('assets/i_online.svg'))),
-          PageViewModel(
-              title: 'Title 3',
-              body: 'Description 3',
-              decoration: getPageDecoration(),
-              image: Hero(
-                  tag: 'intro',
-                  child: buildImage('assets/i_tuition.svg')))
-        ],
-        done: Hero(
-          tag: 'joe',
-          child: ElevatedButton.icon(
-              onPressed: () {
-                goToChooseUserType();
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue[900]
-              ),
-              icon: const Icon(CupertinoIcons.forward),
-              label: const Text('Start')),
+    return Scaffold(
+      body: Container(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: PageView(
+          onPageChanged: (index){
+            setState(() {
+              isLastPage = index == 2;
+            });
+          },
+          controller: pageController,
+          children: [
+            Container(
+              color: Colors.blue[900],
+              child: buildPage('assets/i_personal.svg', 'Choose Your '
+                  'Identity', 'Serves as an open channel of communication '
+                  'between teachers, students, parents, and staff.'),
+            ),
+            Container(
+              color: Colors.blue[900],
+              child: buildPage('assets/i_account.svg', 'Create Account', 'You'
+                  ' have entered all the required data and now able to access'
+                  ' the system online learning resources.'),
+            ),
+            Container(
+              color: Colors.blue[900],
+              child: buildPage('assets/i_learn.svg', 'Learn and Discover',
+                  'This will become a unique source of knowledge in your '
+                      'field and will help you improve your skills.')
+            )
+          ],
         ),
-        onDone: () {},
-        onSkip: () {},
-        dotsDecorator: getDotDecoration(),
-        skip: Hero(
-          tag: 'joe',
-          child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue[900]
-              ),
-              onPressed: () {
-                goToChooseUserType();
+      ),
+      bottomSheet: isLastPage ? Container(
+        height: 80,
+        color: Colors.white,
+        child:  Center(
+          child: SizedBox(
+            height: 80,
+            width: 1000,
+            child: TextButton(
+              onPressed: () async{
+
+                final prefs = await SharedPreferences.getInstance();
+                prefs.setBool('showHome', true);
+                if(!mounted){
+                  return;
+                }
+                Navigator.pushNamedAndRemoveUntil(context, '/choose_user',
+                        (route) =>
+                false);
+
               },
-              icon: const Icon(CupertinoIcons.fullscreen_exit),
-              label: const Text('Skip')),
+              child: Text(
+                'Get Started', style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 19,
+                  color: Colors.blue[900]
+              ),
+              ),
+            ),
+          ),
         ),
-        showSkipButton: true,
-        next: const Icon(Icons.arrow_forward),
+      ) :
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        height: 80,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextButton(onPressed: (){
+              pageController.jumpToPage(2);
+            }, child: Text
+              ('SKIP', style: TextStyle(
+              color: Colors.blue[900]
+            ),)),
+            Center(
+              child: SmoothPageIndicator(
+                controller: pageController,
+                effect: ExpandingDotsEffect(
+                  dotWidth: 10,
+                  dotHeight: 10,
+                  dotColor: Colors.blueGrey,
+                  activeDotColor: Colors.blueAccent
+                ),
+                onDotClicked: (index) => pageController.jumpToPage(index),
+                count: 3,
+              ),
+            ),
+            TextButton(onPressed: (){
+              pageController.nextPage(duration: Duration(seconds: 1), curve:
+              Curves.easeInOut);
+            }, child: Text('Next', style: TextStyle(
+              color: Colors.blue[900]
+            ),))
+          ],
+        ),
       ),
     );
   }
 
-  Widget buildImage(String path) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
-        child: SvgPicture.asset(path, width: 200,),
-      );
-
-  DotsDecorator getDotDecoration() => DotsDecorator(
-        color: const Color(0xFFBDBDBD),
-        //activeColor: Colors.orange,
-        size: const Size(10, 10),
-        activeSize: const Size(22, 10),
-        activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-      );
-  PageDecoration getPageDecoration() => const PageDecoration(
-        titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-        bodyTextStyle: TextStyle(fontSize: 15),
-        imagePadding: EdgeInsets.all(24),
-        pageColor: Colors.white,
-      );
-
-  void goToChooseUserType() {
-    Navigator.pushNamedAndRemoveUntil(context, '/choose_user', (route) =>
-    false);
-  }
+  Widget buildPage(String path, String title, String description)=> Center(
+    child: Padding(
+      padding: const EdgeInsets.all(50.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(path, width: 200,),
+          const SizedBox(height: 10,),
+          Text(title, style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 20
+          ),
+          ),
+          const SizedBox(height: 5,),
+          Center(
+            child: Text(description, style: TextStyle(
+              fontWeight: FontWeight.w300,
+              fontSize: 15,
+              color: Colors.white
+            ),
+            textAlign: TextAlign.center,
+            ),
+          )
+        ],
+      ),
+    ),
+  );
 }

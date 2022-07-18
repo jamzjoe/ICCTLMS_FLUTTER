@@ -50,166 +50,154 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     data = ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(
-                  height: 10,
+      body: Container(
+        padding: EdgeInsets.only(bottom: 40),
+        child: Center(
+          child: ListView(
+            shrinkWrap: true,
+            padding: EdgeInsets.all(40),
+            children: [
+              const Image(
+                image: AssetImage('assets/logo_black_text.png'),
+                width: 250,
+              ),
+              const SizedBox(height: 10,),
+              Text('${data['user_type']} Register', style: const TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.w700
+              ),),
+              const Text("*Please make sure you input a correct data.",
+                style: TextStyle(
+                    fontWeight: FontWeight.w300
+                ),),
+              const SizedBox(
+                height: 50,
+              ),
+              TextField(
+                onChanged: (value) => setState(() {
+                  name = value;
+                }),
+                decoration: InputDecoration(
+                  label: const Text('Username'),
+                  hintText: 'Juan Dela Cruz',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.person),
+                  suffixIcon: nameController.text.isEmpty
+                      ? Container(
+                    width: 0,
+                  )
+                      : IconButton(
+                      onPressed: () => nameController.clear(),
+                      icon: const Icon(Icons.close)),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Image(
-                      image: AssetImage('assets/logo_black_text.png'),
-                      width: 250,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      '${data['user_type']} Register',
-                      style: const TextStyle(
-                          fontSize: 23, fontWeight: FontWeight.w700),
-                    ),
-                    const Text(
-                      "*Please make sure you input a correct data.",
-                      style: TextStyle(fontWeight: FontWeight.w300),
-                    ),
-                    const SizedBox(
-                      height: 50,
-                    ),
-                    TextField(
-                      onChanged: (value) => setState(() {
-                        name = value;
-                      }),
-                      decoration: InputDecoration(
-                        label: const Text('Username'),
-                        hintText: 'Juan Dela Cruz',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.person),
-                        suffixIcon: nameController.text.isEmpty
-                            ? Container(
-                                width: 0,
-                              )
-                            : IconButton(
-                                onPressed: () => nameController.clear(),
-                                icon: const Icon(Icons.close)),
-                      ),
-                      controller: nameController,
-                      keyboardType: TextInputType.name,
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Center(
-                    child: TextField(
-                  onChanged: (value) => setState(() {
-                    email = value;
-                  }),
-                  decoration: InputDecoration(
-                    label: const Text('Email address'),
-                    hintText: 'email@example.com',
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.mail),
-                    suffixIcon: emailController.text.isEmpty
-                        ? Container(
-                            width: 0,
-                          )
-                        : IconButton(
-                            onPressed: () => emailController.clear(),
-                            icon: const Icon(Icons.close)),
-                  ),
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                )),
-                const SizedBox(
-                  height: 10,
-                ),
-                Center(
-                    child: TextField(
-                  onChanged: (value) => setState(() {
-                    password = value;
-                  }),
-                  decoration: InputDecoration(
-                    label: const Text('Password'),
-                    hintText: '123456',
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.password),
-                    suffixIcon: IconButton(
-                      icon: isPasswordVisible
-                          ? const Icon(Icons.visibility_off)
-                          : const Icon(Icons.visibility),
-                      onPressed: () {
-                        setState(() {
-                          isPasswordVisible = !isPasswordVisible;
-                        });
-                      },
-                    ),
-                  ),
-                  obscureText: isPasswordVisible,
-                  controller: passwordController,
-                )),
-                const SizedBox(
-                  height: 10,
-                ),
-                Center(
-                    child: TextField(
-                  readOnly: true,
-                  controller: schoolController,
-                  onTap: () {
-                    chooseCampus();
-                  },
-                  decoration: InputDecoration(
-                      label: const Text('Choose Campus'),
+                controller: nameController,
+                keyboardType: TextInputType.name,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Center(
+                  child: TextField(
+                    onChanged: (value) => setState(() {
+                      email = value;
+                    }),
+                    decoration: InputDecoration(
+                      label: const Text('Email address'),
+                      hintText: 'email@example.com',
                       border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(CupertinoIcons.house_alt_fill),
+                      prefixIcon: const Icon(Icons.mail),
+                      suffixIcon: emailController.text.isEmpty
+                          ? Container(
+                        width: 0,
+                      )
+                          : IconButton(
+                          onPressed: () => emailController.clear(),
+                          icon: const Icon(Icons.close)),
+                    ),
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                  )),
+              const SizedBox(
+                height: 10,
+              ),
+              Center(
+                  child: TextField(
+                    onChanged: (value) => setState(() {
+                      password = value;
+                    }),
+                    decoration: InputDecoration(
+                      label: const Text('Password'),
+                      hintText: '******',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.password),
                       suffixIcon: IconButton(
-                          onPressed: () {
-                            chooseCampus();
-                          },
-                          icon: Icon(Icons.arrow_drop_down_circle))),
-                )),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Center(
-                      child: ElevatedButton.icon(
+                        icon: isPasswordVisible
+                            ? const Icon(Icons.visibility_off)
+                            : const Icon(Icons.visibility),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordVisible = !isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                    obscureText: isPasswordVisible,
+                    controller: passwordController,
+                  )
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Center(
+                  child: TextField(
+                    readOnly: true,
+                    controller: schoolController,
+                    onTap: (){
+                      chooseCampus();
+                    },
+                    decoration: InputDecoration(
+                        label: const Text('Choose Campus'),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(CupertinoIcons.house_alt_fill),
+                        suffixIcon: IconButton(onPressed: (){
+                          chooseCampus();
+                        }, icon: Icon
+                          (Icons.arrow_drop_down_circle))
+                    ),
+                  )
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Center(
+                    child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.blue[900]
+                            primary: Colors.blue[900]
                         ),
-                          onPressed: () {
-                            // validateAccount();
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.create),
-                          label: const Text('Register Account')),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 110,
-                ),
-                SizedBox(
-                  width: 180,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.blue[900]
-                    ),
-                      onPressed: () {
-                        backToLogin();
-                      },
-                      icon: const Icon(Icons.account_circle),
-                      label: const Text('Back to Login')),
-                ),
-              ],
-            ),
+                        onPressed: () {
+                          backToLogin();
+                        },
+                        icon: const Icon(CupertinoIcons.create),
+                        label: const Text('Register Account')),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 110,
+              ),
+            ],
           ),
+        ),
+      ),
+      bottomSheet: Container(
+        height: 40,
+        child: Center(
+          child: TextButton(onPressed: (){
+            Navigator.pop(context);
+          }, child: Text('Back to login')),
         ),
       ),
     );

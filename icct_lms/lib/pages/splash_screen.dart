@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -10,10 +11,14 @@ class SplashScreen extends StatefulWidget {
 
 
 class _SplashScreenState extends State<SplashScreen> {
-  void validateUser(){
-     Future.delayed(const Duration(seconds: 5), (){Navigator
+  void validateUser() async{
+      final prefs = await SharedPreferences.getInstance();
+      final showHome = prefs.getBool('showHome') ?? false;
+     Future.delayed(const Duration(seconds: 5), (){!showHome? Navigator
          .pushReplacementNamed(context, '/'
-         'intro');
+         'intro') : Navigator
+         .pushReplacementNamed(context, '/'
+         'choose_user');
     });
   }
   
@@ -57,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
           SizedBox(height: 20,),
           Center(
-            child: SpinKitPouringHourGlass(
+            child: SpinKitPouringHourGlassRefined(
               color: Colors.white,
               duration: Duration(seconds: 2),
             ),

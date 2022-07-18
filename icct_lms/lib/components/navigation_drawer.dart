@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/menu_pages/back_pack.dart';
 import 'package:icct_lms/menu_pages/help_center.dart';
@@ -6,8 +6,11 @@ import 'package:icct_lms/menu_pages/news_and_updates.dart';
 import 'package:icct_lms/menu_pages/settings.dart';
 
 class NavigationDrawer extends StatefulWidget {
-  const NavigationDrawer({Key? key}) : super(key: key);
-
+  const NavigationDrawer({Key? key, required this.name, required this.email, required this.uid, required this.school}) : super(key: key);
+  final String name;
+  final String email;
+  final String uid;
+  final String school;
   @override
   State<NavigationDrawer> createState() => _NavigationDrawerState();
 }
@@ -22,7 +25,8 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
         child: ListView(
           padding: const EdgeInsets.all(0),
           children: [
-            const Header(),
+             Header(name: widget.name, email: widget.email, uid: widget.uid,
+                 school: widget.school),
             buildMenuItem(
                 onClicked: ()=> selectedItem(context, 0),
                text: 'Backpack',
@@ -95,7 +99,6 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
       false,);
       break;
     case 5:
-      print('deleteaccount');
       break;
   }
   }
@@ -105,8 +108,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
 }
 
 class Header extends StatefulWidget {
-  const Header({Key? key}) : super(key: key);
-
+  const Header({Key? key, required this.name, required this.school, required this.uid, required this.email}) : super(key: key);
+  final String name;
+  final String school;
+  final String uid;
+  final String email;
   @override
   State<Header> createState() => _HeaderState();
 }
@@ -127,20 +133,30 @@ class _HeaderState extends State<Header> {
             const SizedBox(width: 10,),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Joe Cristian Jamis', style: TextStyle(
+              children: [
+                Text(widget.name, style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 17
                 ),),
-                Text('jamisjoecristian@gmail.com', style: TextStyle(
+                Text(widget.email, style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w300
                 ),),
-                Text('ICCT San Mateo Campus',
-                  style: TextStyle(
+                Text(widget.school,
+                  style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w300
                   ),),
+                Row(
+                  children: [
+                    Text(widget.uid,
+                      style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w300
+                      ),),
+                      buildCopy(),
+                  ],
+                ),
               ],
             )
           ],
@@ -148,4 +164,14 @@ class _HeaderState extends State<Header> {
       ),
     );
   }
+
+  Widget buildCopy() => IconButton(onPressed: () async{
+    await FlutterClipboard.copy(widget.uid);
+    if(!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar( SnackBar( content: Text
+      ('You copied ${widget.uid}'), duration: const Duration(milliseconds:
+    300), ), );
+    Navigator.of(context).pop();
+  }, icon: const Icon(Icons
+      .copy_outlined, size: 12,));
 }

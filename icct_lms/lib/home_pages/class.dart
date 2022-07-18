@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class ClassScreen extends StatefulWidget {
-  const ClassScreen( {Key? key}) : super(key: key);
-
+  const ClassScreen( {Key? key, required this.uid}) : super(key: key);
+  final String uid;
   @override
   State<ClassScreen> createState() => _ClassScreenState();
 }
@@ -15,8 +15,13 @@ class _ClassScreenState extends State<ClassScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Padding(padding: EdgeInsets.all(20),
-        child: Text('Class'),
+      body: Padding(padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text('Class'),
+            Text(widget.uid)
+          ],
+        ),
       ),
       floatingActionButton: SpeedDial(
         overlayColor: Colors.black54,
