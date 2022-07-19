@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:icct_lms/models/options.dart';
 import 'package:icct_lms/models/school_list.dart';
+import 'package:icct_lms/services/auth.dart';
 
 class Register extends StatefulWidget {
-  const Register({Key? key}) : super(key: key);
-
+  const Register({Key? key, required this.togglePage}) : super(key: key);
+  final Function togglePage;
   @override
   State<Register> createState() => _RegisterState();
 }
@@ -14,12 +16,16 @@ class _RegisterState extends State<Register> {
   final nameController = TextEditingController();
   final passwordController = TextEditingController();
   final schoolController = TextEditingController();
+  final userTypeController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   String name = '';
+  final AuthService _auth = AuthService();
   String email = '';
   String password = '';
+  String error = '';
 
   void backToLogin() {
-    Navigator.pop(context);
+    widget.togglePage();
   }
 
   @override
@@ -29,12 +35,16 @@ class _RegisterState extends State<Register> {
     schoolController.addListener(() {
       setState(() {});
     });
+    userTypeController.addListener(() {
+      setState(() {
+
+      });
+    });
     emailController.addListener(() => setState(() {}));
     nameController.addListener(() => setState(() {}));
     passwordController.addListener(() => setState(() {}));
   }
 
-  Map data = {};
   bool isPasswordVisible = false;
   List<SchoolList> schools = [
     SchoolList('Cainta Main Campus', 'assets/logo_plain.png'),
@@ -46,9 +56,10 @@ class _RegisterState extends State<Register> {
     SchoolList('Cogeo Campus', 'assets/logo_plain.png'),
     SchoolList('Taytay Campus', 'assets/logo_plain.png'),
   ];
+  final option = ['Student', 'Teacher', 'Parent'];
+
   @override
   Widget build(BuildContext context) {
-    data = ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(bottom: 40),
@@ -75,110 +86,154 @@ class _RegisterState extends State<Register> {
                 ),
               ),
               const SizedBox(height: 50,),
-              Text('${data['user_type']} Register', style: const TextStyle(
+              Text('Create a new account', style: const TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.w700
               ),),
-              const Text("*Please make sure you input a correct data.",
-                style: TextStyle(
-                    fontWeight: FontWeight.w300
-                ),),
+
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
-              TextField(
-                onChanged: (value) => setState(() {
-                  name = value;
-                }),
-                decoration: InputDecoration(
-                  label: const Text('Username'),
-                  hintText: 'Juan Dela Cruz',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.person),
-                  suffixIcon: nameController.text.isEmpty
-                      ? Container(
-                    width: 0,
-                  )
-                      : IconButton(
-                      onPressed: () => nameController.clear(),
-                      icon: const Icon(Icons.close)),
-                ),
-                controller: nameController,
-                keyboardType: TextInputType.name,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Center(
-                  child: TextField(
-                    onChanged: (value) => setState(() {
-                      email = value;
-                    }),
-                    decoration: InputDecoration(
-                      label: const Text('Email address'),
-                      hintText: 'email@example.com',
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.mail),
-                      suffixIcon: emailController.text.isEmpty
-                          ? Container(
-                        width: 0,
-                      )
-                          : IconButton(
-                          onPressed: () => emailController.clear(),
-                          icon: const Icon(Icons.close)),
-                    ),
-                    controller: emailController,
-                    keyboardType: TextInputType.emailAddress,
-                  )),
-              const SizedBox(
-                height: 10,
-              ),
-              Center(
-                  child: TextField(
-                    onChanged: (value) => setState(() {
-                      password = value;
-                    }),
-                    decoration: InputDecoration(
-                      label: const Text('Password'),
-                      hintText: '******',
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.password),
-                      suffixIcon: IconButton(
-                        icon: isPasswordVisible
-                            ? const Icon(Icons.visibility_off)
-                            : const Icon(Icons.visibility),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
+              Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        // validator: (value) => value!.length < 5 && value
+                        //     .isEmpty ? 'Username required 5+ chars long':
+                        // null,
+                        onChanged: (value) =>
+                            setState(() {
+                              name = value;
+                            }),
+                        decoration: InputDecoration(
+                          label: const Text('Username'),
+                          hintText: 'Juan Dela Cruz',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.person),
+                          suffixIcon: nameController.text.isEmpty
+                              ? Container(
+                            width: 0,
+                          )
+                              : IconButton(
+                              onPressed: () => nameController.clear(),
+                              icon: const Icon(Icons.close)),
+                        ),
+                        controller: nameController,
+                        keyboardType: TextInputType.name,
                       ),
-                    ),
-                    obscureText: isPasswordVisible,
-                    controller: passwordController,
-                  )
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Center(
-                  child: TextField(
-                    readOnly: true,
-                    controller: schoolController,
-                    onTap: (){
-                      chooseCampus();
-                    },
-                    decoration: InputDecoration(
-                        label: const Text('Choose Campus'),
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(CupertinoIcons.house_alt_fill),
-                        suffixIcon: IconButton(onPressed: (){
-                          chooseCampus();
-                        }, icon: Icon
-                          (Icons.arrow_drop_down_circle))
-                    ),
-                  )
-              ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Center(
+                          child: TextFormField(
+                            validator: (value) =>
+                            value!.isEmpty && !value
+                                .contains('@') ? 'Username must be contains @'
+                                ' and 6+ chars long' :
+                            null,
+                            onChanged: (value) =>
+                                setState(() {
+                                  email = value;
+                                }),
+                            decoration: InputDecoration(
+                              label: const Text('Email address'),
+                              hintText: 'email@example.com',
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.mail),
+                              suffixIcon: emailController.text.isEmpty
+                                  ? Container(
+                                width: 0,
+                              )
+                                  : IconButton(
+                                  onPressed: () => emailController.clear(),
+                                  icon: const Icon(Icons.close)),
+                            ),
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                          )),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Center(
+                          child: TextFormField(
+                            validator: (value) =>
+                            value!.length < 6 ? 'Passwo'
+                                'rd must be 6+ chars long.' : null,
+                            onChanged: (value) =>
+                                setState(() {
+                                  password = value;
+                                }),
+                            decoration: InputDecoration(
+                              label: const Text('Password'),
+                              hintText: '******',
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.password),
+                              suffixIcon: IconButton(
+                                icon: isPasswordVisible
+                                    ? const Icon(Icons.visibility_off)
+                                    : const Icon(Icons.visibility),
+                                onPressed: () {
+                                  setState(() {
+                                    isPasswordVisible = !isPasswordVisible;
+                                  });
+                                },
+                              ),
+                            ),
+                            obscureText: isPasswordVisible,
+                            controller: passwordController,
+                          )
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Center(
+                          child: TextFormField(
+                            // validator: (value) => value!.isEmpty ? 'Choose '
+                            //     'campus': null,
+                            readOnly: true,
+                            controller: schoolController,
+                            onTap: () {
+                              chooseCampus();
+                            },
+                            decoration: InputDecoration(
+                                label: const Text('Choose Campus'),
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(CupertinoIcons
+                                    .house_alt_fill),
+                                suffixIcon: IconButton(onPressed: () {
+                                  chooseCampus();
+                                }, icon: Icon
+                                  (Icons.arrow_drop_down_circle))
+                            ),
+                          )
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Center(
+                          child: TextFormField(
+                            // validator: (value) => value!.isEmpty ? 'Choose '
+                            //     'campus': null,
+                            readOnly: true,
+                            controller: userTypeController,
+                            onTap: () {
+                              chooseUser();
+                            },
+                            decoration: InputDecoration(
+                                label: const Text('User Type'),
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(CupertinoIcons
+                                    .person_2_fill),
+                                suffixIcon: IconButton(onPressed: () {
+                                  chooseUser();
+                                }, icon: Icon
+                                  (Icons.arrow_drop_down_circle))
+                            ),
+                          )
+                      ),
+                    ],
+                  )),
               const SizedBox(
                 height: 10,
               ),
@@ -190,8 +245,19 @@ class _RegisterState extends State<Register> {
                         style: ElevatedButton.styleFrom(
                             primary: Colors.blue[900]
                         ),
-                        onPressed: () {
-                          backToLogin();
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            dynamic result = await _auth
+                                .registerWithEmailAndPassword(emailController
+                                .text.trim(),
+                                passwordController.text.trim());
+                            print(email + password);
+                            if (result == null) {
+                              setState(() {
+                                error = 'Create failed.';
+                              });
+                            }
+                          }
                         },
                         icon: const Icon(CupertinoIcons.create),
                         label: const Text('Register Account')),
@@ -201,6 +267,7 @@ class _RegisterState extends State<Register> {
               const SizedBox(
                 height: 110,
               ),
+
             ],
           ),
         ),
@@ -209,8 +276,8 @@ class _RegisterState extends State<Register> {
         height: 50,
         color: Colors.white,
         child: Center(
-          child: TextButton(onPressed: (){
-            Navigator.pop(context);
+          child: TextButton(onPressed: () {
+            backToLogin();
           }, child: Text('Back to login')),
         ),
       ),
@@ -219,44 +286,87 @@ class _RegisterState extends State<Register> {
 
   void chooseCampus() {
     showModalBottomSheet(context: context, builder:
-        (context)  => buildSheet()
+        (context) => buildSheet()
     );
   }
 
-  Widget buildSheet() => ListView(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          children: [
-            Text('Choose Campus', style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold
+  Widget buildSheet() =>
+      ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              children: [
+                Text('Choose Campus', style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold
+                ),
+                ),
+                SizedBox(height: 20,),
+                Column(
+                  children: schools.map((e) => newSchools(school: e)).toList(),
+                ),
+              ],
             ),
-            ),
-            SizedBox(height: 20,),
-            Column(
-              children: schools.map((e) => newSchools(school: e)).toList(),
-            ),
-          ],
-        ),
-      )
-    ],
-  );
+          )
+        ],
+      );
 
-  Widget newSchools({required SchoolList school}) => ListTile(
-    contentPadding: EdgeInsets.all(2),
-    selectedTileColor: Colors.white24,
-    onTap: (){
-      Navigator.pop(context);
-      setState(() {
-        schoolController.text = school.schoolName;
-      });
-    },
-    leading: CircleAvatar(
-      backgroundImage: AssetImage(school.logo),
-    ),
-    title: Text(school.schoolName),
-    trailing: Icon(CupertinoIcons.arrow_right_square_fill),
-  );
+  Widget newSchools({required SchoolList school}) =>
+      ListTile(
+        contentPadding: EdgeInsets.all(2),
+        selectedTileColor: Colors.white24,
+        onTap: () {
+          Navigator.pop(context);
+          setState(() {
+            schoolController.text = school.schoolName;
+          });
+        },
+        leading: CircleAvatar(
+          backgroundImage: AssetImage(school.logo),
+        ),
+        title: Text(school.schoolName),
+        trailing: Icon(CupertinoIcons.arrow_right_square_fill),
+      );
+
+
+  void chooseUser() {
+    showModalBottomSheet(context: context, builder:
+        (context) => buildSheetForUserType()
+    );
+  }
+
+  Widget buildSheetForUserType() =>
+      ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              children: [
+                Text('Choose User Type', style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold
+                ),
+                ),
+                SizedBox(height: 20,),
+                Column(
+                  children: option.map((e) => userTypes(items: e)).toList(),
+                ),
+              ],
+            ),
+          )
+        ],
+      );
+
+  Widget userTypes({required String items}) =>
+      ListTile(
+        contentPadding: EdgeInsets.all(2),
+        selectedTileColor: Colors.white24,
+        onTap: () {
+          userTypeController.text = items;
+          Navigator.pop(context);
+        },
+        title: Text(items),
+        trailing: Icon(CupertinoIcons.arrow_right_square_fill),
+      );
 }

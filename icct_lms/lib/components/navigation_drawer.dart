@@ -4,6 +4,7 @@ import 'package:icct_lms/menu_pages/back_pack.dart';
 import 'package:icct_lms/menu_pages/help_center.dart';
 import 'package:icct_lms/menu_pages/news_and_updates.dart';
 import 'package:icct_lms/menu_pages/settings.dart';
+import 'package:icct_lms/services/auth.dart';
 
 class NavigationDrawer extends StatefulWidget {
   const NavigationDrawer({Key? key, required this.name, required this.email, required this.uid, required this.school}) : super(key: key);
@@ -16,69 +17,66 @@ class NavigationDrawer extends StatefulWidget {
 }
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(child:
-    Drawer(
-      child: Material(
-        color: Colors.blue[900],
-        child: ListView(
-          padding: const EdgeInsets.all(0),
-          children: [
-             Header(name: widget.name, email: widget.email, uid: widget.uid,
-                 school: widget.school),
 
-            const Divider(
-              thickness: 2,
-              color: Colors.white,
-            ),
-            buildMenuItem(
-                onClicked: ()=> selectedItem(context, 0),
-               text: 'Backpack',
-              icon: Icons.shopping_bag,
-            ),
-            buildMenuItem(
-                onClicked: ()=> selectedItem(context, 1),
-                text: 'News and Updates',
-                icon: Icons.newspaper
-            ),
-            buildMenuItem(
-                onClicked: ()=> selectedItem(context, 2),
-                text: 'Help Center',
-                icon: Icons.question_answer
-            ),
-            buildMenuItem(
-                onClicked: ()=> selectedItem(context, 3),
-                text: 'Settings',
-                icon: Icons.settings
-            ),
-            const Divider(
-              thickness: 2,
-              color: Colors.white,
-            ),
-            buildMenuItem(
-                onClicked: ()=> selectedItem(context, 4),
-                text: 'Logout',
-                icon: Icons.exit_to_app
-            ),
-            buildMenuItem(
-                onClicked: ()=> selectedItem(context, 5),
-                text: 'Delete Account',
-                icon: Icons.delete
-            )
-          ],
-        ),
+  final AuthService _auth = AuthService();
+
+  @override
+  Widget build(BuildContext context) => SafeArea(child: Drawer(
+    backgroundColor: Colors.blue[900],
+    child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Header(name: widget.name, school: widget.school, uid: widget.uid, email: widget
+              .email),
+          buildMenuItem(
+            onClicked: ()=> selectedItem(context, 0),
+            text: 'Backpack',
+            icon: Icons.shopping_bag,
+          ),
+          buildMenuItem(
+              onClicked: ()=> selectedItem(context, 1),
+              text: 'News and Updates',
+              icon: Icons.newspaper
+          ),
+          buildMenuItem(
+              onClicked: ()=> selectedItem(context, 2),
+              text: 'Help Center',
+              icon: Icons.question_answer
+          ),
+          buildMenuItem(
+              onClicked: ()=> selectedItem(context, 3),
+              text: 'Settings',
+              icon: Icons.settings
+          ),
+          const Divider(
+            thickness: 1,
+            color: Colors.white,
+          ),
+          buildMenuItem(
+              onClicked: ()=> selectedItem(context, 4),
+              text: 'Logout',
+              icon: Icons.exit_to_app
+          ),
+          buildMenuItem(
+              onClicked: () async => await selectedItem(context, 5),
+              text: 'Delete Account',
+              icon: Icons.delete
+          )
+        ],
       ),
-    )
-    );
-  }
+    ),
+  ));
 
   buildMenuItem({required String text, required IconData icon, required Function() onClicked}) {
     const color = Colors.white;
-    return ListTile(
-      onTap: onClicked,
-      leading: Icon(icon, color: color,),
-      title: Text(text, style: const TextStyle(color: color),),
+    return Container(
+      child: ListTile(
+        onTap: onClicked,
+        selectedTileColor: Colors.cyan,
+        leading: Icon(icon, color: color,),
+        title: Text(text, style: const TextStyle(color: color),),
+      ),
     );
   }
 
@@ -101,8 +99,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
         builder: (context) => const Settings(),));
       break;
     case 4:
-      Navigator.pushNamedAndRemoveUntil(context, '/choose_user', (route) =>
-      false,);
+      _auth.signOut();
       break;
     case 5:
       break;
@@ -127,62 +124,34 @@ class _HeaderState extends State<Header> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue[900],
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const CircleAvatar(
-                radius: 30,
-                backgroundImage: AssetImage('assets/logo_plain.png'),
-              ),
-              const SizedBox(width: 20,),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.name, style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 17,
-                    color: Colors.white
-                  ),),
-                  Text(widget.email, style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w300,
-                      color: Colors.white
-                  ),),
-                  Text(widget.school,
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.white
-                    ),),
-                  Row(
-                    children: [
-                      Text(widget.uid,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w300,
-                            color: Colors.white
-                        ),),
-                        buildCopy(),
-                    ],
-                  ),
-
-
-                ],
-
-              )
-            ],
-
+      color: Colors.white,
+      padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage('assets/logo_plain.png'),
           ),
+          SizedBox(width: 10,),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.name, style: const TextStyle(
+                fontWeight: FontWeight.bold
+              ),),
+              Text(widget.email, style: const TextStyle(
+                fontWeight: FontWeight.w300
+              ),
+              ),
+              Text(widget.school, style: const TextStyle(
+                  fontWeight: FontWeight.w300
+              ),),
 
-
-        ),
-
+            ],
+          ),
+          buildCopy()
+        ],
       ),
-
     );
 
   }
@@ -195,5 +164,5 @@ class _HeaderState extends State<Header> {
     300), ), );
     Navigator.of(context).pop();
   }, icon: const Icon(Icons
-      .copy_outlined, size: 12, color: Colors.white,));
+      .copy_outlined, size: 12, color: Colors.black54,));
 }

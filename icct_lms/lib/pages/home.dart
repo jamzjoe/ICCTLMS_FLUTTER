@@ -25,18 +25,13 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
-  Map data = {};
   int currentIndex = 0;
 
 
   @override
   Widget build(BuildContext context) {
-    data = ModalRoute
-        .of(context)!
-        .settings
-        .arguments as Map;
 
-
+    bool searching = false;
     String name = 'Name data from main';
     String email = 'Email data';
     String school = 'School data';
@@ -60,42 +55,64 @@ class _HomeState extends State<Home> {
           school: school,
           uid: uid),
         appBar: AppBar(
+            automaticallyImplyLeading: true,
+            leadingWidth: 300,
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                onTap: (){
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>  EditProfile(uid: uid)
+                  )
+                  );
+                },
+                child: Image(
+                  image: AssetImage('assets/logo_black_text.png'),
+                ),
+              ),
+            ),
             flexibleSpace: Container(
-              color: Colors.blue[900]
+               color: Colors.white
             ),
             bottom: TabBar(
-              indicatorColor: Colors.red,
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.black54,
+              indicatorColor: Colors.blue[900],
               indicatorWeight: 3,
               tabs: [
-                Tab(icon: Icon(CupertinoIcons.home), text: 'Home',),
-                Tab(icon: Icon(CupertinoIcons.device_desktop), text: 'Class',),
-                Tab(icon: Icon(CupertinoIcons.calendar), text: 'Planner',),
+                Tab(
+                  icon: Icon(CupertinoIcons.home)),
+                Tab(icon: Icon(CupertinoIcons.device_desktop)),
+                Tab(icon: Icon(CupertinoIcons.calendar)),
                 Tab(icon: Badge(
                     badgeContent: Text('2'),
                     showBadge: true,
-                    child: Icon(CupertinoIcons.chat_bubble)), text: 'Messages',),
+                    child: Icon(CupertinoIcons.chat_bubble)),),
                 Tab(icon: Badge(
                   showBadge: true,
                     badgeContent: Text('10'),
-                    child: Icon(CupertinoIcons.bell)), text: 'Not'
-                    'ifications',),
+                    child: Icon(CupertinoIcons.bell))),
               ],
             ),
             backgroundColor: Colors.blue,
-            title: Text('${data['user_name']}'),
+
             actions:[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-                child: InkWell(
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>  EditProfile(uid: uid)));
-                  },
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage('assets/logo_plain.png'),
-                  ),
-                ),
+              Builder(
+                builder: (BuildContext context){
+                  return IconButton(onPressed: (){
+                    showSearch(context: context, delegate:
+                        CustomSearchDelegate());
+                  }, icon: Icon(Icons.search, color: Colors.black54,));
+                },
               ),
+              Builder(
+                builder: (BuildContext context){
+                  return IconButton(onPressed: (){
+                    Scaffold.of(context).openDrawer();
+                  }, icon: Icon(Icons.menu, color: Colors.black54,));
+                },
+              ),
+
             ]),
         body: TabBarView(
           children: screens,
@@ -104,4 +121,74 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+}
+
+class CustomSearchDelegate extends SearchDelegate{
+  List<String> searchItems = [
+    'I miss you',
+    'I am still inlove with you',
+    'I am glad.',
+    'I am your forever',
+    'Nobita'
+  ];
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    // TODO: implement buildActions
+   return [
+     IconButton(onPressed: (){
+       query = '';
+     }, icon: const Icon(Icons.clear))
+   ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    // TODO: implement buildLeading
+    return IconButton(onPressed: (){
+      close(context, null);
+    }, icon: const Icon(Icons.arrow_back_ios));
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    // TODO: implement buildResults
+    List<String> matchQuery = [];
+    for(var each in searchItems){
+        if(each.toLowerCase().contains(query.toLowerCase())){
+          matchQuery.add(each);
+        }
+    }
+    return ListView.builder(
+        itemCount: matchQuery.length,
+        itemBuilder:(context, index) {
+          var result = matchQuery[index];
+
+          return ListTile(
+            title: Text(result),
+          );
+        },
+        );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // TODO: implement buildSuggestions
+    List<String> matchQuery = [];
+    for(var each in searchItems){
+      if(each.toLowerCase().contains(query.toLowerCase())){
+        matchQuery.add(each);
+      }
+    }
+    return ListView.builder(
+      itemCount: matchQuery.length,
+      itemBuilder:(context, index) {
+        var result = matchQuery[index];
+
+        return ListTile(
+          title: Text(result),
+        );
+      },
+    );
+  }
+
 }

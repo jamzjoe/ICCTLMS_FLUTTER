@@ -1,15 +1,22 @@
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/models/school_list.dart';
+import 'package:icct_lms/services/auth.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
-
+  const Login({Key? key, required this.usertype, required this.togglePage}) :
+        super(key:
+  key);
+  final String usertype;
+  final Function togglePage;
   @override
   State<Login> createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
+  final AuthService _auth = AuthService();
+  final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final nameController = TextEditingController();
   final passwordController = TextEditingController();
@@ -18,18 +25,15 @@ class _LoginState extends State<Login> {
   String email = '';
   String password = '';
 
-  void validateAccount() {
-    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false,
-        arguments: {'user_name': name});
+  validateAccount() {
+  if(_formKey.currentState!.validate()){
+    print(emailController.text);
+    print(passwordController.text);
   }
 
-  void goToRegister() {
-    Navigator.pushNamed(context, '/user_register',
-        arguments: {
-          'user_type': data['user_type']
-        });
   }
-  void goToForgotPassword(){
+
+  void goToForgotPassword() {
     Navigator.pushNamed(context, '/forgot_password');
   }
 
@@ -59,182 +63,154 @@ class _LoginState extends State<Login> {
     SchoolList('Cogeo Campus', 'assets/logo_plain.png'),
     SchoolList('Taytay Campus', 'assets/logo_plain.png'),
   ];
+
   @override
   Widget build(BuildContext context) {
-    data = ModalRoute.of(context)!.settings.arguments as Map;
     return Scaffold(
-
       body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.only(bottom: 40),
-          child: Center(
-            child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.all(40),
-              children: [
-                const Center(
-                    child: Hero(
-                      tag: 'assets/logo_black_text.png',
-                      child: Image(
-                        image: AssetImage('assets/logo_black_text.png'),
-                        width: 250,
-                      ),
-                    )),
-                const Center(
-                  child: Text(
-                    'E-learning Management System',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 10,
-                        letterSpacing: 2),
-                  ),
-                ),
-                const SizedBox(height: 50,),
-                Text('${data['user_type']} Login', style: const TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.w700
-                ),),
-                const Text("*Please make sure you input a correct data.",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w300
-                  ),),
-                const SizedBox(
-                  height: 10,
-                ),
-                TextField(
-                  onChanged: (value) => setState(() {
-                    name = value;
-                  }),
-                  decoration: InputDecoration(
-                    label: const Text('Username'),
-                    hintText: 'Juan Dela Cruz',
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.person),
-                    suffixIcon: nameController.text.isEmpty
-                        ? Container(
-                      width: 0,
-                    )
-                        : IconButton(
-                        onPressed: () => nameController.clear(),
-                        icon: const Icon(Icons.close)),
-                  ),
-                  controller: nameController,
-                  keyboardType: TextInputType.name,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Center(
-                    child: TextField(
-                      onChanged: (value) => setState(() {
-                        email = value;
-                      }),
-                      decoration: InputDecoration(
-                        label: const Text('Email address'),
-                        hintText: 'email@example.com',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.mail),
-                        suffixIcon: emailController.text.isEmpty
-                            ? Container(
-                          width: 0,
-                        )
-                            : IconButton(
-                            onPressed: () => emailController.clear(),
-                            icon: const Icon(Icons.close)),
-                      ),
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                    )),
-                const SizedBox(
-                  height: 10,
-                ),
-                Center(
-                    child: TextField(
-                      onChanged: (value) => setState(() {
-                        password = value;
-                      }),
-                      decoration: InputDecoration(
-                        label: const Text('Password'),
-                        hintText: '******',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.password),
-                        suffixIcon: IconButton(
-                          icon: isPasswordVisible
-                              ? const Icon(Icons.visibility_off)
-                              : const Icon(Icons.visibility),
-                          onPressed: () {
-                            setState(() {
-                              isPasswordVisible = !isPasswordVisible;
-                            });
-                          },
+          child: Container(
+            padding: EdgeInsets.only(bottom: 40),
+            child: Center(
+              child: ListView(
+                shrinkWrap: true,
+                padding: EdgeInsets.all(40),
+                children: [
+                  const Center(
+                      child: Hero(
+                        tag: 'assets/logo_black_text.png',
+                        child: Image(
+                          image: AssetImage('assets/logo_black_text.png'),
+                          width: 250,
                         ),
-                      ),
-                      obscureText: isPasswordVisible,
-                      controller: passwordController,
-                    )
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Center(
-                    child: TextField(
-                      readOnly: true,
-                      controller: schoolController,
-                      onTap: (){
-                        chooseCampus();
-                      },
-                      decoration: InputDecoration(
-                          label: const Text('Choose Campus'),
-                          border: const OutlineInputBorder(),
-                          prefixIcon: const Icon(CupertinoIcons.house_alt_fill),
-                          suffixIcon: IconButton(onPressed: (){
-                            chooseCampus();
-                          }, icon: Icon
-                            (Icons.arrow_drop_down_circle))
-                      ),
-                    )
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Center(
-                      child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.blue[900]
-                          ),
-                          onPressed: () {
-                            validateAccount();
-                          },
-                          icon: const Icon(CupertinoIcons.forward),
-                          label: const Text('Login Account')),
+                      )),
+                  const Center(
+                    child: Text(
+                      'E-learning Management System',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: 10,
+                          letterSpacing: 2),
                     ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 110,
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 50,),
+                  Text('Login your account', style: const TextStyle(
+                      fontSize: 23,
+                      fontWeight: FontWeight.w700
+                  ),),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Form(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                      key: _formKey,
+                      child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Center(
+                          child: TextFormField(
+                            validator: (value) => value!.isEmpty && !value
+                                .contains('@') ? 'Username must be contains @'
+                                ' and 6+ chars long':
+                            null,
+                            onChanged: (value) =>
+                                setState(() {
+                                  email = value;
+                                }),
+                            decoration: InputDecoration(
+                              label: const Text('Email address'),
+                              hintText: 'email@example.com',
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.mail),
+                              suffixIcon: emailController.text.isEmpty
+                                  ? Container(
+                                width: 0,
+                              )
+                                  : IconButton(
+                                  onPressed: () => emailController.clear(),
+                                  icon: const Icon(Icons.close)),
+                            ),
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                          )),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Center(
+                          child: TextFormField(
+                            validator: (value) => value!.length < 6 ? 'Passwo'
+                                'rd must be 6+ chars long.' : null,
+                            onChanged: (value) =>
+                                setState(() {
+                                  password = value;
+                                }),
+                            decoration: InputDecoration(
+                              label: const Text('Password'),
+                              hintText: '******',
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.password),
+                              suffixIcon: IconButton(
+                                icon: isPasswordVisible
+                                    ? const Icon(Icons.visibility_off)
+                                    : const Icon(Icons.visibility),
+                                onPressed: () {
+                                  setState(() {
+                                    isPasswordVisible = !isPasswordVisible;
+                                  });
+                                },
+                              ),
+                            ),
+                            obscureText: isPasswordVisible,
+                            controller: passwordController,
+                          )
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+
+
+                    ],
+                  )),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Center(
+                        child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.blue[900]
+                            ),
+                            onPressed: () async{
+                              validateAccount();
+                            },
+                            icon: const Icon(CupertinoIcons.forward),
+                            label: const Text('Login Account')),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 110,
+                  ),
+                ],
+              ),
             ),
-          ),
-        )
+          )
       ),
       bottomSheet: ClipRRect(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20), 
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(20),
             topRight: Radius.circular(20)),
         child: Container(
           color: Colors.white,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TextButton(onPressed: (){
-                Navigator.pushNamed(context, '/user_register', arguments: {
-                  'user_type': data['user_type']
-                });
+              TextButton(onPressed: () {
+                          widget.togglePage();
               }, child: Text('No account yet?')),
-              TextButton(onPressed: (){
+              TextButton(onPressed: () {
                 Navigator.pushNamed(context, '/forgot_password', arguments: {
                   'user_type': data['user_type']
                 });
@@ -248,44 +224,46 @@ class _LoginState extends State<Login> {
 
   void chooseCampus() {
     showModalBottomSheet(context: context, builder:
-    (context)  => buildSheet()
+        (context) => buildSheet()
     );
   }
 
-  Widget buildSheet() => ListView(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          children: [
-            Text('Choose Campus', style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold
+  Widget buildSheet() =>
+      ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              children: [
+                Text('Choose Campus', style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold
+                ),
+                ),
+                SizedBox(height: 20,),
+                Column(
+                  children: schools.map((e) => newSchools(school: e)).toList(),
+                ),
+              ],
             ),
-            ),
-            SizedBox(height: 20,),
-            Column(
-              children: schools.map((e) => newSchools(school: e)).toList(),
-            ),
-          ],
-        ),
-      )
-    ],
-  );
+          )
+        ],
+      );
 
-  Widget newSchools({required SchoolList school}) => ListTile(
-    contentPadding: EdgeInsets.all(2),
-    selectedTileColor: Colors.white24,
-    onTap: (){
-      Navigator.pop(context);
-      setState(() {
-        schoolController.text = school.schoolName;
-      });
-    },
-    leading: CircleAvatar(
-      backgroundImage: AssetImage(school.logo),
-    ),
-    title: Text(school.schoolName),
-    trailing: Icon(CupertinoIcons.arrow_right_square_fill),
-  );
+  Widget newSchools({required SchoolList school}) =>
+      ListTile(
+        contentPadding: EdgeInsets.all(2),
+        selectedTileColor: Colors.white24,
+        onTap: () {
+          Navigator.pop(context);
+          setState(() {
+            schoolController.text = school.schoolName;
+          });
+        },
+        leading: CircleAvatar(
+          backgroundImage: AssetImage(school.logo),
+        ),
+        title: Text(school.schoolName),
+        trailing: Icon(CupertinoIcons.arrow_right_square_fill),
+      );
 }
