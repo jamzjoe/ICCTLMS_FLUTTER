@@ -1,4 +1,8 @@
+
 import 'package:flutter/material.dart';
+import 'package:icct_lms/authentication/authenticate.dart';
+import 'package:icct_lms/pages/login.dart';
+import 'package:icct_lms/services/auth.dart';
 
 class ChooseUser extends StatefulWidget {
   const ChooseUser({Key? key}) : super(key: key);
@@ -6,13 +10,13 @@ class ChooseUser extends StatefulWidget {
   @override
   State<ChooseUser> createState() => _ChooseUserState();
 }
-
+final AuthService _auth = AuthService();
 String userType = '';
 
 class _ChooseUserState extends State<ChooseUser> {
+
   void goToLogin(userType) {
-    Navigator.pushNamed(context, '/user_login',
-        arguments: {'user_type': userType});
+    Navigator.pushNamed(context, '/auth');
   }
 
   @override
@@ -82,6 +86,17 @@ class _ChooseUserState extends State<ChooseUser> {
                   label: const Text('Parent'),
                   icon: const Icon(Icons.person),
                 ),
+              ),
+              SizedBox(
+                width: 150,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                  onPressed: () {
+                    sigInAsGuest();
+                  },
+                  label: const Text('Guest'),
+                  icon: const Icon(Icons.question_mark),
+                ),
               )
             ],
           ),
@@ -89,4 +104,16 @@ class _ChooseUserState extends State<ChooseUser> {
       ),
     );
   }
-}
+
+  Future sigInAsGuest() async {
+    dynamic result = await _auth.signInAnonymously();
+    if(result == null){
+      print("error signin");
+    }else{
+      print('Success');
+      print(result.uid);
+    }
+  }
+  }
+
+

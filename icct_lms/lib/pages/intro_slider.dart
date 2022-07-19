@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -40,19 +41,19 @@ class _IntroSliderState extends State<IntroSlider> {
           children: [
             Container(
               color: Colors.blue[900],
-              child: buildPage('assets/i_personal.svg', 'Choose Your '
+              child: buildPage('assets/identity.json', 'Choose Your '
                   'Identity', 'Serves as an open channel of communication '
                   'between teachers, students, parents, and staff.'),
             ),
             Container(
               color: Colors.blue[900],
-              child: buildPage('assets/i_account.svg', 'Create Account', 'You'
+              child: buildPage('assets/create.json', 'Create Account', 'You'
                   ' have entered all the required data and now able to access'
                   ' the system online learning resources.'),
             ),
             Container(
               color: Colors.blue[900],
-              child: buildPage('assets/i_learn.svg', 'Learn and Discover',
+              child: buildPage('assets/learn.json', 'Learn and Discover',
                   'This will become a unique source of knowledge in your '
                       'field and will help you improve your skills.')
             )
@@ -134,7 +135,7 @@ class _IntroSliderState extends State<IntroSlider> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset(path, width: 200,),
+          Lottie.asset(path, width: 250),
           const SizedBox(height: 10,),
           Text(title, style: const TextStyle(
               color: Colors.white,
