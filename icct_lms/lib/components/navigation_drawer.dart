@@ -1,10 +1,12 @@
 import 'package:clipboard/clipboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/menu_pages/back_pack.dart';
 import 'package:icct_lms/menu_pages/help_center.dart';
 import 'package:icct_lms/menu_pages/news_and_updates.dart';
 import 'package:icct_lms/menu_pages/settings.dart';
 import 'package:icct_lms/services/auth.dart';
+import 'package:provider/provider.dart';
 
 class NavigationDrawer extends StatefulWidget {
   const NavigationDrawer({Key? key, required this.name, required this.email, required this.uid, required this.school}) : super(key: key);
@@ -18,56 +20,62 @@ class NavigationDrawer extends StatefulWidget {
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
 
+
   final AuthService _auth = AuthService();
-
   @override
-  Widget build(BuildContext context) => SafeArea(child: Drawer(
-    backgroundColor: Colors.blue[900],
-    child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Header(name: widget.name, school: widget.school, uid: widget.uid, email: widget
-              .email),
-          buildMenuItem(
-            onClicked: ()=> selectedItem(context, 0),
-            text: 'Backpack',
-            icon: Icons.shopping_bag,
-          ),
-          buildMenuItem(
-              onClicked: ()=> selectedItem(context, 1),
-              text: 'News and Updates',
-              icon: Icons.newspaper
-          ),
-          buildMenuItem(
-              onClicked: ()=> selectedItem(context, 2),
-              text: 'Help Center',
-              icon: Icons.question_answer
-          ),
-          buildMenuItem(
-              onClicked: ()=> selectedItem(context, 3),
-              text: 'Settings',
-              icon: Icons.settings
-          ),
-          const Divider(
-            thickness: 1,
-            color: Colors.white,
-          ),
-          buildMenuItem(
-              onClicked: ()=> selectedItem(context, 4),
-              text: 'Logout',
-              icon: Icons.exit_to_app
-          ),
-          buildMenuItem(
-              onClicked: () async => await selectedItem(context, 5),
-              text: 'Delete Account',
-              icon: Icons.delete
-          )
-        ],
-      ),
-    ),
-  ));
+  Widget build(BuildContext context) {
+    final user = Provider.of<QuerySnapshot?>(context);
 
+   return SafeArea(child: Drawer(
+      backgroundColor: Colors.blue[900],
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Header(name: widget.name,
+                school: widget.school,
+                uid: widget.uid,
+                email: widget
+                    .email),
+            buildMenuItem(
+              onClicked: () => selectedItem(context, 0),
+              text: 'Backpack',
+              icon: Icons.shopping_bag,
+            ),
+            buildMenuItem(
+                onClicked: () => selectedItem(context, 1),
+                text: 'News and Updates',
+                icon: Icons.newspaper
+            ),
+            buildMenuItem(
+                onClicked: () => selectedItem(context, 2),
+                text: 'Help Center',
+                icon: Icons.question_answer
+            ),
+            buildMenuItem(
+                onClicked: () => selectedItem(context, 3),
+                text: 'Settings',
+                icon: Icons.settings
+            ),
+            const Divider(
+              thickness: 1,
+              color: Colors.white,
+            ),
+            buildMenuItem(
+                onClicked: () => selectedItem(context, 4),
+                text: 'Logout',
+                icon: Icons.exit_to_app
+            ),
+            buildMenuItem(
+                onClicked: () async => await selectedItem(context, 5),
+                text: 'Delete Account',
+                icon: Icons.delete
+            )
+          ],
+        ),
+      ),
+    ));
+  }
   buildMenuItem({required String text, required IconData icon, required Function() onClicked}) {
     const color = Colors.white;
     return Container(
@@ -95,9 +103,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
         builder: (context) => const HelpCenter(),));
       break;
     case 3:
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => const Settings(),));
-      break;
+
     case 4:
       _auth.signOut();
       break;

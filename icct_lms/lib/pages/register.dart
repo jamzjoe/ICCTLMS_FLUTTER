@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:icct_lms/models/options.dart';
+import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/models/school_list.dart';
 import 'package:icct_lms/services/auth.dart';
 
@@ -23,6 +23,7 @@ class _RegisterState extends State<Register> {
   String email = '';
   String password = '';
   String error = '';
+  bool loading = false;
 
   void backToLogin() {
     widget.togglePage();
@@ -60,13 +61,13 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? const Loading() : Scaffold(
       body: Container(
-        padding: EdgeInsets.only(bottom: 40),
+        padding: const EdgeInsets.only(bottom: 40),
         child: Center(
           child: ListView(
             shrinkWrap: true,
-            padding: EdgeInsets.all(40),
+            padding: const EdgeInsets.all(40),
             children: [
               const Center(
                   child: Hero(
@@ -85,8 +86,8 @@ class _RegisterState extends State<Register> {
                       letterSpacing: 2),
                 ),
               ),
-              const SizedBox(height: 50,),
-              Text('Create a new account', style: const TextStyle(
+              const SizedBox(height: 50,),const
+              Text('Create a new account', style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.w700
               ),),
@@ -99,9 +100,10 @@ class _RegisterState extends State<Register> {
                   child: Column(
                     children: [
                       TextFormField(
-                        // validator: (value) => value!.length < 5 && value
-                        //     .isEmpty ? 'Username required 5+ chars long':
-                        // null,
+                        autofillHints: AutofillHints.name.characters,
+                        validator: (value) => value!.length < 5 && value
+                            .isEmpty ? 'Username required 5+ chars long':
+                        null,
                         onChanged: (value) =>
                             setState(() {
                               name = value;
@@ -127,6 +129,7 @@ class _RegisterState extends State<Register> {
                       ),
                       Center(
                           child: TextFormField(
+                            autofillHints: AutofillHints.email.characters,
                             validator: (value) =>
                             value!.isEmpty && !value
                                 .contains('@') ? 'Username must be contains @'
@@ -157,6 +160,7 @@ class _RegisterState extends State<Register> {
                       ),
                       Center(
                           child: TextFormField(
+                            autofillHints: AutofillHints.password.characters,
                             validator: (value) =>
                             value!.length < 6 ? 'Passwo'
                                 'rd must be 6+ chars long.' : null,
@@ -189,8 +193,8 @@ class _RegisterState extends State<Register> {
                       ),
                       Center(
                           child: TextFormField(
-                            // validator: (value) => value!.isEmpty ? 'Choose '
-                            //     'campus': null,
+                            validator: (value) => value!.isEmpty ? 'Choose '
+                                'campus': null,
                             readOnly: true,
                             controller: schoolController,
                             onTap: () {
@@ -203,7 +207,7 @@ class _RegisterState extends State<Register> {
                                     .house_alt_fill),
                                 suffixIcon: IconButton(onPressed: () {
                                   chooseCampus();
-                                }, icon: Icon
+                                }, icon: const Icon
                                   (Icons.arrow_drop_down_circle))
                             ),
                           )
@@ -213,8 +217,8 @@ class _RegisterState extends State<Register> {
                       ),
                       Center(
                           child: TextFormField(
-                            // validator: (value) => value!.isEmpty ? 'Choose '
-                            //     'campus': null,
+                            validator: (value) => value!.isEmpty ? 'Choose '
+                                'campus': null,
                             readOnly: true,
                             controller: userTypeController,
                             onTap: () {
@@ -227,7 +231,7 @@ class _RegisterState extends State<Register> {
                                     .person_2_fill),
                                 suffixIcon: IconButton(onPressed: () {
                                   chooseUser();
-                                }, icon: Icon
+                                }, icon: const Icon
                                   (Icons.arrow_drop_down_circle))
                             ),
                           )
@@ -247,15 +251,26 @@ class _RegisterState extends State<Register> {
                         ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              loading = true;
+                            });
                             dynamic result = await _auth
                                 .registerWithEmailAndPassword(emailController
                                 .text.trim(),
-                                passwordController.text.trim());
-                            print(email + password);
+                                passwordController.text.trim(),
+                                nameController.text.trim(), schoolController
+                                    .text.trim(), emailController.text.trim()
+                              , userTypeController.text.trim());
                             if (result == null) {
                               setState(() {
-                                error = 'Create failed.';
-                              });
+                                loading = false;
+                                error = 'Unable to create account, please '
+                                    'check your internet connection or this '
+                                    'account might be existed.';
+                              showCupertinoDialog(context: context, builder:
+                              createDialog);
+                              }
+                              );
                             }
                           }
                         },
@@ -278,7 +293,7 @@ class _RegisterState extends State<Register> {
         child: Center(
           child: TextButton(onPressed: () {
             backToLogin();
-          }, child: Text('Back to login')),
+          }, child: const Text('Back to login')),
         ),
       ),
     );
@@ -297,12 +312,12 @@ class _RegisterState extends State<Register> {
             padding: const EdgeInsets.all(30.0),
             child: Column(
               children: [
-                Text('Choose Campus', style: TextStyle(
+                const Text('Choose Campus', style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold
                 ),
                 ),
-                SizedBox(height: 20,),
+                const SizedBox(height: 20,),
                 Column(
                   children: schools.map((e) => newSchools(school: e)).toList(),
                 ),
@@ -314,7 +329,7 @@ class _RegisterState extends State<Register> {
 
   Widget newSchools({required SchoolList school}) =>
       ListTile(
-        contentPadding: EdgeInsets.all(2),
+        contentPadding: const EdgeInsets.all(2),
         selectedTileColor: Colors.white24,
         onTap: () {
           Navigator.pop(context);
@@ -326,7 +341,7 @@ class _RegisterState extends State<Register> {
           backgroundImage: AssetImage(school.logo),
         ),
         title: Text(school.schoolName),
-        trailing: Icon(CupertinoIcons.arrow_right_square_fill),
+        trailing: const Icon(CupertinoIcons.arrow_right_square_fill),
       );
 
 
@@ -343,14 +358,19 @@ class _RegisterState extends State<Register> {
             padding: const EdgeInsets.all(30.0),
             child: Column(
               children: [
-                Text('Choose User Type', style: TextStyle(
+                const Text('Choose User Type', style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold
                 ),
                 ),
-                SizedBox(height: 20,),
-                Column(
-                  children: option.map((e) => userTypes(items: e)).toList(),
+                const SizedBox(height: 20,),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: option.map((e) => userTypes(items: e)).toList(),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -360,13 +380,24 @@ class _RegisterState extends State<Register> {
 
   Widget userTypes({required String items}) =>
       ListTile(
-        contentPadding: EdgeInsets.all(2),
+        contentPadding: const EdgeInsets.all(2),
         selectedTileColor: Colors.white24,
         onTap: () {
           userTypeController.text = items;
           Navigator.pop(context);
         },
         title: Text(items),
-        trailing: Icon(CupertinoIcons.arrow_right_square_fill),
+        trailing: const Icon(CupertinoIcons.arrow_right_square_fill),
       );
+
+  Widget createDialog(BuildContext context)  => CupertinoAlertDialog(
+    title: const Text('Error'),
+    content: Text(error),
+    actions: [
+      CupertinoDialogAction(child: const Text('OK'),
+        onPressed: ()=> Navigator.pop(context),
+      ),
+    ],
+
+  );
 }

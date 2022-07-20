@@ -1,12 +1,10 @@
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:icct_lms/authentication/authenticate.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:icct_lms/models/user_model.dart';
 import 'package:icct_lms/pages/choose_type_user.dart';
 import 'package:icct_lms/pages/intro_slider.dart';
-import 'package:icct_lms/pages/splash_screen.dart';
 import 'package:icct_lms/services/auth.dart';
 import 'package:icct_lms/wrapper/wrapper.dart';
 import 'package:provider/provider.dart';
@@ -16,10 +14,18 @@ Future main() async {
   await Firebase.initializeApp();
   final prefs = await SharedPreferences.getInstance();
   final showHome = prefs.getBool('showHome') ?? false;
+
+  FlutterNativeSplash.removeAfter(initialize);
   runApp(MyApp(showHome: showHome));
 
 
 }
+
+Future initialize(BuildContext? context) async {
+  await Future.delayed(const Duration(seconds: 0));
+}
+
+
 
 class MyApp extends StatefulWidget {
 
@@ -40,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       initialData: null,
       child: MaterialApp(
         routes: {
-          '/auth': (context) => const Authenticate(),
+          '/wrap': (context) => const Wrapper(),
           '/choose_user': (context) => const ChooseUser()
         },
         title: 'ICCT LMS',

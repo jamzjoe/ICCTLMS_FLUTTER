@@ -75,7 +75,7 @@ class _IntroSliderState extends State<IntroSlider> {
                 if(!mounted){
                   return;
                 }
-                Navigator.pushNamedAndRemoveUntil(context, '/choose_user',
+                Navigator.pushNamedAndRemoveUntil(context, '/wrap',
                         (route) =>
                 false);
 
