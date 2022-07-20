@@ -1,4 +1,6 @@
 import 'package:badges/badges.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/components/navigation_drawer.dart';
@@ -26,16 +28,16 @@ class _HomeState extends State<Home> {
   }
 
   int currentIndex = 0;
+  final user = FirebaseAuth.instance.currentUser!;
 
 
   @override
   Widget build(BuildContext context) {
 
-    bool searching = false;
     String name = 'Name data from main';
-    String email = 'Email data';
+    String email = user.email!;
     String school = 'School data';
-    String uid = 'School uid';
+    String uid = user.uid;
 
     final screens = [
       HomeScreen(uid: uid),
@@ -66,7 +68,7 @@ class _HomeState extends State<Home> {
                   )
                   );
                 },
-                child: Image(
+                child: const Image(
                   image: AssetImage('assets/logo_black_text.png'),
                 ),
               ),

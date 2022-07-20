@@ -1,6 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/models/school_list.dart';
 import 'package:icct_lms/services/auth.dart';
 
@@ -24,14 +25,8 @@ class _LoginState extends State<Login> {
   String name = '';
   String email = '';
   String password = '';
-
-  validateAccount() {
-  if(_formKey.currentState!.validate()){
-    print(emailController.text);
-    print(passwordController.text);
-  }
-
-  }
+  String error ='';
+  bool loading = false;
 
   void goToForgotPassword() {
     Navigator.pushNamed(context, '/forgot_password');
@@ -66,14 +61,14 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading ? const Loading() : Scaffold(
       body: SafeArea(
           child: Container(
-            padding: EdgeInsets.only(bottom: 40),
+            padding: const EdgeInsets.only(bottom: 40),
             child: Center(
               child: ListView(
                 shrinkWrap: true,
-                padding: EdgeInsets.all(40),
+                padding: const EdgeInsets.all(40),
                 children: [
                   const Center(
                       child: Hero(
@@ -93,7 +88,7 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   const SizedBox(height: 50,),
-                  Text('Login your account', style: const TextStyle(
+                  const Text('Login your account', style: TextStyle(
                       fontSize: 23,
                       fontWeight: FontWeight.w700
                   ),),
@@ -110,8 +105,9 @@ class _LoginState extends State<Login> {
                       ),
                       Center(
                           child: TextFormField(
+                            autofillHints: AutofillHints.email.characters,
                             validator: (value) => value!.isEmpty && !value
-                                .contains('@') ? 'Username must be contains @'
+                                .contains('@') ? 'Email must be contains @'
                                 ' and 6+ chars long':
                             null,
                             onChanged: (value) =>
@@ -139,6 +135,7 @@ class _LoginState extends State<Login> {
                       ),
                       Center(
                           child: TextFormField(
+                            autofillHints: AutofillHints.password.characters,
                             validator: (value) => value!.length < 6 ? 'Passwo'
                                 'rd must be 6+ chars long.' : null,
                             onChanged: (value) =>
@@ -184,7 +181,30 @@ class _LoginState extends State<Login> {
                                 primary: Colors.blue[900]
                             ),
                             onPressed: () async{
-                              validateAccount();
+                              if (_formKey.currentState!.validate()) {
+                                setState(() {
+                                  loading = true;
+                                });
+                                dynamic result = await _auth
+                                    .signInWithEmailAndPassword(emailController
+                                    .text.trim(),
+                                    passwordController.text.trim());
+                                if (result == null) {
+                                  setState(() {
+                                    error = "Unable to login, please check "
+                                        'your internet connection or create '
+                                        "new account if you haven't created "
+                                        "yet.";
+
+                                    loading = false;
+                                    showCupertinoDialog(context: context,
+                                        builder: createDialog);
+                                  }
+                                  );
+                                }
+
+                                print('Valid');
+                              }
                             },
                             icon: const Icon(CupertinoIcons.forward),
                             label: const Text('Login Account')),
@@ -200,7 +220,7 @@ class _LoginState extends State<Login> {
           )
       ),
       bottomSheet: ClipRRect(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20),
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(20),
             topRight: Radius.circular(20)),
         child: Container(
           color: Colors.white,
@@ -209,12 +229,12 @@ class _LoginState extends State<Login> {
             children: [
               TextButton(onPressed: () {
                           widget.togglePage();
-              }, child: Text('No account yet?')),
+              }, child: const Text('No account yet?')),
               TextButton(onPressed: () {
                 Navigator.pushNamed(context, '/forgot_password', arguments: {
                   'user_type': data['user_type']
                 });
-              }, child: Text('Forgot Password?')),
+              }, child: const Text('Forgot Password?')),
             ],
           ),
         ),
@@ -235,12 +255,12 @@ class _LoginState extends State<Login> {
             padding: const EdgeInsets.all(30.0),
             child: Column(
               children: [
-                Text('Choose Campus', style: TextStyle(
+                const Text('Choose Campus', style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold
                 ),
                 ),
-                SizedBox(height: 20,),
+                const SizedBox(height: 20,),
                 Column(
                   children: schools.map((e) => newSchools(school: e)).toList(),
                 ),
@@ -252,7 +272,7 @@ class _LoginState extends State<Login> {
 
   Widget newSchools({required SchoolList school}) =>
       ListTile(
-        contentPadding: EdgeInsets.all(2),
+        contentPadding: const EdgeInsets.all(2),
         selectedTileColor: Colors.white24,
         onTap: () {
           Navigator.pop(context);
@@ -264,6 +284,16 @@ class _LoginState extends State<Login> {
           backgroundImage: AssetImage(school.logo),
         ),
         title: Text(school.schoolName),
-        trailing: Icon(CupertinoIcons.arrow_right_square_fill),
+        trailing: const Icon(CupertinoIcons.arrow_right_square_fill),
       );
+
+  Widget createDialog(BuildContext context) => CupertinoAlertDialog(
+    title: const Text('Error'),
+    content: Text(_auth.error),
+    actions: [
+      CupertinoDialogAction(
+          onPressed: ()=> Navigator.pop(context),
+          child: const Text('OK'))
+    ],
+  );
 }

@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:icct_lms/models/user_model.dart';
+import 'package:icct_lms/services/database.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  late String error = '';
   // create user object
   UserModel? _userFromFirebaseUser(User user){
     if (user != null) {
@@ -25,19 +26,37 @@ class AuthService {
       User? user = result.user;
       return _userFromFirebaseUser(user!);
     }catch(error){
-      print(error);
       return null;
     }
   }
-  //sign in with email and password
-  Future registerWithEmailAndPassword(String email, String password) async{
+  //Sign in with email and password
+  Future signInWithEmailAndPassword(String email, String password) async {
     try{
-      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential result = await _auth.signInWithEmailAndPassword(email: email, password: password);
       User? user = result.user;
 
       return _userFromFirebaseUser(user!);
+    }on FirebaseAuthException catch(e){
+      error = e.message!;
+      return null;
+    }
+  }
+
+
+  //Register with email and password
+  Future registerWithEmailAndPassword(String email, String password, String
+  username, String campus, String emailAddress, String userType) async{
+    try{
+      UserCredential result = await _auth.createUserWithEmailAndPassword
+        (email: email, password: password);
+      User? user = result.user;
+
+      //update user info for new user
+      await DatabaseService(uid:user!.uid).updateUserDetails(username,
+          emailAddress, campus, userType);
+      return _userFromFirebaseUser(user);
     }catch(e){
-      print(e.toString());
+      error = e.toString();
       return null;
     }
   }

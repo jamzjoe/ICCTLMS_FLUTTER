@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:icct_lms/authentication/authenticate.dart';
 import 'package:icct_lms/models/user_model.dart';
-import 'package:icct_lms/pages/choose_type_user.dart';
 import 'package:icct_lms/pages/home.dart';
 import 'package:provider/provider.dart';
 
