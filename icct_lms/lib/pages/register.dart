@@ -260,7 +260,7 @@ class _RegisterState extends State<Register> {
                                 passwordController.text.trim(),
                                 nameController.text.trim(), schoolController
                                     .text.trim(), emailController.text.trim()
-                              , userTypeController.text.trim());
+                              , userTypeController.text.trim(), );
                             if (result == null) {
                               setState(() {
                                 loading = false;
@@ -392,7 +392,7 @@ class _RegisterState extends State<Register> {
 
   Widget createDialog(BuildContext context)  => CupertinoAlertDialog(
     title: const Text('Error'),
-    content: Text(error),
+    content: Text(_auth.error),
     actions: [
       CupertinoDialogAction(child: const Text('OK'),
         onPressed: ()=> Navigator.pop(context),

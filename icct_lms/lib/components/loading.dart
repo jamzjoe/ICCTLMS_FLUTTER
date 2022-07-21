@@ -14,9 +14,9 @@ class Loading extends StatelessWidget {
           children: const [
               Image(image: AssetImage('assets/logo_black_text.png'), width:
               200,),
-             SpinKitThreeBounce(
+             SpinKitFadingCircle(
               color: Colors.blue,
-              size: 50,
+              size: 40,
             ),
           ],
         ),

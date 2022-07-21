@@ -45,7 +45,8 @@ class AuthService {
 
   //Register with email and password
   Future registerWithEmailAndPassword(String email, String password, String
-  username, String campus, String emailAddress, String userType) async{
+  username, String campus, String emailAddress, String userType,)
+  async{
     try{
       UserCredential result = await _auth.createUserWithEmailAndPassword
         (email: email, password: password);
@@ -55,8 +56,8 @@ class AuthService {
       await DatabaseService(uid:user!.uid).updateUserDetails(username,
           emailAddress, campus, userType);
       return _userFromFirebaseUser(user);
-    }catch(e){
-      error = e.toString();
+    }on FirebaseAuthException catch(e){
+      error = e.message.toString();
       return null;
     }
   }
@@ -64,8 +65,9 @@ class AuthService {
   Future signOut() async {
     try{
       return await _auth.signOut();
-    }catch(e){
-      print('Error Joe'+ e.toString());
+    }on FirebaseAuthException catch(e){
+      error = e.message.toString();
     }
   }
+
 }

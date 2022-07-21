@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, required this.uid}) : super(key: key);
+  const HomeScreen({Key? key, required this.uid, required this.userType}) : super(key:
+key);
   final String uid;
+  final String userType;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -18,7 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             const Text('Home'),
-            Text(widget.uid)
+            Text(widget.uid),
+            Text(widget.userType)
           ],
         ),
       ),
