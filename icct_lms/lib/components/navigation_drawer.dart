@@ -9,11 +9,15 @@ import 'package:icct_lms/services/auth.dart';
 import 'package:provider/provider.dart';
 
 class NavigationDrawer extends StatefulWidget {
-  const NavigationDrawer({Key? key, required this.name, required this.email, required this.uid, required this.school}) : super(key: key);
+  const NavigationDrawer({Key? key,required this.userType, required this.name,
+    required
+  this.email,
+    required this.uid, required this.school}) : super(key: key);
   final String name;
   final String email;
   final String uid;
   final String school;
+  final String userType;
   @override
   State<NavigationDrawer> createState() => _NavigationDrawerState();
 }
@@ -36,7 +40,8 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 school: widget.school,
                 uid: widget.uid,
                 email: widget
-                    .email),
+                    .email,
+            userType: widget.userType),
             buildMenuItem(
               onClicked: () => selectedItem(context, 0),
               text: 'Backpack',
@@ -117,11 +122,13 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
 }
 
 class Header extends StatefulWidget {
-  const Header({Key? key, required this.name, required this.school, required this.uid, required this.email}) : super(key: key);
+  const Header({Key? key, required this.name, required this.school, required
+  this.uid, required this.email, required this.userType}) : super(key: key);
   final String name;
   final String school;
   final String uid;
   final String email;
+  final String userType;
   @override
   State<Header> createState() => _HeaderState();
 }
@@ -133,11 +140,11 @@ class _HeaderState extends State<Header> {
       color: Colors.white,
       padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
       child: Row(
-        children: [
+        children: [ const
           CircleAvatar(
             backgroundImage: AssetImage('assets/logo_plain.png'),
           ),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,6 +157,9 @@ class _HeaderState extends State<Header> {
               ),
               ),
               Text(widget.school, style: const TextStyle(
+                  fontWeight: FontWeight.w300
+              ),),
+              Text(widget.userType, style: const TextStyle(
                   fontWeight: FontWeight.w300
               ),),
 
@@ -166,8 +176,10 @@ class _HeaderState extends State<Header> {
     await FlutterClipboard.copy(widget.uid);
     if(!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar( SnackBar( content: Text
-      ('You copied ${widget.uid}'), duration: const Duration(milliseconds:
-    300), ), );
+      ('You copied ${widget.name} ID:${widget.uid}'), duration: const
+    Duration
+      (milliseconds:
+    1000), ), );
     Navigator.of(context).pop();
   }, icon: const Icon(Icons
       .copy_outlined, size: 12, color: Colors.black54,));
