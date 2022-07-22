@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:icct_lms/components/shimmer_widget.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ShimmerLoading extends StatelessWidget {
   const ShimmerLoading({Key? key}) : super(key: key);
@@ -7,17 +8,30 @@ class ShimmerLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey,
-        leading: const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: ShimmerWidget.circular(height: 64,),
-        ),
-      ),
-      body: Center(
-        child: ListView.builder(
-          itemCount: 10,
-          itemBuilder: (context, index) => buildLoadShimmer() ,
+
+      body: SafeArea(
+        child: Column(
+          children: [
+            Shimmer.fromColors(
+              highlightColor: Colors.white,
+              enabled: true,
+              baseColor: Colors.grey,
+              child: Container(
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: Colors.white60
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: ListView.builder(
+                  itemCount: 10,
+                  itemBuilder: (context, index) => buildLoadShimmer() ,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

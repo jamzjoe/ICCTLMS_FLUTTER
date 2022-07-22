@@ -50,6 +50,7 @@ dependencies:
   shimmer: ^2.0.0
   uuid: 3.0.6
   grouped_list: ^5.1.2
+  font_awesome_flutter: ^10.1.0
 
 flutter_native_splash:
   color: "#ffffff"

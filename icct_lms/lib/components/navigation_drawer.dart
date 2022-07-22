@@ -1,6 +1,8 @@
 import 'package:clipboard/clipboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:icct_lms/home_pages/profile.dart';
 import 'package:icct_lms/menu_pages/back_pack.dart';
 import 'package:icct_lms/menu_pages/help_center.dart';
 import 'package:icct_lms/menu_pages/news_and_updates.dart';
@@ -113,9 +115,30 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
       _auth.signOut();
       break;
     case 5:
+      showAlert();
       break;
   }
   }
+
+  Future showAlert() => showDialog(context: context, builder: (context)=>
+  CupertinoAlertDialog(
+    title: const Text('Warning!'),
+    content: const Text('There is no way to undo the deletion of this account, are you sure you want to delete?'),
+    actions: [
+      TextButton(onPressed: ()async{
+        await
+        _auth.deleteAccount();
+        if(!mounted){
+          return;
+        }
+        Navigator.pushNamedAndRemoveUntil(context, '/wrap', (route) => false);
+      }, child: const Text('Okay')),
+      TextButton(onPressed: (){
+        Navigator.pop(context);
+      }, child: const Text('Cancel'))
+    ],
+  )
+  );
 
 
 
@@ -138,32 +161,57 @@ class _HeaderState extends State<Header> {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
+      padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
       child: Row(
-        children: [ const
-          CircleAvatar(
-            backgroundImage: AssetImage('assets/logo_plain.png'),
+        children: [
+          InkWell(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                Profile(name: widget.name, userType: widget.userType,
+                   uid: widget.uid,
+                   school:
+               widget.school, email: widget.email)));
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all( Radius.circular(50.0)),
+                border: Border.all(
+                  color: Colors.blue,
+                  width: 4.0,
+                ),
+              ),
+              child: CircleAvatar(
+                backgroundColor: Colors.blue[900],
+                child: Text(widget.name.substring(0, 2).toUpperCase(), style:
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700
+                ),),
+              ),
+            ),
           ),
           const SizedBox(width: 10,),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(widget.name, style: const TextStyle(
-                fontWeight: FontWeight.bold
-              ),),
-              Text(widget.email, style: const TextStyle(
-                fontWeight: FontWeight.w300
-              ),
-              ),
-              Text(widget.school, style: const TextStyle(
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.name, style: const TextStyle(
+                  fontWeight: FontWeight.bold
+                , overflow: TextOverflow.fade),),
+                Text(widget.email, style: const TextStyle(
                   fontWeight: FontWeight.w300
-              ),),
-              Text(widget.userType, style: const TextStyle(
-                  fontWeight: FontWeight.w300
-              ),),
+                ),
+                ),
+                Text(widget.school, style: const TextStyle(
+                    fontWeight: FontWeight.w300
+                ),),
+                Text(widget.userType, style: const TextStyle(
+                    fontWeight: FontWeight.w300
+                ),),
 
-            ],
+              ],
+            ),
           ),
           buildCopy()
         ],
