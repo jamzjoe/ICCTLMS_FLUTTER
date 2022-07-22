@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/components/navigation_drawer.dart';
 import 'package:icct_lms/components/shimmer_loading.dart';
 import 'package:icct_lms/home_pages/class.dart';
@@ -37,10 +36,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
 
     String uid = user.uid;
-    final screens = [
 
-
-    ];
     return DefaultTabController(
       length: 5,
       initialIndex: currentIndex,
@@ -61,14 +57,16 @@ class _HomeState extends State<Home> {
   }
 
  Future<UserProfile?> readUser() async {
-    final docUser = FirebaseFirestore.instance.collection('Users').doc(user
-        .uid);
-    final snapshot = await docUser.get();
+   final docUser = FirebaseFirestore.instance.collection('Users').doc(user
+       .uid);
+   final snapshot = await docUser.get();
 
-    if(snapshot.exists){
-      return UserProfile.fromJson(snapshot.data()!);
-    }
+   if(snapshot.exists){
+     return UserProfile.fromJson(snapshot.data()!);
+   }
  }
+
+
 
   Widget buildUser(UserProfile user, String uid) => Scaffold(
     drawer: NavigationDrawer(
@@ -138,8 +136,12 @@ class _HomeState extends State<Home> {
         ]),
     body: TabBarView(
       children: [
-        HomeScreen(uid: uid, userType: user.userType),
-        ClassScreen(uid: uid, userType: user.userType, name: user.name),
+        HomeScreen(uid: uid, userType: user.userType, userName: user.name,
+            userEmail:
+        user.email, userCampus: user.campus),
+        ClassScreen(uid: uid, userType: user.userType, userName: user.name,
+            userEmail:
+        user.email, userCampus: user.campus),
         PlannerScreen(uid: uid),
         MessageScreen(uid: uid),
         NotificationScreen(uid: uid),

@@ -5,6 +5,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:icct_lms/models/user_model.dart';
 import 'package:icct_lms/pages/choose_type_user.dart';
 import 'package:icct_lms/pages/intro_slider.dart';
+import 'package:icct_lms/room_screens/room.dart';
 import 'package:icct_lms/services/auth.dart';
 import 'package:icct_lms/wrapper/wrapper.dart';
 import 'package:provider/provider.dart';

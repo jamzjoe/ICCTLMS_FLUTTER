@@ -70,4 +70,13 @@ class AuthService {
     }
   }
 
+  Future deleteAccount() async {
+    final User user = _auth.currentUser!;
+    try{
+      return await user.delete();
+    } on FirebaseAuthException catch(e){
+      error = e.message.toString();
+    }
+  }
+
 }

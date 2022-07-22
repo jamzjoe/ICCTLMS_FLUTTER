@@ -5,18 +5,24 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:icct_lms/components/copy.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/home_pages/profile.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
+import 'package:icct_lms/pages/home.dart';
+import 'package:icct_lms/room_screens/room.dart';
 import 'package:uuid/uuid.dart';
 
 class ClassScreen extends StatefulWidget {
   const ClassScreen( {Key? key, required this.uid, required this.userType,
-  required this.name})
+  required this.userName, required this.userEmail, required this.userCampus})
       : super(key: key);
   final String uid;
   final String userType;
-  final String name;
+  final String userName;
+  final String userEmail;
+  final String userCampus;
   @override
   State<ClassScreen> createState() => _ClassScreenState();
 }
@@ -26,6 +32,9 @@ class ClassScreen extends StatefulWidget {
   final groupCodeController = TextEditingController(text: initialGroupCode);
   final classNameController = TextEditingController();
   final groupNameController = TextEditingController();
+  final Copy copy = Copy();
+  final _classKey = GlobalKey<FormState>();
+  final _groupKey = GlobalKey<FormState>();
 
 class _ClassScreenState extends State<ClassScreen> {
 
@@ -35,11 +44,10 @@ class _ClassScreenState extends State<ClassScreen> {
     super.initState();
 
   }
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      animationDuration: Duration(seconds: 1),
+      animationDuration: const Duration(seconds: 1),
       length: 2,
       child: Scaffold(
         appBar: AppBar(
@@ -200,110 +208,134 @@ class _ClassScreenState extends State<ClassScreen> {
       )
   );
   Future <void> openCreateClass() => showDialog(context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Create Class'),
-        content: Column(
-          children: [
-            CupertinoTextField(
-              controller: classNameController,
-              onSubmitted: (value){
-              },
-              keyboardType: TextInputType.visiblePassword,
-              padding: const EdgeInsets.all(10),
-              placeholder: 'Class name', style: const TextStyle(
-              fontSize: 14,
-            ),
-            ),
-            const SizedBox(height: 10,),
-            CupertinoTextField(
-              onTap: () async{
-                showAndCopy(classCodeController.text);
-              },
-              suffix: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.copy, size: 15,),
+        content: Form(
+          key: _classKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                validator: (value) => value!.length < 5 || value.isEmpty ? 'Ca'
+                    'nno'
+                    't be empty and chars must be 5+ long. ':
+                null,
+                controller: classNameController,
+                keyboardType: TextInputType.visiblePassword,
+                decoration: const InputDecoration(
+                  hintText: 'Class Name'
+                ),
               ),
-              controller: classCodeController,
-              readOnly: true,
-              onSubmitted: (value){
+              const SizedBox(height: 10,),
+              CupertinoTextField(
+                onTap: () async{
+                  copy.showAndCopy(
+                  'You copied ${classCodeController.text.trim()}',
+                      classCodeController.text.trim(), context,
+                      mounted);
+                },
+                suffix: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.copy, size: 15,),
+                ),
+                controller: classCodeController,
+                readOnly: true,
+                onSubmitted: (value){
 
-              },
-              keyboardType: TextInputType.visiblePassword,
-              padding: const EdgeInsets.all(10),
-              placeholder: 'Class code', style: const TextStyle(
-              fontSize: 14,
-            ),
-            ),
-          ],
+                },
+                keyboardType: TextInputType.visiblePassword,
+                padding: const EdgeInsets.all(10),
+                placeholder: 'Class code', style: const TextStyle(
+                fontSize: 14,
+              ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: (){
             final classInfo = Class(classNameController.text.trim(),
-                classCodeController.text.trim(), widget.name);
-
-            createClass(classInfo);
-            Navigator.pop(context);
+                classCodeController.text.trim(), widget.userName);
+            if(_classKey.currentState!.validate()){
+              createClass(classInfo);
+              copy.showAndCopy(
+                  'You copied ${classCodeController.text.trim()}',
+                  classCodeController.text.trim(), context,
+                  mounted);
+              setState(() {
+                classNameController.text = '';
+              });
+              Navigator.pop(context);
+            }
           }, child: const Text('Submit'))
         ],
       )
   );
   Future <void> openCreateGroup() => showDialog(context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Create Group'),
-        content: Column(
-          children: [
-            CupertinoTextField(
-              controller: groupNameController,
-              onSubmitted: (value){
-              },
-              keyboardType: TextInputType.visiblePassword,
-              padding: const EdgeInsets.all(10),
-              placeholder: 'Group name', style: const TextStyle(
-              fontSize: 14,
-            ),
-            ),
-            const SizedBox(height: 10,),
-            CupertinoTextField(
-              suffix: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.copy, size: 15,),
+        content: Form(
+          key: _groupKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                validator: (value) => value!.length < 5 || value.isEmpty ? 'Ca'
+                    'nno'
+                    't be empty and chars must be 5+ long. ':
+                null,
+                controller: groupNameController,
+                keyboardType: TextInputType.visiblePassword,
+                decoration: const InputDecoration(
+                  hintText: 'Group name'
+                ),
               ),
-              onTap: () => showAndCopy(groupCodeController.text),
-              controller: groupCodeController,
-              readOnly: true,
-              onSubmitted: (value){
+              const SizedBox(height: 10,),
+              CupertinoTextField(
+                suffix: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.copy, size: 15,),
+                ),
+                onTap: () => copy.showAndCopy(
+                    'You copied ${groupCodeController.text.trim()}',
+                    groupCodeController.text.trim(),
+                    context,
+                    mounted),
+                controller: groupCodeController,
+                readOnly: true,
+                onSubmitted: (value){
 
-              },
-              keyboardType: TextInputType.visiblePassword,
-              padding: const EdgeInsets.all(10),
-              placeholder: 'Group code', style: const TextStyle(
-              fontSize: 14,
-            ),
-            ),
-          ],
+                },
+                keyboardType: TextInputType.visiblePassword,
+                padding: const EdgeInsets.all(10),
+                placeholder: 'Group code', style: const TextStyle(
+                fontSize: 14,
+              ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: (){
             final groupInfo = Group(groupNameController .text.trim(),
-                groupCodeController.text.trim(), widget.name);
-
-            createGroup(groupInfo);
-            Navigator.pop(context);
+                groupCodeController.text.trim(), widget.userName);
+            if(_groupKey.currentState!.validate()){
+              createGroup(groupInfo);
+              copy.showAndCopy(
+                  'You copied ${groupCodeController.text.trim()}',
+                  groupCodeController.text.trim(),
+                  context,
+                  mounted);
+              setState(() {
+                groupNameController.text = '';
+              });
+              Navigator.pop(context);
+            }
           }, child: const Text('Submit'))
         ],
       )
   );
 
-  void showAndCopy(String text) async{
-    await FlutterClipboard.copy(widget.uid);
-    if(!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar( SnackBar( content: Text
-      ('You copied ${classCodeController.text}'),
-      duration: const
-      Duration
-        (milliseconds:
-      1000), ), );
-  }
 
 
   //streams
@@ -335,6 +367,11 @@ class _ClassScreenState extends State<ClassScreen> {
 
   Widget buildGroup(Group e) => Card(
     child: ListTile(
+      onTap: (){
+        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Room
+          (uid: uid, userType: e.teacher, userName: e.name, roomType: 'Group'
+        )));
+      },
       leading: CircleAvatar(
         radius: 25,
         backgroundColor: Colors.blue[900],
@@ -355,17 +392,18 @@ class _ClassScreenState extends State<ClassScreen> {
               docUser.delete();
             },
             child: const Text('Delete'),
-          ),
-          PopupMenuItem(
-              onTap: (){
-              },
-              child: const Text('Update'))
+          )
         ],
       ),
     ),
   );
   Widget buildUser(Class e) => Card(
     child: ListTile(
+      onTap: (){
+        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Room
+          (uid: uid, userType: e.teacher, userName: e.name, roomType: 'Class'
+        )));
+      },
       leading: CircleAvatar(
         radius: 25,
         backgroundColor: Colors.blue[900],
@@ -382,19 +420,86 @@ class _ClassScreenState extends State<ClassScreen> {
             itemBuilder: (context) => [
               PopupMenuItem(
                 onTap: (){
-                  print(e.code);
                   final docUser = FirebaseFirestore.instance.collection('Rooms').doc
                     ('Class').collection(widget.uid).doc(e.code.trim());
                   docUser.delete();
                 },
                 child: const Text('Delete'),
-              ),
-              PopupMenuItem(
-                  onTap: (){},
-                  child: const Text('Update'))
+              )
             ],
         )
 
     ),
   );
+
+
+  Future updateGroup() => showDialog(context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Create Group'),
+        content: Form(
+          key: _groupKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                validator: (value) => value!.length < 5 || value.isEmpty ? 'Ca'
+                    'nno'
+                    't be empty and chars must be 5+ long. ':
+                null,
+                controller: groupNameController,
+                keyboardType: TextInputType.visiblePassword,
+                decoration: const InputDecoration(
+                    hintText: 'Group name'
+                ),
+              ),
+              const SizedBox(height: 10,),
+              CupertinoTextField(
+                suffix: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.copy, size: 15,),
+                ),
+                onTap: () => copy.showAndCopy(
+                    'You copied ${groupCodeController.text.trim()}',
+                    groupCodeController.text.trim(),
+                    context,
+                    mounted),
+                controller: groupCodeController,
+                readOnly: true,
+                onSubmitted: (value){
+
+                },
+                keyboardType: TextInputType.visiblePassword,
+                padding: const EdgeInsets.all(10),
+                placeholder: 'Group code', style: const TextStyle(
+                fontSize: 14,
+              ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: (){
+            final groupInfo = Group(groupNameController .text.trim(),
+                groupCodeController.text.trim(), widget.userName);
+            if(_groupKey.currentState!.validate()){
+              createGroup(groupInfo);
+              copy.showAndCopy(
+                  'You copied ${groupCodeController.text.trim()}',
+                  groupCodeController.text.trim(),
+                  context,
+                  mounted);
+              setState(() {
+                groupNameController.text = '';
+              });
+              Navigator.pop(context);
+            }
+          }, child: const Text('Submit'))
+        ],
+      )
+  );
+
+
+
 }
+
+
