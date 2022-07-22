@@ -47,9 +47,9 @@ class _IntroSliderState extends State<IntroSlider> {
             ),
             Container(
               color: Colors.blue[900],
-              child: buildPage('assets/create.json', 'Create Account', 'You'
-                  ' have entered all the required data and now able to access'
-                  ' the system online learning resources.'),
+              child: buildPage('assets/create.json', 'Create Account', "You'v"
+                  "e entered all the required information and now may access "
+                  "the system's online learning courses."),
             ),
             Container(
               color: Colors.blue[900],
@@ -106,7 +106,7 @@ class _IntroSliderState extends State<IntroSlider> {
             Center(
               child: SmoothPageIndicator(
                 controller: pageController,
-                effect: ExpandingDotsEffect(
+                effect: const ExpandingDotsEffect(
                   dotWidth: 10,
                   dotHeight: 10,
                   dotColor: Colors.blueGrey,

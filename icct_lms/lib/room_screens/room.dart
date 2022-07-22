@@ -5,10 +5,11 @@ import 'package:icct_lms/room_screens/pages/member.dart';
 import 'package:icct_lms/room_screens/pages/post.dart';
 
 class Room extends StatefulWidget {
-  const Room({Key? key, required this.uid, required this.userType, required this.userName, required this.roomType}) : super(key: key);
+  const Room({Key? key, required this.uid, required this.teacherUID, required this.teacher, required this.roomName, required this.roomType}) : super(key: key);
   final String uid;
-  final String userType;
-  final String userName;
+  final String teacherUID;
+  final String teacher;
+  final String roomName;
   final String roomType;
   @override
   State<Room> createState() => _RoomState();
@@ -30,7 +31,7 @@ class _RoomState extends State<Room> {
           foregroundColor: Colors.white,
           elevation: 2,
           backgroundColor: Colors.blue[900],
-          title: Text('${widget.userName} - ${widget.userType}', style:
+          title: Text('${widget.roomName} - ${widget.roomType}', style:
           const TextStyle
             (
             color: Colors.white
@@ -67,13 +68,11 @@ class _RoomState extends State<Room> {
         ),
         body: TabBarView(
           children: [
-            Post(uid: widget.uid, userType: widget.userType, userName: widget.userName,
+            Post(uid: widget.uid, userType: widget.roomType, userName: widget.teacher,
             roomType: widget.roomType),
-            Folder(uid: widget.uid, userType: widget.userType, userName: widget
-                .userName,
+            Folder(uid: widget.uid, userType: widget.roomType, userName: widget.teacher,
                 roomType: widget.roomType),
-            Member(uid: widget.uid, userType: widget.userType, userName: widget
-                .userName,
+            Member(uid: widget.uid, userType: widget.roomType, userName: widget.teacher,
                 roomType: widget.roomType),
           ],),
       ),
