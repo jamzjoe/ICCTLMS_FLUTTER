@@ -12,7 +12,7 @@ class _BackPackState extends State<BackPack> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('BackPack'),
+        title: const Text('BackPack'),
       ),
     );
   }

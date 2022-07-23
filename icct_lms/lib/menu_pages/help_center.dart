@@ -12,7 +12,7 @@ class _HelpCenterState extends State<HelpCenter> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Help Center'),
+        title: const Text('Help Center'),
       ),
     );
   }

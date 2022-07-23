@@ -10,23 +10,23 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-
 class _SplashScreenState extends State<SplashScreen> {
-  void validateUser() async{
-      final prefs = await SharedPreferences.getInstance();
-      final showHome = prefs.getBool('showHome') ?? false;
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) =>  ChooseUser()
-      )
-      );
+  void validateUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final showHome = prefs.getBool('showHome') ?? false;
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const ChooseUser()));
   }
-  
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     validateUser();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,25 +44,33 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
           ),
-          SizedBox(height: 10,),
-          Center(
-            child: Text('Institute of Creative Computer Technology', style:
-            TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 14
-            ),),
-            ),
-          SizedBox(height: 5,),
-          Center(
-            child: Text('Learning Management System', style:
-            TextStyle(
-              color: Colors.white,
-                fontWeight: FontWeight.w300,
-                fontSize: 12
-            ),),
+          SizedBox(
+            height: 10,
           ),
-          SizedBox(height: 100,),
+          Center(
+            child: Text(
+              'Institute of Creative Computer Technology',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14),
+            ),
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          Center(
+            child: Text(
+              'Learning Management System',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300,
+                  fontSize: 12),
+            ),
+          ),
+          SizedBox(
+            height: 100,
+          ),
           Center(
             child: SpinKitPouringHourGlassRefined(
               color: Colors.white,
@@ -74,4 +82,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

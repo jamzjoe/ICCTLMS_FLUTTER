@@ -1,11 +1,17 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/room_screens/pages/folder.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
 import 'package:icct_lms/room_screens/pages/post.dart';
 
 class Room extends StatefulWidget {
-  const Room({Key? key, required this.uid, required this.teacherUID, required this.teacher, required this.roomName, required this.roomType}) : super(key: key);
+  const Room(
+      {Key? key,
+      required this.uid,
+      required this.teacherUID,
+      required this.teacher,
+      required this.roomName,
+      required this.roomType})
+      : super(key: key);
   final String uid;
   final String teacherUID;
   final String teacher;
@@ -16,7 +22,7 @@ class Room extends StatefulWidget {
 }
 
 class _RoomState extends State<Room> {
- @override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -31,25 +37,29 @@ class _RoomState extends State<Room> {
           foregroundColor: Colors.white,
           elevation: 2,
           backgroundColor: Colors.blue[900],
-          title: Text('${widget.roomName} - ${widget.roomType}', style:
-          const TextStyle
-            (
-            color: Colors.white
-          ),),
+          title: Text(
+            '${widget.roomName} - ${widget.roomType}',
+            style: const TextStyle(color: Colors.white),
+          ),
           actions: [
             Builder(
-              builder: (BuildContext context){
-                return IconButton(onPressed: (){
-                }, icon: const Icon(Icons.add_to_photos_sharp, color:
-                Colors.white,));
+              builder: (BuildContext context) {
+                return IconButton(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.add_to_photos_sharp,
+                      color: Colors.white,
+                    ));
               },
             ),
             Builder(
-              builder: (BuildContext context){
-                return IconButton(onPressed: (){
-
-                }, icon: const Icon(Icons.video_call, color: Colors.white ,)
-                );
+              builder: (BuildContext context) {
+                return IconButton(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.video_call,
+                      color: Colors.white,
+                    ));
               },
             ),
           ],
@@ -59,22 +69,40 @@ class _RoomState extends State<Room> {
             indicatorColor: Colors.blue[900],
             indicatorWeight: 2,
             tabs: const [
-              Tab(text: 'Timeline', icon: Icon(Icons.post_add),),
-              Tab(text: 'Sources', icon: Icon(Icons.folder),),
-              Tab(text: 'Members', icon: Icon(Icons.group),),
+              Tab(
+                text: 'Timeline',
+                icon: Icon(Icons.post_add),
+              ),
+              Tab(
+                text: 'Sources',
+                icon: Icon(Icons.folder),
+              ),
+              Tab(
+                text: 'Members',
+                icon: Icon(Icons.group),
+              ),
             ],
-
           ),
         ),
         body: TabBarView(
           children: [
-            Post(uid: widget.uid, userType: widget.roomType, userName: widget.teacher,
-            roomType: widget.roomType),
-            Folder(uid: widget.uid, userType: widget.roomType, userName: widget.teacher,
+            Post(
+                uid: widget.uid,
+                userType: widget.roomType,
+                userName: widget.teacher,
                 roomType: widget.roomType),
-            Member(uid: widget.uid, userType: widget.roomType, userName: widget.teacher,
+            Folder(
+                uid: widget.uid,
+                userType: widget.roomType,
+                userName: widget.teacher,
                 roomType: widget.roomType),
-          ],),
+            Member(
+                uid: widget.uid,
+                userType: widget.roomType,
+                userName: widget.teacher,
+                roomType: widget.roomType),
+          ],
+        ),
       ),
     );
   }
