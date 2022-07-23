@@ -13,12 +13,14 @@ class _EditProfileState extends State<EditProfile> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[900],
-        title: Text('Edit Profile'),
+        title: const Text('Edit Profile'),
       ),
-      body: Padding(padding: EdgeInsets.all(20),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
         child: Center(
           child: Text(widget.uid),
-        ),),
+        ),
+      ),
     );
   }
 }

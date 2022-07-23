@@ -2,13 +2,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:icct_lms/authentication/authenticate.dart';
 import 'package:icct_lms/services/auth.dart';
 import 'package:icct_lms/services/database.dart';
-import 'package:icct_lms/wrapper/wrapper.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({Key? key, required this.name, required this.userType, required this.uid, required this.school, required this.email}) : super(key: key);
+  const Profile(
+      {Key? key,
+      required this.name,
+      required this.userType,
+      required this.uid,
+      required this.school,
+      required this.email})
+      : super(key: key);
   final String name;
   final String userType;
   final String uid;
@@ -17,6 +22,7 @@ class Profile extends StatefulWidget {
   @override
   State<Profile> createState() => _ProfileState();
 }
+
 final String uid = FirebaseAuth.instance.currentUser!.uid;
 bool showTextField = false;
 bool updateButton = true;
@@ -27,6 +33,7 @@ final schoolController = TextEditingController();
 final userTypeController = TextEditingController();
 final DatabaseService user = DatabaseService(uid: uid);
 final AuthService _auth = AuthService();
+
 class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
@@ -48,32 +55,33 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget buildCover() => Container(
-    color: Colors.blue[900],
-    height: 170,
-    width: double.infinity,
-    child: Image.asset('assets/cover.jpg', width: double.infinity,),
-  );
+        color: Colors.blue[900],
+        height: 170,
+        width: double.infinity,
+        child: Image.asset(
+          'assets/cover.jpg',
+          width: double.infinity,
+        ),
+      );
 
   Widget buildProfile() => Container(
-    decoration: BoxDecoration(
-      borderRadius: const BorderRadius.all( Radius.circular(50.0)),
-      border: Border.all(
-        color: Colors.white,
-        width: 4.0,
-      ),
-    ),
-    child: CircleAvatar(
-      backgroundColor: Colors.blue[900],
-      radius: 45,
-      child: Text(widget.name.substring(0, 2).toUpperCase(), style:
-      const TextStyle
-        (
-        color: Colors.white,
-        fontSize: 20,
-        fontWeight: FontWeight.bold
-      ),),
-    ),
-  );
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(50.0)),
+          border: Border.all(
+            color: Colors.white,
+            width: 4.0,
+          ),
+        ),
+        child: CircleAvatar(
+          backgroundColor: Colors.blue[900],
+          radius: 45,
+          child: Text(
+            widget.name.substring(0, 2).toUpperCase(),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
 
   buildTop() {
     var top = 123;
@@ -82,153 +90,168 @@ class _ProfileState extends State<Profile> {
       alignment: Alignment.center,
       children: [
         Container(
-            margin: EdgeInsets.only(bottom: top/2),
-            child: buildCover()),
-        Positioned(
-            top: top.toDouble(),
-            child: buildProfile()),
-
+            margin: EdgeInsets.only(bottom: top / 2), child: buildCover()),
+        Positioned(top: top.toDouble(), child: buildProfile()),
       ],
     );
   }
 
   Widget buildContent() => Column(
-    children: [
-      Text(widget.name, style: const TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 18
-      ),
-      ),
-      Text('${widget.userType} @${widget.school}'),
-      const SizedBox(height: 10,),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          buildIcon(FontAwesomeIcons.facebook),
-          const SizedBox(width: 10,),
-          buildIcon(FontAwesomeIcons.facebookMessenger),
-          const SizedBox(width: 10,),
-          buildIcon(FontAwesomeIcons.instagram)
-        ],
-      ),
-      Visibility(
-          visible: showTextField,
-          child: Form(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: nameController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text('Username'),
-                    ),
-                  ),
-                  const SizedBox(height: 10,),
-                  TextFormField(
-                    readOnly: true,
-                    controller: emailController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text('Email address'),
-                    ),
-                  ),
-                  const SizedBox(height: 10,),
-                  TextFormField(
-                    controller: schoolController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text('School Campus'),
-                    ),
-                  ),
-                  const SizedBox(height: 10,),
-                  TextFormField(
-                    controller: userTypeController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text('User Type'),
-                    ),
-                  )
-                ],
+          Text(
+            widget.name,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+          ),
+          Text('${widget.userType} @${widget.school}'),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buildIcon(FontAwesomeIcons.facebook),
+              const SizedBox(
+                width: 10,
               ),
-            ),
-          )),
-      const SizedBox(height: 20,),
-      Visibility(
-        visible: updateButton,
-        child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              primary: Colors.blue[900]
-            ),
-            onPressed: (){
-              setState(() {
-                showTextField = true;
-                updateButton = false;
-                submitButton = true;
-              });
-            }, icon: const Icon(FontAwesomeIcons
-            .edit, size: 20,),
-            label: const Text('Update Profile')),
-      ),
-
-      Visibility(
-        visible: submitButton,
-        child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-                primary: Colors.blue[900]
-            ),
-            onPressed: (){
-
-              showAlert();
-
-            }, icon: const Icon(FontAwesomeIcons
-            .fileEdit, size: 20,),
-            label: const Text('Submit Changes')),
-      ),
-
-    ],
-  );
+              buildIcon(FontAwesomeIcons.facebookMessenger),
+              const SizedBox(
+                width: 10,
+              ),
+              buildIcon(FontAwesomeIcons.instagram)
+            ],
+          ),
+          Visibility(
+              visible: showTextField,
+              child: Form(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('Username'),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        readOnly: true,
+                        controller: emailController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('Email address'),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: schoolController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('School Campus'),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: userTypeController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('User Type'),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              )),
+          const SizedBox(
+            height: 20,
+          ),
+          Visibility(
+            visible: updateButton,
+            child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                onPressed: () {
+                  setState(() {
+                    showTextField = true;
+                    updateButton = false;
+                    submitButton = true;
+                  });
+                },
+                icon: const Icon(
+                  FontAwesomeIcons.edit,
+                  size: 20,
+                ),
+                label: const Text('Update Profile')),
+          ),
+          Visibility(
+            visible: submitButton,
+            child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                onPressed: () {
+                  showAlert();
+                },
+                icon: const Icon(
+                  FontAwesomeIcons.fileEdit,
+                  size: 20,
+                ),
+                label: const Text('Submit Changes')),
+          ),
+        ],
+      );
 
   Widget buildIcon(IconData icon) => CircleAvatar(
-      backgroundColor: Colors.white,
-      radius: 20,
-      child: Icon(icon, size: 32, color: Colors.blue[900],),
-    );
+        backgroundColor: Colors.white,
+        radius: 20,
+        child: Icon(
+          icon,
+          size: 32,
+          color: Colors.blue[900],
+        ),
+      );
 
-  Future showAlert() async => showDialog(context: context, builder: (context)
-  => CupertinoAlertDialog(
-    title: const Text('Note'),
-    content: const Text('Changes applied when you restart this app.'),
-    actions: [
-      TextButton(onPressed: ()async{
-        await user.updateUserDetails(
-            nameController.text.trim()
-            ,emailController.text.trim(),
-            schoolController.text.trim(),
-            userTypeController.text.trim());
-        _auth.signOut();
-        if(!mounted){
-          return;
-        }
-        setState(() {
-          showTextField = false;
-          updateButton = true;
-          submitButton = false;
-        });
-        Navigator.pushNamedAndRemoveUntil(context, '/wrap', (route) =>
-        false);
-      }, child: const Text('Logout'),),
-      TextButton(onPressed: (){
-        Navigator.pop(context);
-        setState(() {
-          showTextField = false;
-          updateButton = true;
-          submitButton = false;
-        });
-      }, child: const Text('Cancel'))
-    ],
-  )
-  );
-
+  Future showAlert() async => showDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+            title: const Text('Note'),
+            content: const Text('Changes applied when you restart this app.'),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await user.updateUserDetails(
+                      nameController.text.trim(),
+                      emailController.text.trim(),
+                      schoolController.text.trim(),
+                      userTypeController.text.trim());
+                  _auth.signOut();
+                  if (!mounted) {
+                    return;
+                  }
+                  setState(() {
+                    showTextField = false;
+                    updateButton = true;
+                    submitButton = false;
+                  });
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/wrap', (route) => false);
+                },
+                child: const Text('Logout'),
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      showTextField = false;
+                      updateButton = true;
+                      submitButton = false;
+                    });
+                  },
+                  child: const Text('Cancel'))
+            ],
+          ));
 }

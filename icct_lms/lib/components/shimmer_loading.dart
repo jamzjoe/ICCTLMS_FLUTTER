@@ -8,7 +8,6 @@ class ShimmerLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: SafeArea(
         child: Column(
           children: [
@@ -18,16 +17,14 @@ class ShimmerLoading extends StatelessWidget {
               baseColor: Colors.grey,
               child: Container(
                 height: 100,
-                decoration: const BoxDecoration(
-                  color: Colors.white60
-                ),
+                decoration: const BoxDecoration(color: Colors.white60),
               ),
             ),
             Expanded(
               child: Center(
                 child: ListView.builder(
                   itemCount: 10,
-                  itemBuilder: (context, index) => buildLoadShimmer() ,
+                  itemBuilder: (context, index) => buildLoadShimmer(),
                 ),
               ),
             ),
@@ -37,9 +34,12 @@ class ShimmerLoading extends StatelessWidget {
     );
   }
 
- Widget buildLoadShimmer() =>  const ListTile(
-   leading: ShimmerWidget.circular(width: 64, height: 64,),
-   title: ShimmerWidget.rectangular(height: 16),
-   subtitle: ShimmerWidget.rectangular(height: 14),
- );
+  Widget buildLoadShimmer() => const ListTile(
+        leading: ShimmerWidget.circular(
+          width: 64,
+          height: 64,
+        ),
+        title: ShimmerWidget.rectangular(height: 16),
+        subtitle: ShimmerWidget.rectangular(height: 14),
+      );
 }
