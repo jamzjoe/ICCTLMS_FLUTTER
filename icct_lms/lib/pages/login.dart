@@ -197,7 +197,6 @@ class _LoginState extends State<Login> {
                                     });
                                   }
 
-                                  print('Valid');
                                 }
                               },
                               icon: const Icon(CupertinoIcons.forward),

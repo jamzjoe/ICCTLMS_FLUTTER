@@ -45,11 +45,12 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Header(
-                name: widget.name,
-                school: widget.school,
-                uid: widget.uid,
-                email: widget.email,
-                userType: widget.userType),
+              name: widget.name,
+              school: widget.school,
+              uid: widget.uid,
+              email: widget.email,
+              userType: widget.userType,
+            ),
             buildMenuItem(
               onClicked: () => selectedItem(context, 0),
               text: 'Backpack',
@@ -63,20 +64,16 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                 onClicked: () => selectedItem(context, 2),
                 text: 'Help Center',
                 icon: Icons.question_answer),
-            buildMenuItem(
-                onClicked: () => selectedItem(context, 3),
-                text: 'Settings',
-                icon: Icons.settings),
             const Divider(
               thickness: 1,
               color: Colors.white,
             ),
             buildMenuItem(
-                onClicked: () => selectedItem(context, 4),
+                onClicked: () => selectedItem(context, 3),
                 text: 'Logout',
                 icon: Icons.exit_to_app),
             buildMenuItem(
-                onClicked: () async => await selectedItem(context, 5),
+                onClicked: () async => await selectedItem(context, 4),
                 text: 'Delete Account',
                 icon: Icons.delete)
           ],
@@ -124,11 +121,9 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
         ));
         break;
       case 3:
-
-      case 4:
         showLogoutAlert();
         break;
-      case 5:
+      case 4:
         showAlert();
         break;
     }
@@ -149,11 +144,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                     if (!mounted) {
                       return;
                     }
-                   if(Platform.isAndroid){
-                     SystemNavigator.pop();
-                   }else if(Platform.isIOS){
-                     exit(0);
-                   }
+                    if (Platform.isAndroid) {
+                      SystemNavigator.pop();
+                    } else if (Platform.isIOS) {
+                      exit(0);
+                    }
                   },
                   child: const Text('Delete')),
               TextButton(
@@ -177,9 +172,9 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                     if (!mounted) {
                       return;
                     }
-                    if(Platform.isAndroid){
+                    if (Platform.isAndroid) {
                       SystemNavigator.pop();
-                    }else if(Platform.isIOS){
+                    } else if (Platform.isIOS) {
                       exit(0);
                     }
                   },
@@ -225,11 +220,12 @@ class _HeaderState extends State<Header> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => Profile(
-                          name: widget.name,
-                          userType: widget.userType,
-                          uid: widget.uid,
-                          school: widget.school,
-                          email: widget.email)));
+                            name: widget.name,
+                            userType: widget.userType,
+                            uid: widget.uid,
+                            school: widget.school,
+                            email: widget.email,
+                          )));
             },
             child: Container(
               decoration: BoxDecoration(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icct_lms/components/nodata.dart';
 
 class NewsUpdates extends StatefulWidget {
   const NewsUpdates({Key? key}) : super(key: key);
@@ -12,8 +13,10 @@ class _NewsUpdatesState extends State<NewsUpdates> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue[900],
         title: const Text('News and Updates'),
       ),
+      body: const NoData(),
     );
   }
 }

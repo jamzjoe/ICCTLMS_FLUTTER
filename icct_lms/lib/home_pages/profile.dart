@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/services/auth.dart';
 import 'package:icct_lms/services/database.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
   const Profile(
@@ -31,6 +32,8 @@ final nameController = TextEditingController();
 final emailController = TextEditingController();
 final schoolController = TextEditingController();
 final userTypeController = TextEditingController();
+final facebookController = TextEditingController();
+final instagramController = TextEditingController();
 final DatabaseService user = DatabaseService(uid: uid);
 final AuthService _auth = AuthService();
 
@@ -55,13 +58,9 @@ class _ProfileState extends State<Profile> {
   }
 
   Widget buildCover() => Container(
-        color: Colors.blue[900],
         height: 170,
-        width: double.infinity,
-        child: Image.asset(
-          'assets/cover.jpg',
-          width: double.infinity,
-        ),
+        decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [Colors.blue, Colors.red])),
       );
 
   Widget buildProfile() => Container(
@@ -106,20 +105,7 @@ class _ProfileState extends State<Profile> {
           const SizedBox(
             height: 10,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              buildIcon(FontAwesomeIcons.facebook),
-              const SizedBox(
-                width: 10,
-              ),
-              buildIcon(FontAwesomeIcons.facebookMessenger),
-              const SizedBox(
-                width: 10,
-              ),
-              buildIcon(FontAwesomeIcons.instagram)
-            ],
-          ),
+
           Visibility(
               visible: showTextField,
               child: Form(
@@ -164,7 +150,10 @@ class _ProfileState extends State<Profile> {
                           border: OutlineInputBorder(),
                           label: Text('User Type'),
                         ),
-                      )
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
                     ],
                   ),
                 ),
@@ -205,12 +194,15 @@ class _ProfileState extends State<Profile> {
         ],
       );
 
-  Widget buildIcon(IconData icon) => CircleAvatar(
+  Widget buildIcon(IconData icon, String link) => CircleAvatar(
         backgroundColor: Colors.white,
         radius: 20,
-        child: Icon(
-          icon,
-          size: 32,
+        child: IconButton(
+          icon: Icon(icon),
+          onPressed: () async {
+            final url = link;
+            openBrowserUrl(url, false);
+          },
           color: Colors.blue[900],
         ),
       );
@@ -254,4 +246,18 @@ class _ProfileState extends State<Profile> {
                   child: const Text('Cancel'))
             ],
           ));
+
+  Future openBrowserUrl(String url, bool inApp) async{
+    try{
+      await launch(
+        url,
+        forceWebView: inApp,
+        forceSafariVC: true,
+        enableJavaScript: true
+
+      );
+    }catch(e){
+      return;
+    }
+  }
 }

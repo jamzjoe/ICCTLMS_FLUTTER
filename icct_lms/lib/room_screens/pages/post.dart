@@ -29,6 +29,7 @@ class _PostState extends State<Post> {
           Row(
             children: [
               CircleAvatar(
+                backgroundColor: Colors.blue[900],
                 child: Text(widget.userName.substring(0, 2).toUpperCase()),
               ),
               const SizedBox(
@@ -47,7 +48,7 @@ class _PostState extends State<Post> {
                             ))),
                 readOnly: true,
                 decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: UnderlineInputBorder(),
                     hintText: "What's on your mind?"),
               ))
             ],
