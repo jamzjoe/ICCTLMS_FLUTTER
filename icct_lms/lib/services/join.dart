@@ -1,18 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class Joined {
   final String uid;
-  late String error;
-  late bool showError = false;
   Joined({required this.uid});
 
   final CollectionReference joinReference =
       FirebaseFirestore.instance.collection('Joined');
   final CollectionReference roomReference =
       FirebaseFirestore.instance.collection('Rooms');
-
+  late bool isError;
+  late String error;
   Future joinedTo(String roomType, String roomCode, String teacherUID,
-      String userID) async {
+      String userID, BuildContext context) async {
     try {
       await roomReference
           .doc(roomType)
@@ -23,7 +24,7 @@ class Joined {
         var roomName = value['name'];
         var teacher = value['teacher'];
 
-        await joinReference.doc(roomType).collection(userID).doc(roomCode).set({
+        joinReference.doc(roomType).collection(userID).doc(roomCode).set({
           'userID': userID,
           'teacher': teacher,
           'roomName': roomName,
@@ -33,17 +34,17 @@ class Joined {
         });
       });
     } catch (e) {
-      showError = true;
-      error = e.toString();
+      if(kDebugMode){
+        print("Error boss");
+      }
+      isError = true;
     }
   }
 
-  Future deleteJoin(String roomType, String roomCode,
-      String userID) async {
+  Future deleteJoin(String roomType, String roomCode, String userID) async {
     try {
       await joinReference.doc(roomType).collection(uid).doc(roomCode).delete();
     } catch (e) {
-      showError = true;
       error = e.toString();
     }
   }

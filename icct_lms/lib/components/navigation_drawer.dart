@@ -1,13 +1,17 @@
+import 'dart:io';
+
 import 'package:clipboard/clipboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:icct_lms/home_pages/profile.dart';
 import 'package:icct_lms/menu_pages/back_pack.dart';
 import 'package:icct_lms/menu_pages/help_center.dart';
 import 'package:icct_lms/menu_pages/news_and_updates.dart';
 import 'package:icct_lms/services/auth.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NavigationDrawer extends StatefulWidget {
   const NavigationDrawer(
@@ -140,11 +144,16 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               TextButton(
                   onPressed: () async {
                     await _auth.deleteAccount();
+                    final prefs = await SharedPreferences.getInstance();
+                    prefs.setBool('showHome', false);
                     if (!mounted) {
                       return;
                     }
-                    Navigator.pushNamedAndRemoveUntil(
-                        context, '/wrap', (route) => false);
+                   if(Platform.isAndroid){
+                     SystemNavigator.pop();
+                   }else if(Platform.isIOS){
+                     exit(0);
+                   }
                   },
                   child: const Text('Delete')),
               TextButton(
@@ -159,7 +168,8 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
       context: context,
       builder: (context) => CupertinoAlertDialog(
             title: const Text('Warning'),
-            content: const Text('Are you sure you want to sign out?'),
+            content: const Text('Are you sure you want to sign out? This will'
+                ' exit the app.'),
             actions: [
               TextButton(
                   onPressed: () async {
@@ -167,7 +177,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
                     if (!mounted) {
                       return;
                     }
-                    Navigator.pop(context);
+                    if(Platform.isAndroid){
+                      SystemNavigator.pop();
+                    }else if(Platform.isIOS){
+                      exit(0);
+                    }
                   },
                   child: const Text('Logout')),
               TextButton(

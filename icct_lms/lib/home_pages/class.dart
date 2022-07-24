@@ -50,6 +50,7 @@ final _groupKey = GlobalKey<FormState>();
 class _ClassScreenState extends State<ClassScreen>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
+
   @override
   void initState() {
     super.initState();
@@ -57,12 +58,6 @@ class _ClassScreenState extends State<ClassScreen>
     tabController.addListener(() {
       setState(() {});
     });
-  }
-
-  @override
-  void dispose() {
-    tabController.dispose();
-    super.dispose();
   }
 
   final Joined join = Joined(uid: uid);
@@ -119,28 +114,30 @@ class _ClassScreenState extends State<ClassScreen>
                         );
                       }
                     })
-                : StreamBuilder<List<JoinedModel>?>(
-                    stream: readJoinedClass(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text('Something went wrong');
-                      } else if (snapshot.hasData) {
-                        final classes = snapshot.data!;
+                : widget.userType == 'Student'
+                    ? StreamBuilder<List<JoinedModel>?>(
+                        stream: readJoinedClass(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text('Something went wrong');
+                          } else if (snapshot.hasData) {
+                            final classes = snapshot.data!;
 
-                        if (classes.isEmpty) {
-                          return const NoData();
-                        }
-                        return ListView(
-                          children: classes.map(buildClassList).toList(),
-                        );
-                      } else {
-                        return Center(
-                          child: SpinKitFadingCircle(
-                            color: Colors.blue[900],
-                          ),
-                        );
-                      }
-                    }),
+                            if (classes.isEmpty) {
+                              return const NoData();
+                            }
+                            return ListView(
+                              children: classes.map(buildClassList).toList(),
+                            );
+                          } else {
+                            return Center(
+                              child: SpinKitFadingCircle(
+                                color: Colors.blue[900],
+                              ),
+                            );
+                          }
+                        })
+                    : const NoData(),
             widget.userType == 'Teacher'
                 ? StreamBuilder<List<Group>?>(
                     stream: readGroup(),
@@ -164,28 +161,30 @@ class _ClassScreenState extends State<ClassScreen>
                         );
                       }
                     })
-                : StreamBuilder<List<JoinedModel>?>(
-                    stream: readJoinGroup(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text('Something went wrong');
-                      } else if (snapshot.hasData) {
-                        final classes = snapshot.data!;
+                : widget.userType == 'Student'
+                    ? StreamBuilder<List<JoinedModel>?>(
+                        stream: readJoinGroup(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text('Something went wrong');
+                          } else if (snapshot.hasData) {
+                            final classes = snapshot.data!;
 
-                        if (classes.isEmpty) {
-                          return const NoData();
-                        }
-                        return ListView(
-                          children: classes.map(buildGroupList).toList(),
-                        );
-                      } else {
-                        return Center(
-                          child: SpinKitFadingCircle(
-                            color: Colors.blue[900],
-                          ),
-                        );
-                      }
-                    }),
+                            if (classes.isEmpty) {
+                              return const NoData();
+                            }
+                            return ListView(
+                              children: classes.map(buildGroupList).toList(),
+                            );
+                          } else {
+                            return Center(
+                              child: SpinKitFadingCircle(
+                                color: Colors.blue[900],
+                              ),
+                            );
+                          }
+                        })
+                    : const NoData(),
           ],
         ),
         floatingActionButton: SpeedDial(
@@ -249,6 +248,7 @@ class _ClassScreenState extends State<ClassScreen>
           TextEditingController codeController,
           TextEditingController teacherUIDController) =>
       showDialog(
+          barrierDismissible: false,
           context: context,
           builder: (context) => AlertDialog(
                 title: Text('Join $roomType'),
@@ -289,31 +289,38 @@ class _ClassScreenState extends State<ClassScreen>
                 ),
                 actions: [
                   TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel')),
+                  TextButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           await join.joinedTo(
                               roomType,
                               codeController.text.trim(),
                               teacherUIDController.text.trim(),
-                              uid);
+                              uid,
+                              context);
+
                           if (!mounted) {
                             return;
                           }
-                          Navigator.pop(context);
-                          join.error = '';
-                          if (join.error.isNotEmpty) {
-                            showError();
+                          if (join.isError) {
+                            showError(roomType);
+                          } else {
+                            roomType == "Class"
+                                ? tabController.animateTo(0,
+                                    duration: const Duration(seconds: 1))
+                                : tabController.animateTo(1,
+                                    duration: const Duration(seconds: 1));
+                            codeController.text = '';
+                            teacherUIDController.text = '';
+                            Navigator.pop(context);
                           }
-                          roomType == "Class"
-                              ? tabController.animateTo(0,
-                                  duration: const Duration(seconds: 1))
-                              : tabController.animateTo(1,
-                                  duration: const Duration(seconds: 1));
-                          codeController.text = '';
-                          teacherUIDController.text = '';
                         }
                       },
-                      child: Text('Join $roomType'))
+                      child: Text('Join $roomType')),
                 ],
               ));
 
@@ -661,14 +668,16 @@ class _ClassScreenState extends State<ClassScreen>
             )),
       );
 
-  Future showError() => showDialog(
+  Future showError(String roomType) => showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
             title: const Text("Error"),
-            content: Text(join.error),
+            content: Text("$roomType not exist or deleted."),
             actions: [
               TextButton(
                   onPressed: () {
+                    join.isError = false;
                     Navigator.pop(context);
                   },
                   child: const Text('Okay'))

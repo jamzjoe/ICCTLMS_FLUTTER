@@ -76,6 +76,7 @@ class AuthService {
       return await _auth.signOut();
     } on FirebaseAuthException catch (e) {
       error = e.message.toString();
+      return null;
     }
   }
 
@@ -85,6 +86,7 @@ class AuthService {
       return await user.delete();
     } on FirebaseAuthException catch (e) {
       error = e.message.toString();
+      return null;
     }
   }
 }
