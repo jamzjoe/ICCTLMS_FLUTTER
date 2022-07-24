@@ -190,11 +190,6 @@ class _LoginState extends State<Login> {
                                           passwordController.text.trim());
                                   if (result == null) {
                                     setState(() {
-                                      error = "Unable to login, please check "
-                                          'your internet connection or create '
-                                          "new account if you haven't created "
-                                          "yet.";
-
                                       loading = false;
                                       showCupertinoDialog(
                                           context: context,
