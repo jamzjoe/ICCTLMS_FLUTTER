@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icct_lms/components/nodata.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key, required this.uid}) : super(key: key);
@@ -10,13 +11,8 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [const Text('Notifications'), Text(widget.uid)],
-        ),
-      ),
+    return const Scaffold(
+      body: NoData(),
     );
   }
 }

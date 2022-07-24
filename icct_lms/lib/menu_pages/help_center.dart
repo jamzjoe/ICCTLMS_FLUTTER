@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icct_lms/components/nodata.dart';
 
 class HelpCenter extends StatefulWidget {
   const HelpCenter({Key? key}) : super(key: key);
@@ -12,8 +13,10 @@ class _HelpCenterState extends State<HelpCenter> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue[900],
         title: const Text('Help Center'),
       ),
+      body: const NoData(),
     );
   }
 }

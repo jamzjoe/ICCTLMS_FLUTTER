@@ -41,6 +41,10 @@ final joinGroupCodeController = TextEditingController();
 final teacherGroupUIDController = TextEditingController();
 final joinClassCodeController = TextEditingController();
 final teacherClassUIDController = TextEditingController();
+final CollectionReference joinReference =
+    FirebaseFirestore.instance.collection('Joined');
+final CollectionReference roomReference =
+    FirebaseFirestore.instance.collection('Rooms');
 
 final _formKey = GlobalKey<FormState>();
 final Copy copy = Copy();
@@ -54,7 +58,8 @@ class _ClassScreenState extends State<ClassScreen>
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(
+        animationDuration: const Duration(seconds: 1), length: 2, vsync: this);
     tabController.addListener(() {
       setState(() {});
     });
@@ -64,181 +69,177 @@ class _ClassScreenState extends State<ClassScreen>
   final int classBadge = 0;
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      animationDuration: const Duration(seconds: 2),
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          toolbarHeight: 4,
-          bottom: TabBar(
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.black54,
-            indicatorColor: Colors.blue[900],
-            indicatorWeight: 2,
-            controller: tabController,
-            tabs: const [
-              Tab(
-                text: 'Classes',
-              ),
-              Tab(
-                text: 'Groups',
-              ),
-            ],
-          ),
-        ),
-        body: TabBarView(
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        toolbarHeight: 4,
+        bottom: TabBar(
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.black54,
+          indicatorColor: Colors.blue[900],
+          indicatorWeight: 2,
           controller: tabController,
-          children: [
-            widget.userType == 'Teacher'
-                ? StreamBuilder<List<Class>?>(
-                    stream: readClass(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text('Something went wrong');
-                      } else if (snapshot.hasData) {
-                        final classes = snapshot.data!;
-
-                        if (classes.isEmpty) {
-                          return const NoData();
-                        }
-                        return ListView(
-                          children: classes.map(buildUser).toList(),
-                        );
-                      } else {
-                        return Center(
-                          child: SpinKitFadingCircle(
-                            color: Colors.blue[900],
-                          ),
-                        );
-                      }
-                    })
-                : widget.userType == 'Student'
-                    ? StreamBuilder<List<JoinedModel>?>(
-                        stream: readJoinedClass(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return const Text('Something went wrong');
-                          } else if (snapshot.hasData) {
-                            final classes = snapshot.data!;
-
-                            if (classes.isEmpty) {
-                              return const NoData();
-                            }
-                            return ListView(
-                              children: classes.map(buildClassList).toList(),
-                            );
-                          } else {
-                            return Center(
-                              child: SpinKitFadingCircle(
-                                color: Colors.blue[900],
-                              ),
-                            );
-                          }
-                        })
-                    : const NoData(),
-            widget.userType == 'Teacher'
-                ? StreamBuilder<List<Group>?>(
-                    stream: readGroup(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const Text('Something went wrong');
-                      } else if (snapshot.hasData) {
-                        final group = snapshot.data!;
-
-                        if (group.isEmpty) {
-                          return const NoData();
-                        }
-                        return ListView(
-                          children: group.map(buildGroup).toList(),
-                        );
-                      } else {
-                        return Center(
-                          child: SpinKitFadingCircle(
-                            color: Colors.blue[900],
-                          ),
-                        );
-                      }
-                    })
-                : widget.userType == 'Student'
-                    ? StreamBuilder<List<JoinedModel>?>(
-                        stream: readJoinGroup(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return const Text('Something went wrong');
-                          } else if (snapshot.hasData) {
-                            final classes = snapshot.data!;
-
-                            if (classes.isEmpty) {
-                              return const NoData();
-                            }
-                            return ListView(
-                              children: classes.map(buildGroupList).toList(),
-                            );
-                          } else {
-                            return Center(
-                              child: SpinKitFadingCircle(
-                                color: Colors.blue[900],
-                              ),
-                            );
-                          }
-                        })
-                    : const NoData(),
+          tabs: const [
+            Tab(
+              text: 'Classes',
+            ),
+            Tab(
+              text: 'Groups',
+            ),
           ],
         ),
-        floatingActionButton: SpeedDial(
-          spaceBetweenChildren: 10,
-          overlayColor: Colors.black54,
-          backgroundColor: Colors.blue[900],
-          animatedIcon: AnimatedIcons.menu_close,
-          children: [
-            widget.userType == 'Student'
-                ? SpeedDialChild(
-                    onTap: () {
-                      openJoinDialog('Class', joinClassCodeController,
-                          teacherClassUIDController);
-                    },
-                    child: const Icon(CupertinoIcons.device_laptop),
-                    label: 'Join Class',
-                    labelBackgroundColor: Colors.yellow,
-                    backgroundColor: Colors.yellow)
-                : SpeedDialChild(
-                    onTap: () {
-                      setState(() {
-                        classCodeController.text =
-                            'C${const Uuid().v1().substring(0, 8)}';
-                      });
-                      openCreateClass();
-                    },
-                    child: const Icon(CupertinoIcons.add_circled_solid),
-                    label: 'Create Class',
-                    labelBackgroundColor: Colors.yellow,
-                    backgroundColor: Colors.yellow),
-            widget.userType == 'Teacher'
-                ? SpeedDialChild(
-                    onTap: () {
-                      setState(() {
-                        groupCodeController.text =
-                            'G${const Uuid().v1().substring(0, 8)}';
-                      });
-                      openCreateGroup();
-                    },
-                    child: const Icon(CupertinoIcons.person_add_solid),
-                    label: 'Create Group',
-                    labelBackgroundColor: Colors.yellow,
-                    backgroundColor: Colors.yellow)
-                : SpeedDialChild(
-                    onTap: () {
-                      openJoinDialog("Group", joinGroupCodeController,
-                          teacherGroupUIDController);
-                    },
-                    child: const Icon(CupertinoIcons.group),
-                    label: 'Join Group',
-                    labelBackgroundColor: Colors.yellow,
-                    backgroundColor: Colors.yellow)
-          ],
-        ),
+      ),
+      body: TabBarView(
+        controller: tabController,
+        children: [
+          widget.userType == 'Teacher'
+              ? StreamBuilder<List<Class>?>(
+                  stream: readClass(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Text('Something went wrong');
+                    } else if (snapshot.hasData) {
+                      final classes = snapshot.data!;
+
+                      if (classes.isEmpty) {
+                        return const NoData();
+                      }
+                      return ListView(
+                        children: classes.map(buildUser).toList(),
+                      );
+                    } else {
+                      return Center(
+                        child: SpinKitFadingCircle(
+                          color: Colors.blue[900],
+                        ),
+                      );
+                    }
+                  })
+              : widget.userType == 'Student'
+                  ? StreamBuilder<List<JoinedModel>?>(
+                      stream: readJoinedClass(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const Text('Something went wrong');
+                        } else if (snapshot.hasData) {
+                          final classes = snapshot.data!;
+
+                          if (classes.isEmpty) {
+                            return const NoData();
+                          }
+                          return ListView(
+                            children: classes.map(buildClassList).toList(),
+                          );
+                        } else {
+                          return Center(
+                            child: SpinKitFadingCircle(
+                              color: Colors.blue[900],
+                            ),
+                          );
+                        }
+                      })
+                  : const NoData(),
+          widget.userType == 'Teacher'
+              ? StreamBuilder<List<Group>?>(
+                  stream: readGroup(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return const Text('Something went wrong');
+                    } else if (snapshot.hasData) {
+                      final group = snapshot.data!;
+
+                      if (group.isEmpty) {
+                        return const NoData();
+                      }
+                      return ListView(
+                        children: group.map(buildGroup).toList(),
+                      );
+                    } else {
+                      return Center(
+                        child: SpinKitFadingCircle(
+                          color: Colors.blue[900],
+                        ),
+                      );
+                    }
+                  })
+              : widget.userType == 'Student'
+                  ? StreamBuilder<List<JoinedModel>?>(
+                      stream: readJoinGroup(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const Text('Something went wrong');
+                        } else if (snapshot.hasData) {
+                          final classes = snapshot.data!;
+
+                          if (classes.isEmpty) {
+                            return const NoData();
+                          }
+                          return ListView(
+                            children: classes.map(buildGroupList).toList(),
+                          );
+                        } else {
+                          return Center(
+                            child: SpinKitFadingCircle(
+                              color: Colors.blue[900],
+                            ),
+                          );
+                        }
+                      })
+                  : const NoData(),
+        ],
+      ),
+      floatingActionButton: SpeedDial(
+        spaceBetweenChildren: 10,
+        overlayColor: Colors.black54,
+        backgroundColor: Colors.blue[900],
+        animatedIcon: AnimatedIcons.menu_close,
+        children: [
+          widget.userType == 'Student'
+              ? SpeedDialChild(
+                  onTap: () {
+                    openJoinDialog('Class', joinClassCodeController,
+                        teacherClassUIDController);
+                  },
+                  child: const Icon(CupertinoIcons.device_laptop),
+                  label: 'Join Class',
+                  labelBackgroundColor: Colors.yellow,
+                  backgroundColor: Colors.yellow)
+              : SpeedDialChild(
+                  onTap: () {
+                    setState(() {
+                      classCodeController.text =
+                          'C${const Uuid().v1().substring(0, 8)}';
+                    });
+                    openCreateClass();
+                  },
+                  child: const Icon(CupertinoIcons.add_circled_solid),
+                  label: 'Create Class',
+                  labelBackgroundColor: Colors.yellow,
+                  backgroundColor: Colors.yellow),
+          widget.userType == 'Teacher'
+              ? SpeedDialChild(
+                  onTap: () {
+                    setState(() {
+                      groupCodeController.text =
+                          'G${const Uuid().v1().substring(0, 8)}';
+                    });
+                    openCreateGroup();
+                  },
+                  child: const Icon(CupertinoIcons.person_add_solid),
+                  label: 'Create Group',
+                  labelBackgroundColor: Colors.yellow,
+                  backgroundColor: Colors.yellow)
+              : SpeedDialChild(
+                  onTap: () {
+                    openJoinDialog("Group", joinGroupCodeController,
+                        teacherGroupUIDController);
+                  },
+                  child: const Icon(CupertinoIcons.group),
+                  label: 'Join Group',
+                  labelBackgroundColor: Colors.yellow,
+                  backgroundColor: Colors.yellow)
+        ],
       ),
     );
   }
@@ -296,27 +297,42 @@ class _ClassScreenState extends State<ClassScreen>
                   TextButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          await join.joinedTo(
-                              roomType,
-                              codeController.text.trim(),
-                              teacherUIDController.text.trim(),
-                              uid,
-                              context);
+                          Navigator.pop(context);
 
-                          if (!mounted) {
-                            return;
-                          }
-                          if (join.isError) {
+                          try {
+                            await roomReference
+                                .doc(roomType)
+                                .collection(teacherUIDController.text.trim())
+                                .doc(codeController.text.trim())
+                                .get()
+                                .then((value) async {
+                              var roomName = value['name'];
+                              var teacher = value['teacher'];
+
+                              joinReference
+                                  .doc(roomType)
+                                  .collection(uid)
+                                  .doc(codeController.text.trim())
+                                  .set({
+                                'userID': uid,
+                                'teacher': teacher,
+                                'roomName': roomName,
+                                'roomType': roomType,
+                                'roomCode': codeController.text.trim(),
+                                'teacherUID': teacherUIDController.text.trim()
+                              });
+
+                              Navigator.pop(context);
+                              roomType == "Class"
+                                  ? tabController.animateTo(0,
+                                      duration: const Duration(seconds: 1))
+                                  : tabController.animateTo(1,
+                                      duration: const Duration(seconds: 1));
+                              codeController.text = '';
+                              teacherUIDController.text = '';
+                            });
+                          } on FirebaseException {
                             showError(roomType);
-                          } else {
-                            roomType == "Class"
-                                ? tabController.animateTo(0,
-                                    duration: const Duration(seconds: 1))
-                                : tabController.animateTo(1,
-                                    duration: const Duration(seconds: 1));
-                            codeController.text = '';
-                            teacherUIDController.text = '';
-                            Navigator.pop(context);
                           }
                         }
                       },
@@ -325,6 +341,7 @@ class _ClassScreenState extends State<ClassScreen>
               ));
 
   Future<void> openCreateClass() => showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(
             title: const Text('Create Class'),
@@ -377,6 +394,11 @@ class _ClassScreenState extends State<ClassScreen>
             actions: [
               TextButton(
                   onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () {
                     final classInfo = Class(classNameController.text.trim(),
                         classCodeController.text.trim(), widget.userName);
                     if (_classKey.currentState!.validate()) {
@@ -398,6 +420,7 @@ class _ClassScreenState extends State<ClassScreen>
             ],
           ));
   Future<void> openCreateGroup() => showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(
             title: const Text('Create Group'),
@@ -446,6 +469,11 @@ class _ClassScreenState extends State<ClassScreen>
               ),
             ),
             actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel')),
               TextButton(
                   onPressed: () {
                     final groupInfo = Group(groupNameController.text.trim(),
@@ -677,7 +705,6 @@ class _ClassScreenState extends State<ClassScreen>
             actions: [
               TextButton(
                   onPressed: () {
-                    join.isError = false;
                     Navigator.pop(context);
                   },
                   child: const Text('Okay'))

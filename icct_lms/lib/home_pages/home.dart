@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:icct_lms/components/nodata.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen(
@@ -24,16 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const Text('Home'),
-            Text(widget.uid),
-            Text(widget.userType)
-          ],
-        ),
-      ),
+      body: const NoData(),
       floatingActionButton: SpeedDial(
         overlayColor: Colors.black54,
         backgroundColor: Colors.blue[900],

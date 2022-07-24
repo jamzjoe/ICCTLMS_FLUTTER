@@ -33,6 +33,7 @@ class _HomeState extends State<Home> {
     String uid = user.uid;
 
     return DefaultTabController(
+      animationDuration: const Duration(seconds: 1),
       length: 5,
       initialIndex: currentIndex,
       child: FutureBuilder<UserProfile?>(

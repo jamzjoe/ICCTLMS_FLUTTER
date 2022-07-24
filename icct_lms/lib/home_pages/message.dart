@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:icct_lms/components/nodata.dart';
 
 class MessageScreen extends StatefulWidget {
   const MessageScreen({Key? key, required this.uid}) : super(key: key);
@@ -13,12 +14,7 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [const Text('Messages'), Text(widget.uid)],
-        ),
-      ),
+      body: const NoData(),
       floatingActionButton: SpeedDial(
         spaceBetweenChildren: 10,
         overlayColor: Colors.black54,
