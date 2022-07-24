@@ -11,7 +11,10 @@ class NoData extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Lottie.asset('assets/no_data.json', width: 200),
-          const Text('No data available')
+          const Text(
+            "No data available...",
+            style: TextStyle(fontSize: 15),
+          )
         ],
       ),
     );

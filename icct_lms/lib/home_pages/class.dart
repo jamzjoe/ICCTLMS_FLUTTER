@@ -45,7 +45,7 @@ final CollectionReference joinReference =
     FirebaseFirestore.instance.collection('Joined');
 final CollectionReference roomReference =
     FirebaseFirestore.instance.collection('Rooms');
-
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 final _formKey = GlobalKey<FormState>();
 final Copy copy = Copy();
 final _classKey = GlobalKey<FormState>();
@@ -70,6 +70,7 @@ class _ClassScreenState extends State<ClassScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
@@ -250,7 +251,7 @@ class _ClassScreenState extends State<ClassScreen>
           TextEditingController teacherUIDController) =>
       showDialog(
           barrierDismissible: false,
-          context: context,
+          context: _scaffoldKey.currentContext!,
           builder: (context) => AlertDialog(
                 title: Text('Join $roomType'),
                 content: Form(
@@ -298,6 +299,11 @@ class _ClassScreenState extends State<ClassScreen>
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           Navigator.pop(context);
+                          roomType == "Class"
+                              ? tabController.animateTo(0,
+                                  duration: const Duration(seconds: 1))
+                              : tabController.animateTo(1,
+                                  duration: const Duration(seconds: 1));
 
                           try {
                             await roomReference
@@ -321,18 +327,13 @@ class _ClassScreenState extends State<ClassScreen>
                                 'roomCode': codeController.text.trim(),
                                 'teacherUID': teacherUIDController.text.trim()
                               });
-
-                              Navigator.pop(context);
-                              roomType == "Class"
-                                  ? tabController.animateTo(0,
-                                      duration: const Duration(seconds: 1))
-                                  : tabController.animateTo(1,
-                                      duration: const Duration(seconds: 1));
                               codeController.text = '';
                               teacherUIDController.text = '';
+                            }, onError: (e) {
+                              showError(roomType);
                             });
-                          } on FirebaseException {
-                            showError(roomType);
+                          } catch (e) {
+                            return;
                           }
                         }
                       },
@@ -342,7 +343,7 @@ class _ClassScreenState extends State<ClassScreen>
 
   Future<void> openCreateClass() => showDialog(
       barrierDismissible: false,
-      context: context,
+      context: _scaffoldKey.currentContext!,
       builder: (context) => AlertDialog(
             title: const Text('Create Class'),
             content: Form(
@@ -421,7 +422,7 @@ class _ClassScreenState extends State<ClassScreen>
           ));
   Future<void> openCreateGroup() => showDialog(
       barrierDismissible: false,
-      context: context,
+      context: _scaffoldKey.currentContext!,
       builder: (context) => AlertDialog(
             title: const Text('Create Group'),
             content: Form(
@@ -556,8 +557,9 @@ class _ClassScreenState extends State<ClassScreen>
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => Room(
                     uid: uid,
-                    teacherUID: '',
+                    teacherUID: uid,
                     teacher: e.teacher,
+                    roomCode: e.code,
                     roomName: e.name,
                     roomType: 'Group')));
           },
@@ -594,11 +596,13 @@ class _ClassScreenState extends State<ClassScreen>
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
-                      uid: uid,
-                      teacherUID: '',
-                      teacher: e.teacher,
-                      roomName: e.name,
-                      roomType: 'Class')));
+                        uid: uid,
+                        teacherUID: uid,
+                        teacher: e.teacher,
+                        roomName: e.name,
+                        roomType: 'Class',
+                        roomCode: e.code,
+                      )));
             },
             leading: CircleAvatar(
               radius: 25,
@@ -637,7 +641,8 @@ class _ClassScreenState extends State<ClassScreen>
                       teacherUID: e.teacherUID,
                       teacher: e.teacher,
                       roomName: e.roomName,
-                      roomType: e.roomType)));
+                      roomType: e.roomType,
+                      roomCode: e.roomCode)));
             },
             leading: CircleAvatar(
               radius: 25,
@@ -667,11 +672,13 @@ class _ClassScreenState extends State<ClassScreen>
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
-                      uid: uid,
-                      teacherUID: e.teacherUID,
-                      teacher: e.teacher,
-                      roomName: e.roomName,
-                      roomType: e.roomType)));
+                        uid: uid,
+                        teacherUID: e.teacherUID,
+                        teacher: e.teacher,
+                        roomName: e.roomName,
+                        roomType: e.roomType,
+                        roomCode: e.roomCode,
+                      )));
             },
             leading: CircleAvatar(
               radius: 25,
@@ -697,7 +704,7 @@ class _ClassScreenState extends State<ClassScreen>
       );
 
   Future showError(String roomType) => showDialog(
-      context: context,
+      context: _scaffoldKey.currentContext!,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
             title: const Text("Error"),

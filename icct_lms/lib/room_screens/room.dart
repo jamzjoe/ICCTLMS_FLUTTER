@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/room_screens/pages/folder.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
@@ -10,21 +11,25 @@ class Room extends StatefulWidget {
       required this.teacherUID,
       required this.teacher,
       required this.roomName,
-      required this.roomType})
+      required this.roomType,
+      required this.roomCode})
       : super(key: key);
   final String uid;
   final String teacherUID;
   final String teacher;
   final String roomName;
   final String roomType;
+  final String roomCode;
   @override
   State<Room> createState() => _RoomState();
 }
 
+final attendanceController = TextEditingController();
+final virtualController = TextEditingController();
+
 class _RoomState extends State<Room> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -45,9 +50,19 @@ class _RoomState extends State<Room> {
             Builder(
               builder: (BuildContext context) {
                 return IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      buildDialog(
+                          widget.roomType,
+                          widget.roomName,
+                          widget.uid,
+                          widget.teacherUID,
+                          widget.teacher,
+                          "Attendance",
+                          widget.roomCode,
+                          attendanceController);
+                    },
                     icon: const Icon(
-                      Icons.add_to_photos_sharp,
+                      Icons.calendar_month,
                       color: Colors.white,
                     ));
               },
@@ -55,9 +70,19 @@ class _RoomState extends State<Room> {
             Builder(
               builder: (BuildContext context) {
                 return IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      buildDialog(
+                          widget.roomType,
+                          widget.roomName,
+                          widget.uid,
+                          widget.teacherUID,
+                          widget.teacher,
+                          'Virtual',
+                          widget.roomCode,
+                          virtualController);
+                    },
                     icon: const Icon(
-                      Icons.video_call,
+                      Icons.video_camera_back,
                       color: Colors.white,
                     ));
               },
@@ -106,4 +131,60 @@ class _RoomState extends State<Room> {
       ),
     );
   }
+
+  Future buildDialog(
+    String roomType,
+    String roomName,
+    String uid,
+    String teacherUID,
+    String teacher,
+    String buttonType,
+    String roomCode,
+    TextEditingController controller,
+  ) =>
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text('Add/Update'),
+                content: Form(
+                    child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                          hintText: 'Input $buttonType link',
+                          label: Text('$buttonType Link')),
+                    )
+                  ],
+                )),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel')),
+                  TextButton(
+                      onPressed: () async {
+                        final CollectionReference addLinks =
+                            FirebaseFirestore.instance.collection("Rooms");
+
+                        await addLinks
+                            .doc(roomType)
+                            .collection(teacherUID)
+                            .doc(roomCode)
+                            .set({
+                          'code': roomCode,
+                          'name': roomName,
+                          'teacher': teacher,
+                          'virtual': virtualController.text.trim(),
+                          'attendance': attendanceController.text.trim(),
+                        }).whenComplete(() {
+                          Navigator.pop(context);
+                          controller.text = '';
+                        });
+                      },
+                      child: const Text('Confirm')),
+                ],
+              ));
 }

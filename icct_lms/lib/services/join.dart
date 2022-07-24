@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 class Joined {
   final String uid;
@@ -32,15 +30,13 @@ class Joined {
         });
       });
     } catch (e) {
-      if(kDebugMode){
-        print("Error boss");
-      }
+      return;
     }
   }
 
   Future getTeacher(String roomType, String roomCode, String teacherUID,
-      String userID)async{
-    try{
+      String userID) async {
+    try {
       await roomReference
           .doc(roomType)
           .collection(teacherUID)
@@ -51,7 +47,7 @@ class Joined {
         var teacher = value['teacher'];
         joinRoomTo(roomName, teacher, roomType, roomCode, teacherUID, userID);
       });
-    }catch(e){
+    } catch (e) {
       return null;
     }
   }
@@ -64,20 +60,19 @@ class Joined {
     }
   }
 
-  Future joinRoomTo(roomName, teacher, roomType, roomCode, teacherUID, userID)
-  async {
-        try{
-           await joinReference.doc(roomType).collection(userID).doc(roomCode)
-               .set({
-            'userID': userID,
-            'teacher': teacher,
-            'roomName': roomName,
-            'roomType': roomType,
-            'roomCode': roomCode,
-            'teacherUID': teacherUID
-          });
-        }catch(e){
-          return null;
-        }
+  Future joinRoomTo(
+      roomName, teacher, roomType, roomCode, teacherUID, userID) async {
+    try {
+      await joinReference.doc(roomType).collection(userID).doc(roomCode).set({
+        'userID': userID,
+        'teacher': teacher,
+        'roomName': roomName,
+        'roomType': roomType,
+        'roomCode': roomCode,
+        'teacherUID': teacherUID
+      });
+    } catch (e) {
+      return null;
+    }
   }
 }
