@@ -11,6 +11,7 @@ import 'package:icct_lms/models/group_model.dart';
 import 'package:icct_lms/models/joined_model.dart';
 import 'package:icct_lms/room_screens/room.dart';
 import 'package:icct_lms/services/join.dart';
+import 'package:lottie/lottie.dart';
 import 'package:uuid/uuid.dart';
 
 class ClassScreen extends StatefulWidget {
@@ -297,43 +298,51 @@ class _ClassScreenState extends State<ClassScreen>
                       child: const Text('Cancel')),
                   TextButton(
                       onPressed: () async {
+
+                        final DocumentReference reference = roomReference
+                            .doc(roomType)
+                            .collection(teacherUIDController.text.trim())
+                            .doc(codeController.text.trim());
                         if (_formKey.currentState!.validate()) {
-                          Navigator.pop(context);
-                          roomType == "Class"
-                              ? tabController.animateTo(0,
-                                  duration: const Duration(seconds: 1))
-                              : tabController.animateTo(1,
-                                  duration: const Duration(seconds: 1));
+                          // Navigator.pop(context);
+                          // roomType == "Class"
+                          //     ? tabController.animateTo(0,
+                          //         duration: const Duration(seconds: 1))
+                          //     : tabController.animateTo(1,
+                          //         duration: const Duration(seconds: 1));
 
                           try {
-                            await roomReference
+                             roomReference
                                 .doc(roomType)
                                 .collection(teacherUIDController.text.trim())
-                                .doc(codeController.text.trim())
-                                .get()
-                                .then((value) async {
-                              var roomName = value['name'];
-                              var teacher = value['teacher'];
+                                .doc(codeController.text.trim()).get();
 
-                              joinReference
-                                  .doc(roomType)
-                                  .collection(uid)
-                                  .doc(codeController.text.trim())
-                                  .set({
-                                'userID': uid,
-                                'teacher': teacher,
-                                'roomName': roomName,
-                                'roomType': roomType,
-                                'roomCode': codeController.text.trim(),
-                                'teacherUID': teacherUIDController.text.trim()
-                              });
-                              codeController.text = '';
-                              teacherUIDController.text = '';
-                            }, onError: (e) {
-                              showError(roomType);
-                            });
-                          } catch (e) {
+                             throw Exception('Error');
+                          }  catch (e) {
+                            showError(roomType);
                             return;
+                          }finally{
+                              reference.get()
+                                  .then((value) async {
+                                var roomName = value['name'];
+                                var teacher = value['teacher'];
+                                joinReference
+                                    .doc(roomType)
+                                    .collection(uid)
+                                    .doc(codeController.text.trim())
+                                    .set({
+                                  'userID': uid,
+                                  'teacher': teacher,
+                                  'roomName': roomName,
+                                  'roomType': roomType,
+                                  'roomCode': codeController.text.trim(),
+                                  'teacherUID': teacherUIDController.text.trim()
+                                }).whenComplete((){
+                                  Navigator.pop(context);
+                                  codeController.text = '';
+                                  teacherUIDController.text = '';
+                                });
+                              });
                           }
                         }
                       },
@@ -556,12 +565,15 @@ class _ClassScreenState extends State<ClassScreen>
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => Room(
-                    uid: uid,
-                    teacherUID: uid,
-                    teacher: e.teacher,
-                    roomCode: e.code,
-                    roomName: e.name,
-                    roomType: 'Group')));
+                      uid: uid,
+                      teacherUID: uid,
+                      userName: widget.userName,
+                      teacher: e.teacher,
+                      roomCode: e.code,
+                      roomName: e.name,
+                      roomType: 'Group',
+                      userType: 'Teacher',
+                    )));
           },
           leading: CircleAvatar(
             radius: 25,
@@ -597,11 +609,13 @@ class _ClassScreenState extends State<ClassScreen>
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
                         uid: uid,
+                        userName: widget.userName,
                         teacherUID: uid,
                         teacher: e.teacher,
                         roomName: e.name,
                         roomType: 'Class',
                         roomCode: e.code,
+                        userType: 'Teacher',
                       )));
             },
             leading: CircleAvatar(
@@ -637,12 +651,15 @@ class _ClassScreenState extends State<ClassScreen>
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
-                      uid: uid,
-                      teacherUID: e.teacherUID,
-                      teacher: e.teacher,
-                      roomName: e.roomName,
-                      roomType: e.roomType,
-                      roomCode: e.roomCode)));
+                        uid: uid,
+                        userName: widget.userName,
+                        teacherUID: e.teacherUID,
+                        teacher: e.teacher,
+                        roomName: e.roomName,
+                        roomType: e.roomType,
+                        roomCode: e.roomCode,
+                        userType: 'Student',
+                      )));
             },
             leading: CircleAvatar(
               radius: 25,
@@ -673,11 +690,13 @@ class _ClassScreenState extends State<ClassScreen>
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
                         uid: uid,
+                        userName: widget.userName,
                         teacherUID: e.teacherUID,
                         teacher: e.teacher,
                         roomName: e.roomName,
                         roomType: e.roomType,
                         roomCode: e.roomCode,
+                        userType: 'Student',
                       )));
             },
             leading: CircleAvatar(
@@ -704,17 +723,20 @@ class _ClassScreenState extends State<ClassScreen>
       );
 
   Future showError(String roomType) => showDialog(
-      context: _scaffoldKey.currentContext!,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-            title: const Text("Error"),
-            content: Text("$roomType not exist or deleted."),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Okay'))
-            ],
-          ));
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        content: Column(
+          children: [
+            Lottie.asset('assets/not.json', width: 150),
+            Text('$roomType not found or not a valid $roomType ID.')
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Okay'))
+        ],
+      ));
 }
