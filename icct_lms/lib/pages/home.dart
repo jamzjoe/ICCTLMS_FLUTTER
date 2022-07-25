@@ -43,8 +43,8 @@ class _HomeState extends State<Home> {
               final user = snapshot.data;
               return user == null
                   ? const Center(
-                      child: Text('No user'),
-                    )
+                child: Text('No user'),
+              )
                   : buildUser(user, uid);
             } else {
               return const ShimmerLoading();
@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
 
   Future<UserProfile?> readUser() async {
     final docUser =
-        FirebaseFirestore.instance.collection('Users').doc(user.uid);
+    FirebaseFirestore.instance.collection('Users').doc(user.uid);
     final snapshot = await docUser.get();
 
     if (snapshot.exists) {
@@ -65,103 +65,102 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildUser(UserProfile user, String uid) => Scaffold(
-        drawer: NavigationDrawer(
-          userType: user.userType,
-          name: user.name,
-          email: user.email,
-          school: user.campus,
-          uid: uid,
+    drawer: NavigationDrawer(
+      userType: user.userType,
+      name: user.name,
+      email: user.email,
+      school: user.campus,
+      uid: uid,
+    ),
+    appBar: AppBar(
+        automaticallyImplyLeading: true,
+        leadingWidth: 300,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: InkWell(
+            onTap: () {
+              // Navigator.of(context).push(MaterialPageRoute(
+              //     builder: (context) =>  EditProfile(user: user.)
+              // )
+              // );
+            },
+            child: const Image(
+              image: AssetImage('assets/logo_black_text.png'),
+            ),
+          ),
         ),
-        appBar: AppBar(
-            automaticallyImplyLeading: true,
-            leadingWidth: 300,
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InkWell(
-                onTap: () {
-                  // Navigator.of(context).push(MaterialPageRoute(
-                  //     builder: (context) =>  EditProfile(user: user.)
-                  // )
-                  // );
-                },
-                child: const Image(
-                  image: AssetImage('assets/logo_black_text.png'),
-                ),
-              ),
+        flexibleSpace: Container(color: Colors.white),
+        bottom: TabBar(
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.black54,
+          indicatorColor: Colors.blue[900],
+          indicatorWeight: 3,
+          tabs: [
+            const Tab(icon: Icon(CupertinoIcons.home)),
+            const Tab(icon: Icon(CupertinoIcons.device_desktop)),
+            const Tab(icon: Icon(CupertinoIcons.calendar)),
+            Tab(
+              icon: Badge(
+                  badgeContent: const Text('2'),
+                  showBadge: true,
+                  child: const Icon(CupertinoIcons.chat_bubble)),
             ),
-            flexibleSpace: Container(color: Colors.white),
-            bottom: TabBar(
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.black54,
-              indicatorColor: Colors.blue[900],
-              indicatorWeight: 3,
-              tabs: [
-                const Tab(icon: Icon(CupertinoIcons.home)),
-                const Tab(icon: Icon(CupertinoIcons.device_desktop)),
-                const Tab(icon: Icon(CupertinoIcons.calendar)),
-                Tab(
-                  icon: Badge(
-                      badgeContent: const Text('2'),
-                      showBadge: true,
-                      child: const Icon(CupertinoIcons.chat_bubble)),
-                ),
-                Tab(
-                    icon: Badge(
-                        showBadge: true,
-                        badgeContent: const Text('10'),
-                        child: const Icon(CupertinoIcons.bell))),
-              ],
-            ),
-            backgroundColor: Colors.blue,
-            actions: [
-              Builder(
-                builder: (BuildContext context) {
-                  return IconButton(
-                      onPressed: () {
-                        showSearch(
-                            context: context, delegate: CustomSearchDelegate());
-                      },
-                      icon: const Icon(
-                        Icons.search,
-                        color: Colors.black54,
-                      ));
-                },
-              ),
-              Builder(
-                builder: (BuildContext context) {
-                  return IconButton(
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                      icon: const Icon(
-                        Icons.menu,
-                        color: Colors.black54,
-                      ));
-                },
-              ),
-            ]),
-        body: TabBarView(
-          children: [
-            HomeScreen(
-                uid: uid,
-                userType: user.userType,
-                userName: user.name,
-                userEmail: user.email,
-                userCampus: user.campus),
-            ClassScreen(
-                uid: uid,
-                userType: user.userType,
-                userName: user.name,
-                userEmail: user.email,
-                userCampus: user.campus,
-            ),
-            PlannerScreen(uid: uid),
-            MessageScreen(uid: uid),
-            NotificationScreen(uid: uid),
+            Tab(
+                icon: Badge(
+                    showBadge: true,
+                    badgeContent: const Text('10'),
+                    child: const Icon(CupertinoIcons.bell))),
           ],
         ),
-        // bottomNavigationBar: buildBottomNavigationDrawer(),
-      );
+        backgroundColor: Colors.blue,
+        actions: [
+          Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                  onPressed: () {
+                    showSearch(
+                        context: context, delegate: CustomSearchDelegate());
+                  },
+                  icon: const Icon(
+                    Icons.search,
+                    color: Colors.black54,
+                  ));
+            },
+          ),
+          Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                  icon: const Icon(
+                    Icons.menu,
+                    color: Colors.black54,
+                  ));
+            },
+          ),
+        ]),
+    body: TabBarView(
+      children: [
+        HomeScreen(
+            uid: uid,
+            userType: user.userType,
+            userName: user.name,
+            userEmail: user.email,
+            userCampus: user.campus),
+        ClassScreen(
+            uid: uid,
+            userType: user.userType,
+            userName: user.name,
+            userEmail: user.email,
+            userCampus: user.campus),
+        PlannerScreen(uid: uid),
+        MessageScreen(uid: uid),
+        NotificationScreen(uid: uid),
+      ],
+    ),
+    // bottomNavigationBar: buildBottomNavigationDrawer(),
+  );
 }
 
 class CustomSearchDelegate extends SearchDelegate {

@@ -1,11 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddLinks {
-  final String roomType, userID, teacherUID, roomCode, subjectName, teacher;
+  final String roomType,
+      userID,
+      teacherUID,
+      roomCode,
+      subjectName,
+      teacher,
+      virtual,
+      attendance;
 
   AddLinks(this.roomType, this.userID, this.teacherUID, this.roomCode,
-      this.subjectName, this.teacher);
-
+      this.subjectName, this.teacher, this.virtual, this.attendance);
 
   Map<String, dynamic> toJson() => {
         'roomType': roomType,
@@ -13,14 +19,18 @@ class AddLinks {
         'teacher': teacher,
         'name': subjectName,
         'userID': userID,
-        'teachersID': teacherUID
+        'teachersID': teacherUID,
+        'virtual': virtual,
+        'attendance': attendance
       };
 
   static AddLinks fromJson(Map<String, dynamic> json) => AddLinks(
-      json['roomType'],
-      json['userID'],
-      json['teacherUID'],
-      json['roomCode'],
-      json['subjectName'],
-      json['teacher']);
+      json['roomType'] ?? 'RoomType',
+      json['userID'] ?? 'UserID',
+      json['teacherUID'] ?? 'TeacherUID',
+      json['code'] ?? 'Code',
+      json['name'] ?? 'Name',
+      json['teacher'] ?? 'Teacher',
+      json['virtual'] ?? 'Virtual',
+      json['attendance'] ?? 'Attendance');
 }
