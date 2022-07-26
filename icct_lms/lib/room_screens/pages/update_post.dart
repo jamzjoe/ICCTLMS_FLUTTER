@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:icct_lms/services/post.dart';
 
-class WritePost extends StatefulWidget {
-  const WritePost({
+class UpdatePost extends StatefulWidget {
+  const UpdatePost({
     Key? key,
     required this.uid,
     required this.userType,
@@ -11,28 +11,36 @@ class WritePost extends StatefulWidget {
     required this.roomCode,
     required this.roomName,
     required this.teacherUID,
+    required this.message,
+    required this.postID,
+    required this.sortKey,
+    required this.date,
   }) : super(key: key);
   final String uid;
+  final String postID;
   final String userType;
   final String userName;
+  final String sortKey;
+  final String date;
+  final String message;
   final String roomType;
   final String roomCode;
   final String roomName;
   final String teacherUID;
   @override
-  State<WritePost> createState() => _WritePostState();
+  State<UpdatePost> createState() => _UpdatePostState();
 }
 
 final messageController = TextEditingController();
 final _formKey = GlobalKey<FormState>();
 
-class _WritePostState extends State<WritePost> {
+class _UpdatePostState extends State<UpdatePost> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[900],
-        title: const Text('Create Post'),
+        title: const Text('Update Post'),
       ),
       body: postTextField(widget: widget),
     );
@@ -45,10 +53,11 @@ class postTextField extends StatelessWidget {
     required this.widget,
   }) : super(key: key);
 
-  final WritePost widget;
+  final UpdatePost widget;
 
   @override
   Widget build(BuildContext context) {
+    messageController.text = widget.message;
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -91,13 +100,13 @@ class postTextField extends StatelessWidget {
                   onPressed: () async {
                     final PostService post = PostService();
                     try {
-                      await post.createPost(
+                      await post.updatePost(
                           widget.roomType,
                           widget.teacherUID,
                           widget.roomCode,
                           messageController.text.trim(),
                           widget.userName,
-                          widget.uid);
+                          widget.uid, widget.postID);
                     } catch (e) {
                       Navigator.pop(context);
                     } finally {

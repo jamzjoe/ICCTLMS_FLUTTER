@@ -4,7 +4,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/models/post_model.dart';
+import 'package:icct_lms/room_screens/pages/update_post.dart';
 import 'package:icct_lms/room_screens/pages/write_post.dart';
+import 'package:icct_lms/services/post.dart';
 
 class Post extends StatefulWidget {
   const Post(
@@ -50,6 +52,7 @@ class _PostState extends State<Post> {
       .collection(widget.teacherUID)
       .doc(widget.roomCode)
       .collection('Post')
+      .orderBy('sortKey', descending: true)
       .snapshots()
       .map((snapshot) =>
           snapshot.docs.map((doc) => PostModel.fromJson(doc.data())).toList());
@@ -74,7 +77,13 @@ class _PostState extends State<Post> {
           child: Row(
             children: [
               CircleAvatar(
-                child: Text(widget.userName.substring(0, 2).toUpperCase()),
+                backgroundColor: Colors.blue[900],
+                child: Text(widget.userName.substring(0, 2).toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
               ),
               const SizedBox(
                 width: 15,
@@ -129,35 +138,100 @@ class _PostState extends State<Post> {
 
   Widget buildPostTiles(PostModel e) => Card(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
           child: ListTile(
             leading: CircleAvatar(
               backgroundColor: Colors.blue[900],
               child: Center(
-                child: Text(e.postName.substring(0, 2).toUpperCase()),
+                child: Text(e.postName.substring(0, 2).toUpperCase(), style:
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold
+                ),),
               ),
             ),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(e.postName),
-                Text(
-                  e.date,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w300, fontSize: 12),
-                )
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          e.postName,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          e.date,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w300, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    PopupMenuButton(
+                      icon: const Icon(
+                        FontAwesomeIcons.ellipsisVertical,
+                        size: 15,
+                      ),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          onTap: ()async {
+                            // final PostService post = PostService();
+                            print('Tap');
+
+                            await Future.delayed(const Duration(seconds: 1));
+                            if(!mounted){
+                              return;
+                            }
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => UpdatePost(
+                                    uid: e.userID,
+                                    sortKey: e.sortKey,
+                                    date: e.date,
+                                    postID: e.postID,
+                                    message: e.message,
+                                    userType: widget.userType,
+                                    userName: e.postName,
+                                    roomType: widget.roomType,
+                                    roomCode: widget.roomCode,
+                                    roomName: widget.roomName,
+                                    teacherUID: widget.teacherUID)));
+                          },
+                          child: const Text('Edit'),
+                        ),
+                        PopupMenuItem(
+                          onTap: () async {
+                            final PostService post = PostService();
+                            await post.deletePost(
+                                widget.roomType,
+                                widget.teacherUID,
+                                widget.roomCode,
+                                e.message,
+                                e.postName,
+                                e.userID,
+                                e.postID);
+                          },
+                          child: const Text('Delete'),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  height: 10,
+                Text(
+                  e.message,
+                  style: const TextStyle(color: Colors.black),
                 ),
-                Text(e.message),
               ],
             ),
-            trailing: const Icon(FontAwesomeIcons.ellipsis),
             isThreeLine: true,
           ),
         ),
