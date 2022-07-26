@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -253,79 +255,87 @@ class _ClassScreenState extends State<ClassScreen>
       showDialog(
           barrierDismissible: false,
           context: _scaffoldKey.currentContext!,
-          builder: (context) => AlertDialog(
-                title: Text('Join $roomType'),
-                content: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+          builder: (context) => StreamBuilder<Object>(
+              stream: null,
+              builder: (context, snapshot) {
+                return AlertDialog(
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextFormField(
-                        validator: (value) => value!.length <= 4
-                            ? '$roomType '
-                                'code usually 4+'
-                                ' chars long'
-                            : null,
-                        decoration:
-                            InputDecoration(label: Text('$roomType Code')),
-                        controller: codeController,
-                        keyboardType: TextInputType.visiblePassword,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        validator: (value) => value!.length <= 7
-                            ? 'Teacher userID '
-                                'usually 7+'
-                                ' chars long'
-                            : null,
-                        decoration: const InputDecoration(
-                            label: Text('Teacher UID'),
-                            hintText: 'Ask for your teacher UID',
-                            border: OutlineInputBorder()),
-                        controller: teacherUIDController,
-                        keyboardType: TextInputType.visiblePassword,
-                      ),
+                      Text('Join $roomType'),
+                      Text(
+                        "If this dialog doesn't close automatically it means no $roomType found or wrong inputs.",
+                        style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400),
+                      )
                     ],
                   ),
-                ),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancel')),
-                  TextButton(
-                      onPressed: () async {
-
-                        final DocumentReference reference = roomReference
-                            .doc(roomType)
-                            .collection(teacherUIDController.text.trim())
-                            .doc(codeController.text.trim());
-                        if (_formKey.currentState!.validate()) {
-                          // Navigator.pop(context);
-                          // roomType == "Class"
-                          //     ? tabController.animateTo(0,
-                          //         duration: const Duration(seconds: 1))
-                          //     : tabController.animateTo(1,
-                          //         duration: const Duration(seconds: 1));
-
-                          try {
-                             roomReference
-                                .doc(roomType)
-                                .collection(teacherUIDController.text.trim())
-                                .doc(codeController.text.trim()).get();
-
-                             throw Exception('Error');
-                          }  catch (e) {
-                            showError(roomType);
-                            return;
-                          }finally{
-                              reference.get()
-                                  .then((value) async {
-                                var roomName = value['name'];
+                  content: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          validator: (value) => value!.length <= 4
+                              ? '$roomType '
+                                  'code usually 4+'
+                                  ' chars long'
+                              : null,
+                          decoration:
+                              InputDecoration(label: Text('$roomType Code')),
+                          controller: codeController,
+                          keyboardType: TextInputType.visiblePassword,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextFormField(
+                          validator: (value) => value!.length <= 7
+                              ? 'Teacher userID '
+                                  'usually 7+'
+                                  ' chars long'
+                              : null,
+                          decoration: const InputDecoration(
+                              label: Text('Teacher UID'),
+                              hintText: 'Ask for your teacher UID',
+                              border: OutlineInputBorder()),
+                          controller: teacherUIDController,
+                          keyboardType: TextInputType.visiblePassword,
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          codeController.text = '';
+                          teacherUIDController.text = '';
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Cancel')),
+                    TextButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              roomReference
+                                  .doc(roomType)
+                                  .collection(teacherUIDController.text.trim())
+                                  .doc(codeController.text.trim())
+                                  .get();
+                            } on FirebaseException {
+                              showError(roomType);
+                            } finally {
+                              roomReference
+                                  .doc(roomType)
+                                  .collection(teacherUIDController.text.trim())
+                                  .doc(codeController.text.trim())
+                                  .get()
+                                  .then((value) {
                                 var teacher = value['teacher'];
+                                var roomName = value['name'];
+
                                 joinReference
                                     .doc(roomType)
                                     .collection(uid)
@@ -337,18 +347,24 @@ class _ClassScreenState extends State<ClassScreen>
                                   'roomType': roomType,
                                   'roomCode': codeController.text.trim(),
                                   'teacherUID': teacherUIDController.text.trim()
-                                }).whenComplete((){
+                                }).whenComplete(() {
                                   Navigator.pop(context);
                                   codeController.text = '';
                                   teacherUIDController.text = '';
+                                  roomType == "Class"
+                                      ? tabController.animateTo(0,
+                                          duration: const Duration(seconds: 1))
+                                      : tabController.animateTo(1,
+                                          duration: const Duration(seconds: 1));
                                 });
                               });
+                            }
                           }
-                        }
-                      },
-                      child: Text('Join $roomType')),
-                ],
-              ));
+                        },
+                        child: Text('Join $roomType')),
+                  ],
+                );
+              }));
 
   Future<void> openCreateClass() => showDialog(
       barrierDismissible: false,
@@ -725,18 +741,18 @@ class _ClassScreenState extends State<ClassScreen>
   Future showError(String roomType) => showDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        content: Column(
-          children: [
-            Lottie.asset('assets/not.json', width: 150),
-            Text('$roomType not found or not a valid $roomType ID.')
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Okay'))
-        ],
-      ));
+            content: Column(
+              children: [
+                Lottie.asset('assets/not.json', width: 150),
+                Text('$roomType not found or not a valid $roomType ID.')
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Okay'))
+            ],
+          ));
 }

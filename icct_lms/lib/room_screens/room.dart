@@ -6,6 +6,7 @@ import 'package:icct_lms/room_screens/pages/folder.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
 import 'package:icct_lms/room_screens/pages/post.dart';
 import 'package:lottie/lottie.dart';
+import 'package:string_validator/string_validator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Room extends StatefulWidget {
@@ -32,8 +33,8 @@ class Room extends StatefulWidget {
   State<Room> createState() => _RoomState();
 }
 
-final attendanceController = TextEditingController();
-final virtualController = TextEditingController();
+final attendanceController = TextEditingController(text: 'https://');
+final virtualController = TextEditingController(text: 'https://');
 bool isError = false;
 final CollectionReference addLinks =
     FirebaseFirestore.instance.collection("Rooms");
@@ -221,19 +222,17 @@ class _RoomState extends State<Room> {
     String roomCode,
     TextEditingController controller,
   ) =>
-      showDialog(
+      showCupertinoDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
                 title: const Text('Add/Update'),
                 content: Form(
                     child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextFormField(
+                    CupertinoTextField(
                       controller: controller,
-                      decoration: InputDecoration(
-                          hintText: 'Input $buttonType link',
-                          label: Text('$buttonType Link')),
+                      placeholder: 'Paste $buttonType links',
                     )
                   ],
                 )),
@@ -259,16 +258,14 @@ class _RoomState extends State<Room> {
               ));
 
   Future openBrowserUrl(String url, bool inApp, String type) async {
-    try {
-      if (url.isEmpty || !Uri.parse(url).isAbsolute) {
-        showError(type);
-      }
-      {
-        await launch(url,
-            forceWebView: inApp, forceSafariVC: true, enableJavaScript: true);
-      }
-    } catch (e) {
-      return;
+
+    if(isURL(url) && url.contains('https://')){
+      launch(url,
+          forceWebView: inApp, forceSafariVC: true, enableJavaScript: true);
+    }else if(url.isEmpty){
+      showError(type);
+    }else{
+      showError(type);
     }
   }
 
@@ -278,7 +275,8 @@ class _RoomState extends State<Room> {
             content: Column(
               children: [
                 Lottie.asset('assets/not.json', width: 150),
-                Text('$type link not found or not a valid URL.')
+                Text('$type link not found, not a valid URL or not contains '
+                    'https://.')
               ],
             ),
             actions: [
