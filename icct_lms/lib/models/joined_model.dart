@@ -1,8 +1,7 @@
 class JoinedModel {
   final String roomType, roomCode, teacherUID, roomName, userID, teacher;
-
   JoinedModel(
-      {required this.roomType,
+      { required this.roomType,
       required this.roomCode,
       required this.teacherUID,
       required this.userID,
@@ -24,5 +23,6 @@ class JoinedModel {
       teacherUID: json['teacherUID'],
       roomName: json['roomName'],
       userID: json['userID'],
-      teacher: json['teacher']);
+      teacher: json['teacher'],
+      );
 }

@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/components/nodata.dart';
@@ -7,6 +10,8 @@ import 'package:icct_lms/models/post_model.dart';
 import 'package:icct_lms/room_screens/pages/update_post.dart';
 import 'package:icct_lms/room_screens/pages/write_post.dart';
 import 'package:icct_lms/services/post.dart';
+import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Post extends StatefulWidget {
   const Post(
@@ -33,9 +38,12 @@ class Post extends StatefulWidget {
   State<Post> createState() => _PostState();
 }
 
+final currentUserID = FirebaseAuth.instance.currentUser!.uid;
+
 class _PostState extends State<Post> {
   @override
   Widget build(BuildContext context) {
+    print(widget.userType);
     return Scaffold(
       body: ListView(
         children: [
@@ -67,7 +75,7 @@ class _PostState extends State<Post> {
                     builder: (context) => WritePost(
                           uid: widget.uid,
                           userType: widget.userType,
-                          roomType: widget.userType,
+                          roomType: widget.roomType,
                           userName: widget.userName,
                           roomCode: widget.roomCode,
                           roomName: widget.roomName,
@@ -78,11 +86,10 @@ class _PostState extends State<Post> {
             children: [
               CircleAvatar(
                 backgroundColor: Colors.blue[900],
-                child: Text(widget.userName.substring(0, 2).toUpperCase(),
+                child: Text(
+                  widget.userName.substring(0, 2).toUpperCase(),
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold
-                  ),
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(
@@ -122,16 +129,28 @@ class _PostState extends State<Post> {
           final classes = snapshot.data!;
 
           if (classes.isEmpty) {
-            return const NoData();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: const [
+                IntrinsicHeight(child: Center(child: NoData())),
+              ],
+            );
           }
           return Column(
             children: classes.map(buildPostTiles).toList(),
           );
         } else {
-          return Center(
-            child: SpinKitFadingCircle(
-              color: Colors.blue[900],
-            ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              IntrinsicHeight(
+                child: Center(
+                  child: SpinKitFadingCircle(
+                    color: Colors.blue[900],
+                  ),
+                ),
+              ),
+            ],
           );
         }
       });
@@ -143,11 +162,11 @@ class _PostState extends State<Post> {
             leading: CircleAvatar(
               backgroundColor: Colors.blue[900],
               child: Center(
-                child: Text(e.postName.substring(0, 2).toUpperCase(), style:
-                const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold
-                ),),
+                child: Text(
+                  e.postName.substring(0, 2).toUpperCase(),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
             title: Column(
@@ -179,44 +198,103 @@ class _PostState extends State<Post> {
                       ),
                       itemBuilder: (context) => [
                         PopupMenuItem(
-                          onTap: ()async {
-                            // final PostService post = PostService();
-                            print('Tap');
-
-                            await Future.delayed(const Duration(seconds: 1));
-                            if(!mounted){
-                              return;
-                            }
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => UpdatePost(
-                                    uid: e.userID,
-                                    sortKey: e.sortKey,
-                                    date: e.date,
-                                    postID: e.postID,
-                                    message: e.message,
-                                    userType: widget.userType,
-                                    userName: e.postName,
-                                    roomType: widget.roomType,
-                                    roomCode: widget.roomCode,
-                                    roomName: widget.roomName,
-                                    teacherUID: widget.teacherUID)));
-                          },
-                          child: const Text('Edit'),
-                        ),
+                            onTap: () async {
+                              await Future.delayed(const Duration(seconds: 1));
+                              if (!mounted) {
+                                return;
+                              }
+                              if (e.userID != currentUserID) {
+                                showError("Cannot edit someone's post.");
+                              } else {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => UpdatePost(
+                                        uid: e.userID,
+                                        sortKey: e.sortKey,
+                                        date: e.date,
+                                        postID: e.postID,
+                                        message: e.message,
+                                        userType: widget.userType,
+                                        userName: e.postName,
+                                        roomType: widget.roomType,
+                                        roomCode: widget.roomCode,
+                                        roomName: widget.roomName,
+                                        teacherUID: widget.teacherUID)));
+                              }
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: const [
+                                Icon(
+                                  FontAwesomeIcons.edit,
+                                  color: Colors.blue,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Edit post',
+                                  style: TextStyle(color: Colors.blue),
+                                )
+                              ],
+                            )),
                         PopupMenuItem(
-                          onTap: () async {
-                            final PostService post = PostService();
-                            await post.deletePost(
-                                widget.roomType,
-                                widget.teacherUID,
-                                widget.roomCode,
-                                e.message,
-                                e.postName,
-                                e.userID,
-                                e.postID);
-                          },
-                          child: const Text('Delete'),
-                        )
+                            onTap: () async {
+                              final PostService post = PostService();
+
+                              if (currentUserID != e.userID) {
+                                await Future.delayed(
+                                    const Duration(seconds: 1));
+                                showError("You can't delete someone's post.");
+                              } else {
+                                await post.deletePost(
+                                    widget.roomType,
+                                    widget.teacherUID,
+                                    widget.roomCode,
+                                    e.message,
+                                    e.postName,
+                                    e.userID,
+                                    e.postID);
+                              }
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: const [
+                                Icon(
+                                  FontAwesomeIcons.deleteLeft,
+                                  color: Colors.blue,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Delete post',
+                                  style: TextStyle(color: Colors.blue),
+                                )
+                              ],
+                            )),
+                        PopupMenuItem(
+                            onTap: () async {
+                              final PostService post = PostService();
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: const [
+                                Icon(
+                                  FontAwesomeIcons.thumbtack,
+                                  color: Colors.blue,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text(
+                                  'Make pin',
+                                  style: TextStyle(color: Colors.blue),
+                                )
+                              ],
+                            ))
                       ],
                     ),
                   ],
@@ -226,14 +304,40 @@ class _PostState extends State<Post> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  e.message,
-                  style: const TextStyle(color: Colors.black),
-                ),
+                SelectableLinkify(
+                  options: const LinkifyOptions(humanize: true),
+                  onOpen: (link) async {
+                    launch(link.url);
+                  },
+                  text: e.message,
+                  style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12),
+                  linkStyle: const TextStyle(color: Colors.blue),
+                )
               ],
             ),
             isThreeLine: true,
           ),
         ),
       );
+
+  Future showError(String errorMessage) => showDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+            content: Column(
+              children: [
+                Lottie.asset('assets/error.json', width: 150),
+                Text(errorMessage)
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Okay'))
+            ],
+          ));
 }

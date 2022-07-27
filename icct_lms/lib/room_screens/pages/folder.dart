@@ -33,7 +33,12 @@ class _FolderState extends State<Folder> {
                   style: const TextStyle(
                       fontSize: 15, fontWeight: FontWeight.w700),
                 ),
-                const NoData()
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: const [
+          IntrinsicHeight(child: Center(child: NoData())),
+        ],
+      )
               ],
             ),
           ),
