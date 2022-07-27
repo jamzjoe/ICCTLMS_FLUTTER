@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:icct_lms/services/post.dart';
+import 'package:lottie/lottie.dart';
 
 class WritePost extends StatefulWidget {
   const WritePost({
@@ -39,7 +42,7 @@ class _WritePostState extends State<WritePost> {
   }
 }
 
-class postTextField extends StatelessWidget {
+class postTextField extends StatefulWidget {
   const postTextField({
     Key? key,
     required this.widget,
@@ -48,68 +51,134 @@ class postTextField extends StatelessWidget {
   final WritePost widget;
 
   @override
+  State<postTextField> createState() => _postTextFieldState();
+}
+bool error = false;
+class _postTextFieldState extends State<postTextField> {
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Row(
+    return StreamBuilder<DocumentSnapshot>(
+      stream: readRestrictions(),
+      builder: (context, snapshot) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
             children: [
-              CircleAvatar(
-                child: Text(widget.userName.substring(0, 2).toUpperCase()),
+              Row(
+                children: [
+                  CircleAvatar(
+                    child:
+                        Text(widget.widget.userName.substring(0, 2).toUpperCase()),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(widget.widget.userName,
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w600))
+                ],
               ),
               const SizedBox(
-                width: 10,
+                height: 20,
               ),
-              Text(widget.userName,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w600))
+              Form(
+                key: _formKey,
+                child: TextFormField(
+                  validator: (value) => value!.length < 5
+                      ? 'Cannot post less than'
+                          ' 5 chars long.'
+                      : null,
+                  maxLines: null,
+                  controller: messageController,
+                  decoration: const InputDecoration(
+                      label: Text('Post'),
+                      hintText: 'Write Something...',
+                      border: OutlineInputBorder()),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                      style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                      onPressed: () async {
+                        final PostService post = PostService();
+                        if (_formKey.currentState!.validate()) {
+                          final data = snapshot.data!;
+                          try {
+                            data['restriction'];
+                          }catch(e){
+                            Navigator.pop(context);
+                            await post.createPost(
+                                widget.widget.roomType,
+                                widget.widget.teacherUID,
+                                widget.widget.roomCode,
+                                messageController.text.trim(),
+                                widget.widget.userName,
+                                widget.widget.uid);
+
+                            messageController.text = '';
+                        }finally{
+                            if(data['restriction'] == 'true'){
+                                showError('Your teacher set '
+                                    'the ${widget.widget.roomType} post to '
+                                    'private.');
+                                setState(() {
+                                  messageController.text = '';
+                                  error = true;
+                                });
+                            }else{
+
+                              Navigator.pop(context);
+                              await post.createPost(
+                                  widget.widget.roomType,
+                                  widget.widget.teacherUID,
+                                  widget.widget.roomCode,
+                                  messageController.text.trim(),
+                                  widget.widget.userName,
+                                  widget.widget.uid);
+
+                              messageController.text ='';
+                            }
+                          }
+                        }
+                      },
+                      child: const Text('Post'))
+                ],
+              )
             ],
           ),
-          const SizedBox(
-            height: 20,
-          ),
-          Form(
-            key: _formKey,
-            child: TextField(
-              maxLines: null,
-              controller: messageController,
-              decoration: const InputDecoration(
-                  label: Text('Post'),
-                  hintText: 'Write Something...',
-                  border: OutlineInputBorder()),
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
-                  onPressed: () async {
-                    final PostService post = PostService();
-                    try {
-                      await post.createPost(
-                          widget.roomType,
-                          widget.teacherUID,
-                          widget.roomCode,
-                          messageController.text.trim(),
-                          widget.userName,
-                          widget.uid);
-                    } catch (e) {
-                      Navigator.pop(context);
-                    } finally {
-                      messageController.text = '';
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Post'))
-            ],
-          )
-        ],
-      ),
+        );
+      }
     );
   }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> readRestrictions() =>
+      FirebaseFirestore.instance
+          .collection('Rooms')
+          .doc(widget.widget.roomType)
+          .collection(widget.widget.teacherUID)
+          .doc(widget.widget.roomCode)
+          .snapshots();
+
+  Future showError(String errorMessage) => showDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        content: Column(
+          children: [
+            Lottie.asset('assets/error.json', width: 150),
+            Text(errorMessage)
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Okay'))
+        ],
+      ));
 }

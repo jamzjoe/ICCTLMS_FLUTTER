@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/room_screens/pages/folder.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
 import 'package:icct_lms/room_screens/pages/post.dart';
+import 'package:icct_lms/room_screens/pages/room_settings.dart';
 import 'package:lottie/lottie.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,11 +37,12 @@ class Room extends StatefulWidget {
   State<Room> createState() => _RoomState();
 }
 
-final attendanceController = TextEditingController(text: 'https://');
-final virtualController = TextEditingController(text: 'https://');
+final attendanceController = TextEditingController();
+final virtualController = TextEditingController();
 bool isError = false;
 final CollectionReference addLinks =
     FirebaseFirestore.instance.collection("Rooms");
+final currentUserID = FirebaseAuth.instance.currentUser!.uid;
 
 class _RoomState extends State<Room> {
   @override
@@ -53,8 +58,9 @@ class _RoomState extends State<Room> {
           if (snapshot.hasError) {
             return const NoData();
           }
+
           return DefaultTabController(
-            length: 3,
+            length: 4,
             child: Scaffold(
               appBar: AppBar(
                 foregroundColor: Colors.white,
@@ -74,15 +80,16 @@ class _RoomState extends State<Room> {
                               snapshot.data!['attendance'];
                             } catch (e) {
                               if (widget.userType == 'Teacher') {
-                                buildDialog(
+                                buildDialogForUpdates(
                                     widget.roomType,
                                     widget.roomName,
-                                    widget.uid,
-                                    widget.teacherUID,
+                                    currentUserID,
+                                    currentUserID,
                                     widget.teacher,
                                     "Attendance",
                                     widget.roomCode,
-                                    attendanceController);
+                                    attendanceController,
+                                    '');
                               } else {
                                 showError('Class');
                               }
@@ -93,18 +100,25 @@ class _RoomState extends State<Room> {
                                 buildDialogForUpdates(
                                     widget.roomType,
                                     widget.roomName,
-                                    widget.uid,
-                                    widget.teacherUID,
+                                    currentUserID,
+                                    currentUserID,
                                     widget.teacher,
                                     "Attendance",
                                     widget.roomCode,
                                     attendanceController,
                                     data['attendance']);
+                              } else {
+                                openBrowserUrl(
+                                    data['attendance'],
+                                    false,
+                                    "At"
+                                    "tendance");
                               }
                             }
                           },
                           icon: const Icon(
-                            Icons.calendar_month,
+                            FontAwesomeIcons.calendarCheck,
+                            size: 20,
                             color: Colors.white,
                           ));
                     },
@@ -118,15 +132,16 @@ class _RoomState extends State<Room> {
                               snapshot.data!['virtual'];
                             } catch (e) {
                               if (widget.userType == 'Teacher') {
-                                buildDialog(
+                                buildDialogForUpdates(
                                     widget.roomType,
                                     widget.roomName,
-                                    widget.uid,
-                                    widget.teacherUID,
+                                    currentUserID,
+                                    currentUserID,
                                     widget.teacher,
                                     "Virtual",
                                     widget.roomCode,
-                                    virtualController);
+                                    virtualController,
+                                    '');
                               } else {
                                 showError('Class');
                               }
@@ -137,18 +152,25 @@ class _RoomState extends State<Room> {
                                 buildDialogForUpdates(
                                     widget.roomType,
                                     widget.roomName,
-                                    widget.uid,
-                                    widget.teacherUID,
+                                    currentUserID,
+                                    currentUserID,
                                     widget.teacher,
                                     "Virtual",
                                     widget.roomCode,
                                     virtualController,
                                     data['virtual']);
+                              } else {
+                                openBrowserUrl(
+                                    data['virtual'],
+                                    false,
+                                    'Atten'
+                                    'dance');
                               }
                             }
                           },
                           icon: const Icon(
-                            Icons.video_camera_back,
+                            FontAwesomeIcons.video,
+                            size: 18,
                             color: Colors.white,
                           ));
                     },
@@ -172,31 +194,50 @@ class _RoomState extends State<Room> {
                       text: 'Members',
                       icon: Icon(Icons.group),
                     ),
+                    Tab(
+                      text: "Settings",
+                      icon: Icon(Icons.settings),
+                    )
                   ],
                 ),
               ),
               body: TabBarView(
                 children: [
                   Post(
-                    uid: widget.uid,
+                    uid: currentUserID,
                     roomCode: widget.roomCode,
                     roomName: widget.roomName,
                     teacherUID: widget.teacherUID,
                     teacher: widget.teacher,
-                    userType: widget.roomType,
+                    userType: widget.userType,
                     roomType: widget.roomType,
                     userName: widget.userName,
                   ),
                   Folder(
-                      uid: widget.uid,
-                      userType: widget.roomType,
+                      uid: currentUserID,
+                      userType: widget.userType,
                       userName: widget.teacher,
                       roomType: widget.roomType),
                   Member(
-                      uid: widget.uid,
-                      userType: widget.roomType,
+                      uid: currentUserID,
+                      userType: widget.userType,
                       userName: widget.teacher,
                       roomType: widget.roomType),
+                  widget.userType == "Teacher"
+                      ? RoomSettings(
+                          uid: currentUserID,
+                          roomCode: widget.roomCode,
+                          roomName: widget.roomName,
+                          teacherUID: widget.teacherUID,
+                          teacher: widget.teacher,
+                          userType: widget.userType,
+                          roomType: widget.roomType,
+                          userName: widget.userName,
+                        )
+                      : const Center(
+                          child: Text('Only the teacher can see this page'
+                              '.'),
+                        )
                 ],
               ),
             ),
@@ -212,59 +253,13 @@ class _RoomState extends State<Room> {
           .doc(widget.roomCode)
           .snapshots();
 
-  Future buildDialog(
-    String roomType,
-    String roomName,
-    String uid,
-    String teacherUID,
-    String teacher,
-    String buttonType,
-    String roomCode,
-    TextEditingController controller,
-  ) =>
-      showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-                title: const Text('Add/Update'),
-                content: Form(
-                    child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CupertinoTextField(
-                      controller: controller,
-                      placeholder: 'Paste $buttonType links',
-                    )
-                  ],
-                )),
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancel')),
-                  TextButton(
-                      onPressed: () {
-                        addOrUpdateLinks(
-                            roomName,
-                            roomCode,
-                            teacher,
-                            virtualController.text.trim(),
-                            attendanceController.text.trim(),
-                            roomType,
-                            teacherUID);
-                      },
-                      child: const Text('Confirm')),
-                ],
-              ));
-
   Future openBrowserUrl(String url, bool inApp, String type) async {
-
-    if(isURL(url) && url.contains('https://')){
+    if (isURL(url) && url.contains('https://')) {
       launch(url,
           forceWebView: inApp, forceSafariVC: true, enableJavaScript: true);
-    }else if(url.isEmpty){
+    } else if (url.isEmpty) {
       showError(type);
-    }else{
+    } else {
       showError(type);
     }
   }
@@ -326,12 +321,17 @@ class _RoomState extends State<Room> {
                             roomType,
                             teacherUID);
                       },
-                      child: const Text('Update')),
-                  TextButton(
-                      onPressed: () {
-                        openBrowserUrl(controller.text.trim(), false, s);
-                      },
-                      child: const Text('View')),
+                      child: controller.text.isEmpty
+                          ? const Text('Add Link')
+                          : const Text('Update Link')),
+                  Visibility(
+                    visible: controller.text.isNotEmpty,
+                    child: TextButton(
+                        onPressed: () {
+                          openBrowserUrl(controller.text.trim(), false, s);
+                        },
+                        child: const Text('View Link')),
+                  ),
                   TextButton(
                       onPressed: () {
                         Navigator.pop(context);
@@ -356,8 +356,6 @@ class _RoomState extends State<Room> {
       'attendance': attendance,
     }).whenComplete(() {
       Navigator.pop(context);
-      attendanceController.text = '';
-      virtualController.text = '';
     });
   }
 }

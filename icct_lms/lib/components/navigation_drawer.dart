@@ -169,14 +169,10 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               TextButton(
                   onPressed: () async {
                     await _auth.signOut();
-                    if (!mounted) {
+                    if(!mounted){
                       return;
                     }
-                    if (Platform.isAndroid) {
-                      SystemNavigator.pop();
-                    } else if (Platform.isIOS) {
-                      exit(0);
-                    }
+                    Navigator.pop(context);
                   },
                   child: const Text('Logout')),
               TextButton(
@@ -257,10 +253,6 @@ class _HeaderState extends State<Header> {
                   widget.name,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, overflow: TextOverflow.fade),
-                ),
-                Text(
-                  widget.email,
-                  style: const TextStyle(fontWeight: FontWeight.w300),
                 ),
                 Text(
                   widget.school,

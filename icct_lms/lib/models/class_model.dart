@@ -1,6 +1,5 @@
 class Class {
   final String name, code, teacher;
-
   Class(this.name, this.code, this.teacher);
 
   Map<String, dynamic> toJson() =>

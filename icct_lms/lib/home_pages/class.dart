@@ -68,10 +68,10 @@ class _ClassScreenState extends State<ClassScreen>
     });
   }
 
-  final Joined join = Joined(uid: uid);
   final int classBadge = 0;
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -338,10 +338,10 @@ class _ClassScreenState extends State<ClassScreen>
 
                                 joinReference
                                     .doc(roomType)
-                                    .collection(uid)
+                                    .collection(widget.uid)
                                     .doc(codeController.text.trim())
                                     .set({
-                                  'userID': uid,
+                                  'userID': widget.uid,
                                   'teacher': teacher,
                                   'roomName': roomName,
                                   'roomType': roomType,
@@ -426,7 +426,7 @@ class _ClassScreenState extends State<ClassScreen>
               TextButton(
                   onPressed: () {
                     final classInfo = Class(classNameController.text.trim(),
-                        classCodeController.text.trim(), widget.userName);
+                        classCodeController.text.trim(), widget.userName,);
                     if (_classKey.currentState!.validate()) {
                       createClass(classInfo);
                       copy.showAndCopy(
@@ -503,7 +503,7 @@ class _ClassScreenState extends State<ClassScreen>
               TextButton(
                   onPressed: () {
                     final groupInfo = Group(groupNameController.text.trim(),
-                        groupCodeController.text.trim(), widget.userName);
+                        groupCodeController.text.trim(), widget.userName,);
                     if (_groupKey.currentState!.validate()) {
                       createGroup(groupInfo);
                       copy.showAndCopy(
@@ -581,8 +581,8 @@ class _ClassScreenState extends State<ClassScreen>
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => Room(
-                      uid: uid,
-                      teacherUID: uid,
+                      uid: widget.uid,
+                      teacherUID: widget.uid,
                       userName: widget.userName,
                       teacher: e.teacher,
                       roomCode: e.code,
@@ -605,13 +605,19 @@ class _ClassScreenState extends State<ClassScreen>
           trailing: PopupMenuButton(
             itemBuilder: (context) => [
               PopupMenuItem(
-                onTap: () {
+                onTap: () async {
                   final docUser = FirebaseFirestore.instance
                       .collection('Rooms')
                       .doc('Group')
                       .collection(widget.uid)
                       .doc(e.code);
-                  docUser.delete();
+
+                  await docUser.delete();
+                  docUser.collection("Post").get().then((value) async{
+                    for(DocumentSnapshot snapshot in value.docs){
+                      await snapshot.reference.delete();
+                    }
+                  });
                 },
                 child: const Text('Delete'),
               )
@@ -624,9 +630,9 @@ class _ClassScreenState extends State<ClassScreen>
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
-                        uid: uid,
+                        uid: widget.uid,
                         userName: widget.userName,
-                        teacherUID: uid,
+                        teacherUID: widget.uid,
                         teacher: e.teacher,
                         roomName: e.name,
                         roomType: 'Class',
@@ -648,13 +654,18 @@ class _ClassScreenState extends State<ClassScreen>
             trailing: PopupMenuButton(
               itemBuilder: (context) => [
                 PopupMenuItem(
-                  onTap: () {
+                  onTap: () async {
                     final docUser = FirebaseFirestore.instance
                         .collection('Rooms')
                         .doc('Class')
                         .collection(widget.uid)
                         .doc(e.code.trim());
-                    docUser.delete();
+                    await docUser.delete();
+                    docUser.collection("Post").get().then((value)async{
+                      for(DocumentSnapshot snapshot in value.docs){
+                        await snapshot.reference.delete();
+                      }
+                    });
                   },
                   child: const Text('Delete'),
                 )
@@ -667,7 +678,7 @@ class _ClassScreenState extends State<ClassScreen>
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
-                        uid: uid,
+                        uid: widget.uid,
                         userName: widget.userName,
                         teacherUID: e.teacherUID,
                         teacher: e.teacher,
@@ -692,6 +703,8 @@ class _ClassScreenState extends State<ClassScreen>
               itemBuilder: (context) => [
                 PopupMenuItem(
                   onTap: () {
+
+                    final Joined join = Joined(uid: widget.uid);
                     join.deleteJoin(e.roomType, e.roomCode, e.userID);
                   },
                   child: Text('Leave ${e.roomType}'),
@@ -705,7 +718,7 @@ class _ClassScreenState extends State<ClassScreen>
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => Room(
-                        uid: uid,
+                        uid: widget.uid,
                         userName: widget.userName,
                         teacherUID: e.teacherUID,
                         teacher: e.teacher,
@@ -730,6 +743,8 @@ class _ClassScreenState extends State<ClassScreen>
               itemBuilder: (context) => [
                 PopupMenuItem(
                   onTap: () {
+
+                    final Joined join = Joined(uid: widget.uid);
                     join.deleteJoin(e.roomType, e.roomCode, e.userID);
                   },
                   child: Text('Leave ${e.roomType}'),

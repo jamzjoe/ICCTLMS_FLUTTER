@@ -80,7 +80,9 @@ class postTextField extends StatelessWidget {
           ),
           Form(
             key: _formKey,
-            child: TextField(
+            child: TextFormField(
+              validator: (value) => value!.length < 5 ? 'Cannot post less '
+                  'thank 5 chars long.' : null,
               maxLines: null,
               controller: messageController,
               decoration: const InputDecoration(
@@ -99,20 +101,22 @@ class postTextField extends StatelessWidget {
                   style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
                   onPressed: () async {
                     final PostService post = PostService();
-                    try {
-                      await post.updatePost(
-                          widget.roomType,
-                          widget.teacherUID,
-                          widget.roomCode,
-                          messageController.text.trim(),
-                          widget.userName,
-                          widget.uid, widget.postID);
-                    } catch (e) {
-                      Navigator.pop(context);
-                    } finally {
-                      messageController.text = '';
-                      Navigator.pop(context);
-                    }
+                   if(_formKey.currentState!.validate()){
+                     try {
+                       await post.updatePost(
+                           widget.roomType,
+                           widget.teacherUID,
+                           widget.roomCode,
+                           messageController.text.trim(),
+                           widget.userName,
+                           widget.uid, widget.postID);
+                     } catch (e) {
+                       Navigator.pop(context);
+                     } finally {
+                       messageController.text = '';
+                       Navigator.pop(context);
+                     }
+                   }
                   },
                   child: const Text('Post'))
             ],
