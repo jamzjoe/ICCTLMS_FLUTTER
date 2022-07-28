@@ -71,7 +71,10 @@ class _RoomSettingsState extends State<RoomSettings> {
                                 snapshot.data!['restriction'] == 'false'
                                     ? true
                                     : false),
-                            buildRoomCode()
+                            buildCopy(widget.roomCode, 'Copy room code', 'Roo'
+                                'm Code'),
+                            buildCopy(widget.teacherUID, 'Copy teacher UID',
+                                "Teacher UID")
                           ],
                         ),
                       )
@@ -106,17 +109,17 @@ class _RoomSettingsState extends State<RoomSettings> {
           .doc(widget.roomCode)
           .snapshots();
 
-  Widget buildRoomCode() => Card(
+  Widget buildCopy(String copy, String title, String subtitle) => Card(
     child: ListTile(
-      subtitle: const Text('Copy Room ID'),
-      title: Text(widget.roomCode),
+      subtitle: Text(copy),
+      title: Text(title),
       trailing: IconButton(
           onPressed: () async {
-            await FlutterClipboard.copy(widget.uid);
+            await FlutterClipboard.copy(copy);
             if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('You copied ${widget.roomName} ID:${widget.uid}'),
+                content: Text('You copied ID:$copy'),
                 duration: const Duration(milliseconds: 1000),
               ),
             );
