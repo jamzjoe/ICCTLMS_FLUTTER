@@ -109,7 +109,7 @@ class postTextField extends StatelessWidget {
                            widget.roomCode,
                            messageController.text.trim(),
                            widget.userName,
-                           widget.uid, widget.postID);
+                           widget.uid, widget.postID, widget.userType);
                      } catch (e) {
                        Navigator.pop(context);
                      } finally {

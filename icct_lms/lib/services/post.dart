@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 
 class PostService{
   Future createPost(roomType, teacherUID, roomCode, String message, String
-  name, String userID)
+  name, String userID, String userType)
   async {
     String postID = const Uuid().v4().substring(0, 8);
    DocumentReference<Map<String, dynamic>> reference = FirebaseFirestore.instance.collection
@@ -19,7 +19,8 @@ class PostService{
      'sortKey': sortKey,
      'postName': name,
      'postID': postID,
-     'userID': userID
+     'userID': userID,
+     'userType': userType
    });
   }
 
@@ -32,7 +33,7 @@ class PostService{
         await reference.delete();
   }
   Future updatePost(roomType, teacherUID, roomCode, String message, String
-  name, String userID, String postID)
+  name, String userID, String postID,String userType)
   async {
     DocumentReference<Map<String, dynamic>> reference = FirebaseFirestore.instance.collection
       ('Rooms').doc(roomType).collection(teacherUID).doc(roomCode).collection
@@ -46,7 +47,8 @@ class PostService{
       'sortKey': sortKey,
       'postName': name,
       'postID': postID,
-      'userID': userID
+      'userID': userID,
+      'userType': userType
     });
   }
 
