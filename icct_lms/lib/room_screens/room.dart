@@ -176,8 +176,7 @@ class _RoomState extends State<Room> {
                       userType: widget.userType,
                       userName: widget.teacher,
                       roomType: widget.roomType),
-                  widget.userType == "Teacher"
-                      ? RoomSettings(
+                  RoomSettings(
                           uid: widget.uid,
                           roomCode: widget.roomCode,
                           roomName: widget.roomName,
@@ -187,10 +186,8 @@ class _RoomState extends State<Room> {
                           roomType: widget.roomType,
                           userName: widget.userName,
                         )
-                      : const Center(
-                          child: Text('Only the teacher can see this page'
-                              '.'),
-                        )
+                      ,
+
                 ],
               ),
             ),

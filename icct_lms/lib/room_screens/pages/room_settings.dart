@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/services/class_service.dart';
 
 class RoomSettings extends StatefulWidget {
@@ -66,11 +65,14 @@ class _RoomSettingsState extends State<RoomSettings> {
                       Expanded(
                         child: ListView(
                           children: [
-                            buildSettingsTile(
-                                'Allow student to post',
-                                snapshot.data!['restriction'] == 'false'
-                                    ? true
-                                    : false),
+                            Visibility(
+                              visible: widget.userType == 'Teacher',
+                              child: buildSettingsTile(
+                                  'Allow student to post',
+                                  snapshot.data!['restriction'] == 'false'
+                                      ? true
+                                      : false),
+                            ),
                             buildCopy(widget.roomCode, 'Copy room code', 'Roo'
                                 'm Code'),
                             buildCopy(widget.teacherUID, 'Copy teacher UID',

@@ -127,9 +127,8 @@ class _postTextFieldState extends State<postTextField> {
                                 widget.widget.uid, widget.widget.userType);
                             messageController.text = '';
                           }else{
-                            showError('Your teacher set '
-                                'the ${widget.widget.roomType} post to '
-                                'private.');
+                            showError('The ${widget.widget.roomType} post was'
+                                ' made private by your teacher.');
                             setState(() {
                               messageController.text = '';
                               error = true;
