@@ -1,7 +1,9 @@
+import 'package:clipboard/clipboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/services/class_service.dart';
 
 class RoomSettings extends StatefulWidget {
@@ -39,21 +41,15 @@ class _RoomSettingsState extends State<RoomSettings> {
       body: StreamBuilder<DocumentSnapshot>(
           stream: readSettings(),
           builder: (context, snapshot) {
-            service.switchRestriction(
-                widget.roomType, currentUser, widget.roomCode, 'false');
-             if(snapshot.connectionState == ConnectionState.waiting){
+
+             if(snapshot.connectionState == ConnectionState.waiting ||
+                 snapshot.hasError){
               return Center(
                 child: SpinKitFadingCircle(
                   color: Colors.blue[900],
                 ),
               );
             }else{
-              try {
-                snapshot.data!['restriction'];
-              } catch (e) {
-                service.switchRestriction(
-                    widget.roomType, currentUser, widget.roomCode, 'false');
-              } finally {
                 // ignore: control_flow_in_finally
                 return Padding(
                   padding: const EdgeInsets.all(20),
@@ -71,10 +67,11 @@ class _RoomSettingsState extends State<RoomSettings> {
                         child: ListView(
                           children: [
                             buildSettingsTile(
-                                'Do not allow student to post.',
+                                'Allow student to post',
                                 snapshot.data!['restriction'] == 'false'
                                     ? true
-                                    : false)
+                                    : false),
+                            buildRoomCode()
                           ],
                         ),
                       )
@@ -82,7 +79,7 @@ class _RoomSettingsState extends State<RoomSettings> {
                   ),
                 );
               }
-            }
+
 
           }),
     );
@@ -108,4 +105,27 @@ class _RoomSettingsState extends State<RoomSettings> {
           .collection(widget.teacherUID)
           .doc(widget.roomCode)
           .snapshots();
+
+  Widget buildRoomCode() => Card(
+    child: ListTile(
+      subtitle: const Text('Copy Room ID'),
+      title: Text(widget.roomCode),
+      trailing: IconButton(
+          onPressed: () async {
+            await FlutterClipboard.copy(widget.uid);
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('You copied ${widget.roomName} ID:${widget.uid}'),
+                duration: const Duration(milliseconds: 1000),
+              ),
+            );
+          },
+          icon: const Icon(
+            Icons.copy_outlined,
+            size: 20,
+            color: Colors.black54,
+          ))
+    ),
+  );
 }

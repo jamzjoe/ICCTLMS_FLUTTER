@@ -32,12 +32,20 @@ final _formKey = GlobalKey<FormState>();
 class _WritePostState extends State<WritePost> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue[900],
-        title: const Text('Create Post'),
+    return WillPopScope(
+      onWillPop: ()async{
+        messageController.text = '';
+        Navigator.pop(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.blue[900],
+          title: const Text('Create Post'),
+        ),
+
+        body: postTextField(widget: widget),
       ),
-      body: postTextField(widget: widget),
     );
   }
 }
@@ -106,11 +114,9 @@ class _postTextFieldState extends State<postTextField> {
                       style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
                       onPressed: () async {
                         final PostService post = PostService();
-                        if (_formKey.currentState!.validate()) {
-                          final data = snapshot.data!;
-                          try {
-                            data['restriction'];
-                          }catch(e){
+                        final data = snapshot.data!;
+                        if(data['restriction'] == 'true'){
+                          if(widget.widget.userType == "Teacher"){
                             Navigator.pop(context);
                             await post.createPost(
                                 widget.widget.roomType,
@@ -118,32 +124,28 @@ class _postTextFieldState extends State<postTextField> {
                                 widget.widget.roomCode,
                                 messageController.text.trim(),
                                 widget.widget.userName,
-                                widget.widget.uid);
-
+                                widget.widget.uid, widget.widget.userType);
                             messageController.text = '';
-                        }finally{
-                            if(data['restriction'] == 'true'){
-                                showError('Your teacher set '
-                                    'the ${widget.widget.roomType} post to '
-                                    'private.');
-                                setState(() {
-                                  messageController.text = '';
-                                  error = true;
-                                });
-                            }else{
-
-                              Navigator.pop(context);
-                              await post.createPost(
-                                  widget.widget.roomType,
-                                  widget.widget.teacherUID,
-                                  widget.widget.roomCode,
-                                  messageController.text.trim(),
-                                  widget.widget.userName,
-                                  widget.widget.uid);
-
-                              messageController.text ='';
-                            }
+                          }else{
+                            showError('Your teacher set '
+                                'the ${widget.widget.roomType} post to '
+                                'private.');
+                            setState(() {
+                              messageController.text = '';
+                              error = true;
+                            });
                           }
+                        }else{
+                          Navigator.pop(context);
+                          await post.createPost(
+                              widget.widget.roomType,
+                              widget.widget.teacherUID,
+                              widget.widget.roomCode,
+                              messageController.text.trim(),
+                              widget.widget.userName,
+                              widget.widget.uid, widget.widget.userType);
+
+                          messageController.text ='';
                         }
                       },
                       child: const Text('Post'))

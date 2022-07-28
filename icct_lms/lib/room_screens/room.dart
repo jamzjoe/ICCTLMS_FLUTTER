@@ -9,6 +9,7 @@ import 'package:icct_lms/room_screens/pages/folder.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
 import 'package:icct_lms/room_screens/pages/post.dart';
 import 'package:icct_lms/room_screens/pages/room_settings.dart';
+import 'package:icct_lms/services/class_service.dart';
 import 'package:lottie/lottie.dart';
 import 'package:string_validator/string_validator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,7 +43,6 @@ final virtualController = TextEditingController();
 bool isError = false;
 final CollectionReference addLinks =
     FirebaseFirestore.instance.collection("Rooms");
-final currentUserID = FirebaseAuth.instance.currentUser!.uid;
 
 class _RoomState extends State<Room> {
   @override
@@ -52,6 +52,7 @@ class _RoomState extends State<Room> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.teacherUID);
     return StreamBuilder<DocumentSnapshot>(
         stream: readLinks(),
         builder: (context, snapshot) {
@@ -74,47 +75,22 @@ class _RoomState extends State<Room> {
                   Builder(
                     builder: (BuildContext context) {
                       return IconButton(
-                          onPressed: () {
+                          onPressed: () async {
                             final data = snapshot.data!;
-                            try {
-                              snapshot.data!['attendance'];
-                            } catch (e) {
-                              if (widget.userType == 'Teacher') {
-                                buildDialogForUpdates(
-                                    widget.roomType,
-                                    widget.roomName,
-                                    currentUserID,
-                                    currentUserID,
-                                    widget.teacher,
-                                    "Attendance",
-                                    widget.roomCode,
-                                    attendanceController,
-                                    '');
-                              } else {
-                                showError('Class');
-                              }
-                              return;
-                            } finally {
-                              if (widget.userType == 'Teacher') {
-                                attendanceController.text = data['attendance'];
-                                buildDialogForUpdates(
-                                    widget.roomType,
-                                    widget.roomName,
-                                    currentUserID,
-                                    currentUserID,
-                                    widget.teacher,
-                                    "Attendance",
-                                    widget.roomCode,
-                                    attendanceController,
-                                    data['attendance']);
-                              } else {
-                                openBrowserUrl(
-                                    data['attendance'],
-                                    false,
-                                    "At"
-                                    "tendance");
-                              }
-                            }
+
+                            final attendance = data['attendance'] ?? "Empty "
+                                "attendance";
+                            attendanceController.text = attendance;
+                            await buildDialogForUpdates(
+                                widget.roomType,
+                                widget.roomName,
+                                currentUserID,
+                                currentUserID,
+                                widget.teacher,
+                                "Attendance",
+                                widget.roomCode,
+                                attendanceController,
+                                attendance);
                           },
                           icon: const Icon(
                             FontAwesomeIcons.calendarCheck,
@@ -128,45 +104,22 @@ class _RoomState extends State<Room> {
                       return IconButton(
                           onPressed: () async {
                             final data = snapshot.data!;
-                            try {
-                              snapshot.data!['virtual'];
-                            } catch (e) {
-                              if (widget.userType == 'Teacher') {
-                                buildDialogForUpdates(
-                                    widget.roomType,
-                                    widget.roomName,
-                                    currentUserID,
-                                    currentUserID,
-                                    widget.teacher,
-                                    "Virtual",
-                                    widget.roomCode,
-                                    virtualController,
-                                    '');
-                              } else {
-                                showError('Class');
-                              }
-                              return;
-                            } finally {
-                              if (widget.userType == 'Teacher') {
-                                virtualController.text = data['virtual'];
-                                buildDialogForUpdates(
-                                    widget.roomType,
-                                    widget.roomName,
-                                    currentUserID,
-                                    currentUserID,
-                                    widget.teacher,
-                                    "Virtual",
-                                    widget.roomCode,
-                                    virtualController,
-                                    data['virtual']);
-                              } else {
-                                openBrowserUrl(
-                                    data['virtual'],
-                                    false,
-                                    'Atten'
-                                    'dance');
-                              }
-                            }
+                            final virtual = data['virtual'] ?? "Empty "
+                                "virtual meeting link";
+                            virtualController.text = virtual;
+
+
+                             await buildDialogForUpdates(
+                                  widget.roomType,
+                                  widget.roomName,
+                                  currentUserID,
+                                  currentUserID,
+                                  widget.teacher,
+                                  "Virtual Meeting",
+                                  widget.roomCode,
+                                  virtualController,
+                                  virtual);
+
                           },
                           icon: const Icon(
                             FontAwesomeIcons.video,
@@ -204,7 +157,7 @@ class _RoomState extends State<Room> {
               body: TabBarView(
                 children: [
                   Post(
-                    uid: currentUserID,
+                    uid: widget.uid,
                     roomCode: widget.roomCode,
                     roomName: widget.roomName,
                     teacherUID: widget.teacherUID,
@@ -214,18 +167,18 @@ class _RoomState extends State<Room> {
                     userName: widget.userName,
                   ),
                   Folder(
-                      uid: currentUserID,
+                      uid: widget.uid,
                       userType: widget.userType,
                       userName: widget.teacher,
                       roomType: widget.roomType),
                   Member(
-                      uid: currentUserID,
+                      uid: widget.uid,
                       userType: widget.userType,
                       userName: widget.teacher,
                       roomType: widget.roomType),
                   widget.userType == "Teacher"
                       ? RoomSettings(
-                          uid: currentUserID,
+                          uid: widget.uid,
                           roomCode: widget.roomCode,
                           roomName: widget.roomName,
                           teacherUID: widget.teacherUID,
@@ -304,31 +257,35 @@ class _RoomState extends State<Room> {
                       height: 20,
                     ),
                     CupertinoTextField(
-                      placeholder: 'Paste $s link',
+                      readOnly: widget.userType == 'Student',
+                      placeholder: '$s link address.',
                       controller: controller,
                     ),
                   ],
                 )),
                 actions: [
-                  TextButton(
-                      onPressed: () {
-                        addOrUpdateLinks(
-                            roomName,
-                            roomCode,
-                            teacher,
-                            virtualController.text.trim(),
-                            attendanceController.text.trim(),
-                            roomType,
-                            teacherUID);
-                      },
-                      child: controller.text.isEmpty
-                          ? const Text('Add Link')
-                          : const Text('Update Link')),
+                  Visibility(
+                    visible: widget.userType == 'Teacher',
+                    child: TextButton(
+                        onPressed: () async {
+                         final ClassService service = ClassService();
+                         Navigator.pop(context);
+                         await service.updateLinks(roomType, widget.teacherUID,
+                             roomCode,
+                             virtualController.text.trim(), attendanceController
+                                 .text
+                                 .trim());
+
+                        },
+                        child: controller.text.isEmpty
+                            ? const Text('Add Link')
+                            : const Text('Update Link')),
+                  ),
                   Visibility(
                     visible: controller.text.isNotEmpty,
                     child: TextButton(
                         onPressed: () {
-                          openBrowserUrl(controller.text.trim(), false, s);
+                          openBrowserUrl(data, false, s);
                         },
                         child: const Text('View Link')),
                   ),

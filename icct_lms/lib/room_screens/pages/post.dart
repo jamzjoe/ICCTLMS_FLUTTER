@@ -43,7 +43,6 @@ final currentUserID = FirebaseAuth.instance.currentUser!.uid;
 class _PostState extends State<Post> {
   @override
   Widget build(BuildContext context) {
-    print(widget.userType);
     return Scaffold(
       body: ListView(
         children: [
@@ -85,7 +84,8 @@ class _PostState extends State<Post> {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: Colors.blue[900],
+                backgroundColor: widget.userType == 'Teacher'? Colors
+                    .blue[900]: Colors.redAccent,
                 child: Text(
                   widget.userName.substring(0, 2).toUpperCase(),
                   style: const TextStyle(
@@ -160,7 +160,8 @@ class _PostState extends State<Post> {
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: Colors.blue[900],
+              backgroundColor: e.userType == 'Teacher'? Colors
+                  .blue[900]: Colors.redAccent,
               child: Center(
                 child: Text(
                   e.postName.substring(0, 2).toUpperCase(),
@@ -181,7 +182,7 @@ class _PostState extends State<Post> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          e.postName,
+                          '${e.postName} - ${e.userType}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
@@ -203,7 +204,7 @@ class _PostState extends State<Post> {
                               if (!mounted) {
                                 return;
                               }
-                              if (e.userID != currentUserID) {
+                              if (e.userID != widget.uid) {
                                 showError("Cannot edit someone's post.");
                               } else {
                                 Navigator.of(context).push(MaterialPageRoute(
@@ -241,8 +242,8 @@ class _PostState extends State<Post> {
                         PopupMenuItem(
                             onTap: () async {
                               final PostService post = PostService();
-
-                              if (currentUserID != e.userID) {
+                              print(e.userID);
+                              if (widget.uid != e.userID) {
                                 await Future.delayed(
                                     const Duration(seconds: 1));
                                 showError("You can't delete someone's post.");

@@ -12,6 +12,7 @@ import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
 import 'package:icct_lms/models/joined_model.dart';
 import 'package:icct_lms/room_screens/room.dart';
+import 'package:icct_lms/services/class_service.dart';
 import 'package:icct_lms/services/join.dart';
 import 'package:lottie/lottie.dart';
 import 'package:uuid/uuid.dart';
@@ -71,7 +72,7 @@ class _ClassScreenState extends State<ClassScreen>
   final int classBadge = 0;
   @override
   Widget build(BuildContext context) {
-
+    print(widget.uid);
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -424,11 +425,15 @@ class _ClassScreenState extends State<ClassScreen>
                   },
                   child: const Text('Cancel')),
               TextButton(
-                  onPressed: () {
+                  onPressed: () async{
                     final classInfo = Class(classNameController.text.trim(),
                         classCodeController.text.trim(), widget.userName,);
-                    if (_classKey.currentState!.validate()) {
+                    if (_classKey.currentState!.validate()){
                       createClass(classInfo);
+                      final ClassService service = ClassService();
+                      service.switchRestriction("Class", widget.uid,
+                          classCodeController.text.trim(),
+                          'false');
                       copy.showAndCopy(
                           'You copied ${classCodeController.text.trim()}',
                           classCodeController.text.trim(),
@@ -506,6 +511,10 @@ class _ClassScreenState extends State<ClassScreen>
                         groupCodeController.text.trim(), widget.userName,);
                     if (_groupKey.currentState!.validate()) {
                       createGroup(groupInfo);
+                      final ClassService service = ClassService();
+                      service.switchRestriction("Group", widget.uid,
+                          groupCodeController.text.trim(),
+                          'false');
                       copy.showAndCopy(
                           'You copied ${groupCodeController.text.trim()}',
                           groupCodeController.text.trim(),

@@ -31,6 +31,18 @@ class ClassService{
         .doc(roomType)
         .collection(userID)
         .doc(roomCode);
-    await docUser.update({'restriction': restrict});
+    await docUser.update({'restriction': restrict, 'virtual': '', 'attendance': ''
+        ''});
+  }
+
+  Future updateLinks(String roomType, String userID, String roomCode,
+      String virtual, String attendance)
+  async {
+    final docUser = FirebaseFirestore.instance
+        .collection('Rooms')
+        .doc(roomType)
+        .collection(userID)
+        .doc(roomCode);
+    await docUser.update({'virtual': virtual, 'attendance': attendance});
   }
 }
