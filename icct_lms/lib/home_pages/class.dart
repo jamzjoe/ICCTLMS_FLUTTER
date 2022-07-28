@@ -265,7 +265,9 @@ class _ClassScreenState extends State<ClassScreen>
                     children: [
                       Text('Join $roomType'),
                       Text(
-                        "If this dialog doesn't close automatically it means no $roomType found or wrong inputs.",
+                        "If this dialog doesn't automatically close, there "
+                            "was either no $roomType detected or the inputs"
+                            " were incorrect.",
                         style: const TextStyle(
                             color: Colors.red,
                             fontSize: 12,

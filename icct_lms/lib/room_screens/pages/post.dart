@@ -205,7 +205,7 @@ class _PostState extends State<Post> {
                                 return;
                               }
                               if (e.userID != widget.uid) {
-                                showError("Cannot edit someone's post.");
+                                showError("You can't edit someone's post.");
                               } else {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) => UpdatePost(
@@ -326,8 +326,9 @@ class _PostState extends State<Post> {
 
   Future showError(String errorMessage) => showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
             content: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Lottie.asset('assets/error.json', width: 150),
                 Text(errorMessage)
