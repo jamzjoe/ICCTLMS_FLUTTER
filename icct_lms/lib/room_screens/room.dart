@@ -302,7 +302,7 @@ class _RoomState extends State<Room> {
       String attendance,
       String roomType,
       String teacherUID) async {
-    await addLinks.doc(roomType).collection(teacherUID).doc(roomCode).set({
+    await addLinks.doc(roomType).collection(widget.teacherUID).doc(roomCode).set({
       'code': roomCode,
       'name': roomName,
       'teacher': teacher,

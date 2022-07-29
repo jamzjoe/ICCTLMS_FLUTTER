@@ -5,9 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/components/copy.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/home_pages/profile.dart';
+import 'package:icct_lms/home_pages/qr_scanner.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
 import 'package:icct_lms/models/joined_model.dart';
@@ -54,7 +56,6 @@ final _formKey = GlobalKey<FormState>();
 final Copy copy = Copy();
 final _classKey = GlobalKey<FormState>();
 final _groupKey = GlobalKey<FormState>();
-
 class _ClassScreenState extends State<ClassScreen>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
@@ -318,6 +319,33 @@ class _ClassScreenState extends State<ClassScreen>
                           Navigator.pop(context);
                         },
                         child: const Text('Cancel')),
+                    TextButton(onPressed: ()async{
+                      final data = await Navigator.push(context,
+                          MaterialPageRoute(builder:
+                          (context) => QRScanner()));
+                      if(!mounted){
+                        return;
+                      }
+                      Navigator.pop(context);
+                       setState((){
+                         teacherUIDController.text = data.toString().split(","
+                         ).last;
+                         codeController.text = data.toString().split(",").first;
+                       });
+                      if(codeController.text[0] == 'C'){
+                        roomType = "Class";
+                      }else{
+                        roomType = "Group";
+                      }
+                      openJoinDialog(roomType, codeController, teacherUIDController);
+
+
+
+
+
+                    }, child: const Text('Join with '
+                        'QR '
+                        'Code')),
                     TextButton(
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
@@ -433,9 +461,12 @@ class _ClassScreenState extends State<ClassScreen>
                     if (_classKey.currentState!.validate()){
                       createClass(classInfo);
                       final ClassService service = ClassService();
-                      service.switchRestriction("Class", widget.uid,
+                      await service.switchRestriction("Class", widget.uid,
                           classCodeController.text.trim(),
                           'false');
+                      if(!mounted){
+                        return;
+                      }
                       copy.showAndCopy(
                           'You copied ${classCodeController.text.trim()}',
                           classCodeController.text.trim(),
@@ -508,15 +539,18 @@ class _ClassScreenState extends State<ClassScreen>
                   },
                   child: const Text('Cancel')),
               TextButton(
-                  onPressed: () {
+                  onPressed: () async{
                     final groupInfo = Group(groupNameController.text.trim(),
                         groupCodeController.text.trim(), widget.userName,);
                     if (_groupKey.currentState!.validate()) {
                       createGroup(groupInfo);
                       final ClassService service = ClassService();
-                      service.switchRestriction("Group", widget.uid,
+                      await service.switchRestriction("Group", widget.uid,
                           groupCodeController.text.trim(),
                           'false');
+                      if(!mounted){
+                        return;
+                      }
                       copy.showAndCopy(
                           'You copied ${groupCodeController.text.trim()}',
                           groupCodeController.text.trim(),
@@ -781,4 +815,56 @@ class _ClassScreenState extends State<ClassScreen>
                   child: const Text('Okay'))
             ],
           ));
+
+  Future joinWithQR(String teacherUID, String roomCode) async{
+    String roomType = '';
+    if(roomCode[0] == "C"){
+      roomType == 'Class';
+    }else{
+      roomType == 'Group';
+  }
+    try {
+      roomReference
+          .doc(roomType)
+          .collection(teacherUID)
+          .doc(roomCode)
+          .get();
+    } on FirebaseException {
+      showError(roomType);
+    } finally {
+      await roomReference
+          .doc(roomType)
+          .collection(teacherUID)
+          .doc(roomCode)
+          .get()
+          .then((value) {
+        var teacher = value['teacher'];
+        var roomName = value['name'];
+
+        joinReference
+            .doc(roomType)
+            .collection(widget.uid)
+            .doc(roomCode)
+            .set({
+          'userID': widget.uid,
+          'teacher': teacher,
+          'roomName': roomName,
+          'roomType': roomType,
+          'roomCode': roomCode,
+          'teacherUID': teacherUID
+        }).whenComplete(() {
+          Navigator.pop(context);
+          classCodeController.text = '';
+          classNameController.text = '';
+          groupCodeController.text = '';
+          groupNameController.text = '';
+          roomType == "Class"
+              ? tabController.animateTo(0,
+              duration: const Duration(seconds: 1))
+              : tabController.animateTo(1,
+              duration: const Duration(seconds: 1));
+        });
+      });
+    }
+  }
 }

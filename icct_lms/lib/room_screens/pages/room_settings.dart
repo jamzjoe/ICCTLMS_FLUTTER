@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:icct_lms/room_screens/pages/qr_generator.dart';
 import 'package:icct_lms/services/class_service.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class RoomSettings extends StatefulWidget {
   const RoomSettings(
@@ -76,7 +78,9 @@ class _RoomSettingsState extends State<RoomSettings> {
                             buildCopy(widget.roomCode, 'Copy room code', 'Roo'
                                 'm Code'),
                             buildCopy(widget.teacherUID, 'Copy teacher UID',
-                                "Teacher UID")
+                                "Teacher UID"),
+                            buildQRGenerator(widget.roomCode, widget
+                                .teacherUID)
                           ],
                         ),
                       )
@@ -133,4 +137,16 @@ class _RoomSettingsState extends State<RoomSettings> {
           ))
     ),
   );
+
+  Widget buildQRGenerator(String roomCode, String teacherUID) => Card(
+    child: ListTile(
+      onTap: (){
+        Navigator.push(context, MaterialPageRoute(builder: (context) => QrGenerator(roomCode: roomCode, teacherUID: teacherUID)));
+      },
+      title: const Text('Generate QR Code'),
+      trailing: const Icon(Icons.qr_code),
+    ),
+  );
+
+
 }
