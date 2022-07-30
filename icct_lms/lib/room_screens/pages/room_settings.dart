@@ -57,13 +57,6 @@ class _RoomSettingsState extends State<RoomSettings> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Settings',
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold),
-                      ),
                       Expanded(
                         child: ListView(
                           children: [

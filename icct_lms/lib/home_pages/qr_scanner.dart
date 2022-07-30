@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:icct_lms/home_pages/test_page.dart';
+import 'package:icct_lms/components/qr_loading.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class QRScanner extends StatefulWidget {
@@ -9,13 +9,33 @@ class QRScanner extends StatefulWidget {
   State<QRScanner> createState() => _QRScannerState();
 }
 
+
+
 class _QRScannerState extends State<QRScanner> {
+
+
+  bool isLoading = true;
+  Future load()async{
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() {
+      isLoading = false;
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    load();
+    super.initState();
+  }
+
   MobileScannerController cameraController = MobileScannerController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading ?  const QRloading(loadingText: 'Generating QR Scanner',) :
+    Scaffold(
         appBar: AppBar(
-          title: const Text('Mobile Scanner'),
+          backgroundColor: Colors.blue[900],
+          title: const Text('QR Scanner'),
           actions: [
             IconButton(
               color: Colors.white,
@@ -24,7 +44,8 @@ class _QRScannerState extends State<QRScanner> {
                 builder: (context, state, child) {
                   switch (state as TorchState) {
                     case TorchState.off:
-                      return const Icon(Icons.flash_off, color: Colors.grey);
+                      return const Icon(Icons.flash_off, color: Colors
+                          .grey);
                     case TorchState.on:
                       return const Icon(Icons.flash_on, color: Colors.yellow);
                   }

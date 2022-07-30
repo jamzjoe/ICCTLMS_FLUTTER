@@ -41,7 +41,7 @@ class _QrGeneratorState extends State<QrGenerator> {
     return Screenshot(
       controller: screenShotController,
       child:
-          isLoading ? const QRloading() :
+          isLoading ?  const QRloading(loadingText: 'Generating QR Code',) :
       Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue[900],

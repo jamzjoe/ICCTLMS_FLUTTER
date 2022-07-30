@@ -173,9 +173,13 @@ class _RoomState extends State<Room> {
                       roomType: widget.roomType),
                   Member(
                       uid: widget.uid,
+                      roomCode: widget.roomCode,
+                      roomName: widget.roomName,
+                      teacherUID: widget.teacherUID,
+                      teacher: widget.teacher,
                       userType: widget.userType,
-                      userName: widget.teacher,
-                      roomType: widget.roomType),
+                      roomType: widget.roomType,
+                      userName: widget.userName),
                   RoomSettings(
                           uid: widget.uid,
                           roomCode: widget.roomCode,

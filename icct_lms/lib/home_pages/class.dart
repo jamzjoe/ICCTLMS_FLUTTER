@@ -5,10 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/components/copy.dart';
 import 'package:icct_lms/components/nodata.dart';
-import 'package:icct_lms/home_pages/profile.dart';
 import 'package:icct_lms/home_pages/qr_scanner.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
@@ -16,6 +14,7 @@ import 'package:icct_lms/models/joined_model.dart';
 import 'package:icct_lms/room_screens/room.dart';
 import 'package:icct_lms/services/class_service.dart';
 import 'package:icct_lms/services/join.dart';
+import 'package:icct_lms/services/post.dart';
 import 'package:lottie/lottie.dart';
 import 'package:uuid/uuid.dart';
 
@@ -320,9 +319,11 @@ class _ClassScreenState extends State<ClassScreen>
                         },
                         child: const Text('Cancel')),
                     TextButton(onPressed: ()async{
+
                       final data = await Navigator.push(context,
                           MaterialPageRoute(builder:
-                          (context) => QRScanner()));
+                          (context) => const QRScanner()));
+
                       if(!mounted){
                         return;
                       }
@@ -379,6 +380,13 @@ class _ClassScreenState extends State<ClassScreen>
                                   'roomCode': codeController.text.trim(),
                                   'teacherUID': teacherUIDController.text.trim()
                                 }).whenComplete(() {
+                                  final PostService service = PostService();
+                                  service.addToMember(roomType, teacherUIDController
+                                      .text
+                                      .trim(),
+                                      codeController.text.trim(),
+                                      widget.userName,
+                                      widget.uid, widget.userType);
                                   Navigator.pop(context);
                                   codeController.text = '';
                                   teacherUIDController.text = '';
@@ -464,6 +472,10 @@ class _ClassScreenState extends State<ClassScreen>
                       await service.switchRestriction("Class", widget.uid,
                           classCodeController.text.trim(),
                           'false');
+                      final PostService add = PostService();
+                      await add.addToMember('Class', widget.uid,
+                          classCodeController.text.trim(), widget.userName,
+                          widget.uid, widget.userType);
                       if(!mounted){
                         return;
                       }
@@ -548,6 +560,10 @@ class _ClassScreenState extends State<ClassScreen>
                       await service.switchRestriction("Group", widget.uid,
                           groupCodeController.text.trim(),
                           'false');
+                      final PostService add = PostService();
+                      await add.addToMember('Group', widget.uid,
+                          groupCodeController.text.trim(), widget.userName,
+                          widget.uid, widget.userType);
                       if(!mounted){
                         return;
                       }

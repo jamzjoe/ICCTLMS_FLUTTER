@@ -23,7 +23,19 @@ class PostService{
      'userType': userType
    });
   }
-
+  Future addToMember(roomType, teacherUID, roomCode, String
+  name, String userID, String userType)async{
+    DocumentReference<Map<String, dynamic>> reference = FirebaseFirestore.instance.collection
+      ('Rooms').doc(roomType).collection(teacherUID).doc(roomCode).collection
+      ('Members').doc(userID);
+    String sortKey = DateTime.now().millisecondsSinceEpoch.toString();
+    await reference.set({
+      'userID': userID,
+      'userType': userType,
+      'name': name,
+      'sortKey': sortKey
+    });
+  }
   Future deletePost(roomType, teacherUID, roomCode, String message, String
   name, String userID, postID)async{
     DocumentReference<Map<String, dynamic>> reference = FirebaseFirestore.instance.collection
