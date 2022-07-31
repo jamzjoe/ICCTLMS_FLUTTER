@@ -93,7 +93,6 @@ class _RoomSettingsState extends State<RoomSettings> {
           trailing: Switch.adaptive(
               value: isOn,
               onChanged: (value) {
-                print(widget.uid);
                 service.switchRestriction(widget.roomType, currentUser,
                     widget.roomCode, isOn.toString());
               }),

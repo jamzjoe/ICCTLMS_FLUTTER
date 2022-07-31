@@ -17,10 +17,25 @@ class Folder extends StatefulWidget {
   State<Folder> createState() => _FolderState();
 }
 
+bool noData = true;
+
 class _FolderState extends State<Folder> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return noData?
+    Scaffold(
+      body: Center(
+        child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.blue[900]
+            ),
+            onPressed: (){
+
+        }, icon: const Icon(Icons.upload), label: const Text('Upload files')),
+      ),
+    )
+:
+    Scaffold(
       body: ListView(
         children: [
           Padding(
