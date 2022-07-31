@@ -20,11 +20,11 @@ class DatabaseService {
     });
   }
 
-  List<User> userList(QuerySnapshot snapshot) {
+  List<UserInfo> userList(QuerySnapshot snapshot) {
     return snapshot.docs.map((doc) {
       Map value = doc.data() as Map;
       //print(doc.data);
-      return User(
+      return UserInfo(
           name: value['username'] ?? '',
           school: value['campus'] ?? '',
           email: value['emailAddress'] ?? '',
@@ -33,7 +33,7 @@ class DatabaseService {
   }
 
   // query stream
-  Stream<List<User>> get user {
+  Stream<List<UserInfo>> get user {
     return userInformation.snapshots().map(userList);
   }
 }
