@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:icct_lms/components/copy.dart';
+import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/components/shimmer_loading.dart';
 import 'package:icct_lms/home_pages/qr_scanner.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
@@ -55,6 +57,7 @@ final _formKey = GlobalKey<FormState>();
 final Copy copy = Copy();
 final _classKey = GlobalKey<FormState>();
 final _groupKey = GlobalKey<FormState>();
+
 class _ClassScreenState extends State<ClassScreen>
     with SingleTickerProviderStateMixin {
   late TabController tabController;
@@ -69,184 +72,188 @@ class _ClassScreenState extends State<ClassScreen>
     });
   }
 
+  bool isLoading = false;
   final int classBadge = 0;
   @override
   Widget build(BuildContext context) {
-    print(widget.uid);
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        toolbarHeight: 4,
-        bottom: TabBar(
-          labelColor: Colors.black,
-          unselectedLabelColor: Colors.black54,
-          indicatorColor: Colors.blue[900],
-          indicatorWeight: 2,
-          controller: tabController,
-          tabs: const [
-            Tab(
-              text: 'Classes',
+    return isLoading
+        ? const Loading()
+        : Scaffold(
+            key: _scaffoldKey,
+            appBar: AppBar(
+              elevation: 0,
+              backgroundColor: Colors.white,
+              toolbarHeight: 4,
+              bottom: TabBar(
+                labelColor: Colors.black,
+                unselectedLabelColor: Colors.black54,
+                indicatorColor: Colors.blue[900],
+                indicatorWeight: 2,
+                controller: tabController,
+                tabs: const [
+                  Tab(
+                    text: 'Class',
+                  ),
+                  Tab(
+                    text: 'Groups',
+                  ),
+                ],
+              ),
             ),
-            Tab(
-              text: 'Groups',
+            body: TabBarView(
+              controller: tabController,
+              children: [
+                widget.userType == 'Teacher'
+                    ? StreamBuilder<List<Class>?>(
+                        stream: readClass(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text('Something went wrong');
+                          } else if (snapshot.hasData) {
+                            final classes = snapshot.data!;
+
+                            if (classes.isEmpty) {
+                              return const NoData();
+                            }
+                            return ListView(
+                              children: classes.map(buildUser).toList(),
+                            );
+                          } else {
+                            return Center(
+                              child: SpinKitFadingCircle(
+                                color: Colors.blue[900],
+                              ),
+                            );
+                          }
+                        })
+                    : widget.userType == 'Student'
+                        ? StreamBuilder<List<JoinedModel>?>(
+                            stream: readJoinedClass(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return const Text('Something went wrong');
+                              } else if (snapshot.hasData) {
+                                final classes = snapshot.data!;
+
+                                if (classes.isEmpty) {
+                                  return const NoData();
+                                }
+                                return ListView(
+                                  children:
+                                      classes.map(buildClassList).toList(),
+                                );
+                              } else {
+                                return Center(
+                                  child: SpinKitFadingCircle(
+                                    color: Colors.blue[900],
+                                  ),
+                                );
+                              }
+                            })
+                        : const NoData(),
+                widget.userType == 'Teacher'
+                    ? StreamBuilder<List<Group>?>(
+                        stream: readGroup(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return const Text('Something went wrong');
+                          } else if (snapshot.hasData) {
+                            final group = snapshot.data!;
+
+                            if (group.isEmpty) {
+                              return const NoData();
+                            }
+                            return ListView(
+                              children: group.map(buildGroup).toList(),
+                            );
+                          } else {
+                            return Center(
+                              child: SpinKitFadingCircle(
+                                color: Colors.blue[900],
+                              ),
+                            );
+                          }
+                        })
+                    : widget.userType == 'Student'
+                        ? StreamBuilder<List<JoinedModel>?>(
+                            stream: readJoinGroup(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return const Text('Something went wrong');
+                              } else if (snapshot.hasData) {
+                                final classes = snapshot.data!;
+
+                                if (classes.isEmpty) {
+                                  return const NoData();
+                                }
+                                return ListView(
+                                  children:
+                                      classes.map(buildGroupList).toList(),
+                                );
+                              } else {
+                                return Center(
+                                  child: SpinKitFadingCircle(
+                                    color: Colors.blue[900],
+                                  ),
+                                );
+                              }
+                            })
+                        : const NoData(),
+              ],
             ),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: tabController,
-        children: [
-          widget.userType == 'Teacher'
-              ? StreamBuilder<List<Class>?>(
-                  stream: readClass(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const Text('Something went wrong');
-                    } else if (snapshot.hasData) {
-                      final classes = snapshot.data!;
-
-                      if (classes.isEmpty) {
-                        return const NoData();
-                      }
-                      return ListView(
-                        children: classes.map(buildUser).toList(),
-                      );
-                    } else {
-                      return Center(
-                        child: SpinKitFadingCircle(
-                          color: Colors.blue[900],
-                        ),
-                      );
-                    }
-                  })
-              : widget.userType == 'Student'
-                  ? StreamBuilder<List<JoinedModel>?>(
-                      stream: readJoinedClass(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text('Something went wrong');
-                        } else if (snapshot.hasData) {
-                          final classes = snapshot.data!;
-
-                          if (classes.isEmpty) {
-                            return const NoData();
-                          }
-                          return ListView(
-                            children: classes.map(buildClassList).toList(),
-                          );
-                        } else {
-                          return Center(
-                            child: SpinKitFadingCircle(
-                              color: Colors.blue[900],
-                            ),
-                          );
-                        }
-                      })
-                  : const NoData(),
-          widget.userType == 'Teacher'
-              ? StreamBuilder<List<Group>?>(
-                  stream: readGroup(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return const Text('Something went wrong');
-                    } else if (snapshot.hasData) {
-                      final group = snapshot.data!;
-
-                      if (group.isEmpty) {
-                        return const NoData();
-                      }
-                      return ListView(
-                        children: group.map(buildGroup).toList(),
-                      );
-                    } else {
-                      return Center(
-                        child: SpinKitFadingCircle(
-                          color: Colors.blue[900],
-                        ),
-                      );
-                    }
-                  })
-              : widget.userType == 'Student'
-                  ? StreamBuilder<List<JoinedModel>?>(
-                      stream: readJoinGroup(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text('Something went wrong');
-                        } else if (snapshot.hasData) {
-                          final classes = snapshot.data!;
-
-                          if (classes.isEmpty) {
-                            return const NoData();
-                          }
-                          return ListView(
-                            children: classes.map(buildGroupList).toList(),
-                          );
-                        } else {
-                          return Center(
-                            child: SpinKitFadingCircle(
-                              color: Colors.blue[900],
-                            ),
-                          );
-                        }
-                      })
-                  : const NoData(),
-        ],
-      ),
-      floatingActionButton: SpeedDial(
-        spaceBetweenChildren: 10,
-        overlayColor: Colors.black54,
-        backgroundColor: Colors.blue[900],
-        animatedIcon: AnimatedIcons.menu_close,
-        children: [
-          widget.userType == 'Student'
-              ? SpeedDialChild(
-                  onTap: () {
-                    openJoinDialog('Class', joinClassCodeController,
-                        teacherClassUIDController);
-                  },
-                  child: const Icon(CupertinoIcons.device_laptop),
-                  label: 'Join Class',
-                  labelBackgroundColor: Colors.yellow,
-                  backgroundColor: Colors.yellow)
-              : SpeedDialChild(
-                  onTap: () {
-                    setState(() {
-                      classCodeController.text =
-                          'C${const Uuid().v1().substring(0, 8)}';
-                    });
-                    openCreateClass();
-                  },
-                  child: const Icon(CupertinoIcons.add_circled_solid),
-                  label: 'Create Class',
-                  labelBackgroundColor: Colors.yellow,
-                  backgroundColor: Colors.yellow),
-          widget.userType == 'Teacher'
-              ? SpeedDialChild(
-                  onTap: () {
-                    setState(() {
-                      groupCodeController.text =
-                          'G${const Uuid().v1().substring(0, 8)}';
-                    });
-                    openCreateGroup();
-                  },
-                  child: const Icon(CupertinoIcons.person_add_solid),
-                  label: 'Create Group',
-                  labelBackgroundColor: Colors.yellow,
-                  backgroundColor: Colors.yellow)
-              : SpeedDialChild(
-                  onTap: () {
-                    openJoinDialog("Group", joinGroupCodeController,
-                        teacherGroupUIDController);
-                  },
-                  child: const Icon(CupertinoIcons.group),
-                  label: 'Join Group',
-                  labelBackgroundColor: Colors.yellow,
-                  backgroundColor: Colors.yellow)
-        ],
-      ),
-    );
+            floatingActionButton: SpeedDial(
+              spaceBetweenChildren: 10,
+              overlayColor: Colors.black54,
+              backgroundColor: Colors.blue[900],
+              animatedIcon: AnimatedIcons.menu_close,
+              children: [
+                widget.userType == 'Student'
+                    ? SpeedDialChild(
+                        onTap: () {
+                          openJoinDialog('Class', joinClassCodeController,
+                              teacherClassUIDController);
+                        },
+                        child: const Icon(CupertinoIcons.device_laptop),
+                        label: 'Join Class',
+                        labelBackgroundColor: Colors.yellow,
+                        backgroundColor: Colors.yellow)
+                    : SpeedDialChild(
+                        onTap: () {
+                          setState(() {
+                            classCodeController.text =
+                                'C${const Uuid().v1().substring(0, 8)}';
+                          });
+                          openCreateClass();
+                        },
+                        child: const Icon(CupertinoIcons.add_circled_solid),
+                        label: 'Create Class',
+                        labelBackgroundColor: Colors.yellow,
+                        backgroundColor: Colors.yellow),
+                widget.userType == 'Teacher'
+                    ? SpeedDialChild(
+                        onTap: () {
+                          setState(() {
+                            groupCodeController.text =
+                                'G${const Uuid().v1().substring(0, 8)}';
+                          });
+                          openCreateGroup();
+                        },
+                        child: const Icon(CupertinoIcons.person_add_solid),
+                        label: 'Create Group',
+                        labelBackgroundColor: Colors.yellow,
+                        backgroundColor: Colors.yellow)
+                    : SpeedDialChild(
+                        onTap: () {
+                          openJoinDialog("Group", joinGroupCodeController,
+                              teacherGroupUIDController);
+                        },
+                        child: const Icon(CupertinoIcons.group),
+                        label: 'Join Group',
+                        labelBackgroundColor: Colors.yellow,
+                        backgroundColor: Colors.yellow)
+              ],
+            ),
+          );
   }
 
   Future<void> openJoinDialog(
@@ -264,20 +271,12 @@ class _ClassScreenState extends State<ClassScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Join $roomType'),
-                      Text(
-                        "If this dialog doesn't automatically close, there "
-                            "was either no $roomType detected or the inputs"
-                            " were incorrect.",
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400),
-                      )
                     ],
                   ),
                   content: Form(
                     key: _formKey,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         TextFormField(
@@ -307,67 +306,71 @@ class _ClassScreenState extends State<ClassScreen>
                           controller: teacherUIDController,
                           keyboardType: TextInputType.visiblePassword,
                         ),
+                        const SizedBox(height: 10,),
+                        TextButton.icon(
+                            onPressed: () async{
+                              final data = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const QRScanner()));
+
+                              if (!mounted) {
+                                return;
+                              }
+                              Navigator.pop(context);
+                              setState(() {
+                                teacherUIDController.text =
+                                    data.toString().split(",").last;
+                                codeController.text =
+                                    data.toString().split(",").first;
+                              });
+                              if (codeController.text[0] == 'C') {
+                                roomType = "Class";
+                              } else {
+                                roomType = "Group";
+                              }
+                              openJoinDialog(
+                                  roomType, codeController, teacherUIDController);
+                            },
+                            icon: const Icon(Icons.qr_code, color: Colors
+                                .black87,),
+                            label: const Text('Join with QR Code', style:
+                             TextStyle(
+                              color: Colors.black54
+                            ),))
                       ],
                     ),
                   ),
                   actions: [
-                    TextButton(
+                    ElevatedButton.icon(
                         onPressed: () {
                           codeController.text = '';
                           teacherUIDController.text = '';
                           Navigator.pop(context);
                         },
-                        child: const Text('Cancel')),
-                    TextButton(onPressed: ()async{
+                icon: const Icon(Icons.class_), label: const Text
+                ('Cancel'), style: ElevatedButton.styleFrom(
+                primary: Colors.red
+                ),
+                    ),
 
-                      final data = await Navigator.push(context,
-                          MaterialPageRoute(builder:
-                          (context) => const QRScanner()));
-
-                      if(!mounted){
-                        return;
-                      }
-                      Navigator.pop(context);
-                       setState((){
-                         teacherUIDController.text = data.toString().split(","
-                         ).last;
-                         codeController.text = data.toString().split(",").first;
-                       });
-                      if(codeController.text[0] == 'C'){
-                        roomType = "Class";
-                      }else{
-                        roomType = "Group";
-                      }
-                      openJoinDialog(roomType, codeController, teacherUIDController);
-
-
-
-
-
-                    }, child: const Text('Join with '
-                        'QR '
-                        'Code')),
-                    TextButton(
+                    ElevatedButton.icon(
                         onPressed: () async {
+
+                          showError(roomType);
                           if (_formKey.currentState!.validate()) {
-                            try {
-                              roomReference
+                            setState(() {
+                              isLoading = true;
+                            });
+                              Navigator.pop(context);
+                              final snapshot = roomReference
                                   .doc(roomType)
                                   .collection(teacherUIDController.text.trim())
-                                  .doc(codeController.text.trim())
-                                  .get();
-                            } on FirebaseException {
-                              showError(roomType);
-                            } finally {
-                              roomReference
-                                  .doc(roomType)
-                                  .collection(teacherUIDController.text.trim())
-                                  .doc(codeController.text.trim())
-                                  .get()
-                                  .then((value) {
+                                  .doc(codeController.text.trim());
+                              await snapshot.get()
+                                      .then((value) {
                                 var teacher = value['teacher'];
                                 var roomName = value['name'];
-
                                 joinReference
                                     .doc(roomType)
                                     .collection(widget.uid)
@@ -379,15 +382,19 @@ class _ClassScreenState extends State<ClassScreen>
                                   'roomType': roomType,
                                   'roomCode': codeController.text.trim(),
                                   'teacherUID': teacherUIDController.text.trim()
-                                }).whenComplete(() {
+                                }).whenComplete(() async {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    isLoading = false;
+                                  });
                                   final PostService service = PostService();
-                                  service.addToMember(roomType, teacherUIDController
-                                      .text
-                                      .trim(),
+                                  await service.addToMember(
+                                      roomType,
+                                      teacherUIDController.text.trim(),
                                       codeController.text.trim(),
                                       widget.userName,
-                                      widget.uid, widget.userType);
-                                  Navigator.pop(context);
+                                      widget.uid,
+                                      widget.userType);
                                   codeController.text = '';
                                   teacherUIDController.text = '';
                                   roomType == "Class"
@@ -396,11 +403,25 @@ class _ClassScreenState extends State<ClassScreen>
                                       : tabController.animateTo(1,
                                           duration: const Duration(seconds: 1));
                                 });
-                              });
-                            }
+                              })
+                              .catchError((e)async{
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                Navigator.pop(context);
+                                await Future.delayed(const Duration(milliseconds:
+                                500));
+                                showError(roomType);
+                                  });
+
                           }
                         },
-                        child: Text('Join $roomType')),
+                icon: const Icon(Icons.group),
+                label: Text('Join $roomType'), style:
+                ElevatedButton.styleFrom(
+                primary: Colors.blue[900]
+                ),
+                    ),
                   ],
                 );
               }));
@@ -457,26 +478,45 @@ class _ClassScreenState extends State<ClassScreen>
               ),
             ),
             actions: [
-              TextButton(
+              ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red
+                  ),
+                  icon: const Icon(Icons.exit_to_app),
+                  label: const Text('Cancel'),
                   onPressed: () {
                     Navigator.pop(context);
-                  },
-                  child: const Text('Cancel')),
-              TextButton(
-                  onPressed: () async{
-                    final classInfo = Class(classNameController.text.trim(),
-                        classCodeController.text.trim(), widget.userName,);
-                    if (_classKey.currentState!.validate()){
+                  }),
+              ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.blue[900]
+                  ),
+                  icon: const Icon(Icons.class_),
+                  label: const Text('Create Class'),
+                  onPressed: () async {
+                    final classInfo = Class(
+                      classNameController.text.trim(),
+                      classCodeController.text.trim(),
+                      widget.userName,
+                    );
+                    if (_classKey.currentState!.validate()) {
+                      Navigator.pop(context);
+                      setState(() {
+                        isLoading = true;
+                      });
                       createClass(classInfo);
                       final ClassService service = ClassService();
                       await service.switchRestriction("Class", widget.uid,
-                          classCodeController.text.trim(),
-                          'false');
+                          classCodeController.text.trim(), 'false');
                       final PostService add = PostService();
-                      await add.addToMember('Class', widget.uid,
-                          classCodeController.text.trim(), widget.userName,
-                          widget.uid, widget.userType);
-                      if(!mounted){
+                      await add.addToMember(
+                          'Class',
+                          widget.uid,
+                          classCodeController.text.trim(),
+                          widget.userName,
+                          widget.uid,
+                          widget.userType);
+                      if (!mounted) {
                         return;
                       }
                       copy.showAndCopy(
@@ -485,14 +525,13 @@ class _ClassScreenState extends State<ClassScreen>
                           context,
                           mounted);
                       setState(() {
+                        isLoading = false;
                         classNameController.text = '';
                         tabController.animateTo(0,
                             duration: const Duration(seconds: 1));
                       });
-                      Navigator.pop(context);
                     }
-                  },
-                  child: const Text('Create Class'))
+                  },)
             ],
           ));
   Future<void> openCreateGroup() => showDialog(
@@ -545,26 +584,46 @@ class _ClassScreenState extends State<ClassScreen>
               ),
             ),
             actions: [
-              TextButton(
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                    primary: Colors.red
+                ),
+                icon: const Icon(Icons.exit_to_app),
+                label: const Text('Cancel'),
                   onPressed: () {
                     Navigator.pop(context);
-                  },
-                  child: const Text('Cancel')),
-              TextButton(
-                  onPressed: () async{
-                    final groupInfo = Group(groupNameController.text.trim(),
-                        groupCodeController.text.trim(), widget.userName,);
+                  },),
+              ElevatedButton.icon(
+
+                  style: ElevatedButton.styleFrom(
+                      primary: Colors.blue[900]
+                  ),
+                  icon: const Icon(Icons.class_),
+                  label: const Text('Create Group'),
+                  onPressed: () async {
+                    final groupInfo = Group(
+                      groupNameController.text.trim(),
+                      groupCodeController.text.trim(),
+                      widget.userName,
+                    );
                     if (_groupKey.currentState!.validate()) {
+                      Navigator.pop(context);
+                      setState(() {
+                        isLoading = true;
+                      });
                       createGroup(groupInfo);
                       final ClassService service = ClassService();
                       await service.switchRestriction("Group", widget.uid,
-                          groupCodeController.text.trim(),
-                          'false');
+                          groupCodeController.text.trim(), 'false');
                       final PostService add = PostService();
-                      await add.addToMember('Group', widget.uid,
-                          groupCodeController.text.trim(), widget.userName,
-                          widget.uid, widget.userType);
-                      if(!mounted){
+                      await add.addToMember(
+                          'Group',
+                          widget.uid,
+                          groupCodeController.text.trim(),
+                          widget.userName,
+                          widget.uid,
+                          widget.userType);
+                      if (!mounted) {
                         return;
                       }
                       copy.showAndCopy(
@@ -573,14 +632,13 @@ class _ClassScreenState extends State<ClassScreen>
                           context,
                           mounted);
                       setState(() {
+                        isLoading = false;
                         groupNameController.text = '';
                         tabController.animateTo(1,
                             duration: const Duration(seconds: 1));
                       });
-                      Navigator.pop(context);
                     }
-                  },
-                  child: const Text('Create Group'))
+                  },)
             ],
           ));
 
@@ -667,18 +725,9 @@ class _ClassScreenState extends State<ClassScreen>
             itemBuilder: (context) => [
               PopupMenuItem(
                 onTap: () async {
-                  final docUser = FirebaseFirestore.instance
-                      .collection('Rooms')
-                      .doc('Group')
-                      .collection(widget.uid)
-                      .doc(e.code);
-
-                  await docUser.delete();
-                  docUser.collection("Post").get().then((value) async{
-                    for(DocumentSnapshot snapshot in value.docs){
-                      await snapshot.reference.delete();
-                    }
-                  });
+                  final ClassService service = ClassService();
+                  await service.deleteRoom("Group", widget.uid,
+                      e.code);
                 },
                 child: const Text('Delete'),
               )
@@ -716,17 +765,9 @@ class _ClassScreenState extends State<ClassScreen>
               itemBuilder: (context) => [
                 PopupMenuItem(
                   onTap: () async {
-                    final docUser = FirebaseFirestore.instance
-                        .collection('Rooms')
-                        .doc('Class')
-                        .collection(widget.uid)
-                        .doc(e.code.trim());
-                    await docUser.delete();
-                    docUser.collection("Post").get().then((value)async{
-                      for(DocumentSnapshot snapshot in value.docs){
-                        await snapshot.reference.delete();
-                      }
-                    });
+                    final ClassService service = ClassService();
+                    await service.deleteRoom("Class", widget.uid,
+                        e.code);
                   },
                   child: const Text('Delete'),
                 )
@@ -764,9 +805,8 @@ class _ClassScreenState extends State<ClassScreen>
               itemBuilder: (context) => [
                 PopupMenuItem(
                   onTap: () {
-
                     final Joined join = Joined(uid: widget.uid);
-                    join.deleteJoin(e.roomType, e.roomCode, e.userID);
+                    join.deleteJoin(e.roomType, e.roomCode, e.userID, e.teacherUID);
                   },
                   child: Text('Leave ${e.roomType}'),
                 )
@@ -804,9 +844,8 @@ class _ClassScreenState extends State<ClassScreen>
               itemBuilder: (context) => [
                 PopupMenuItem(
                   onTap: () {
-
                     final Joined join = Joined(uid: widget.uid);
-                    join.deleteJoin(e.roomType, e.roomCode, e.userID);
+                    join.deleteJoin(e.roomType, e.roomCode, e.userID, e.teacherUID);
                   },
                   child: Text('Leave ${e.roomType}'),
                 )
@@ -815,7 +854,7 @@ class _ClassScreenState extends State<ClassScreen>
       );
 
   Future showError(String roomType) => showDialog(
-      context: context,
+      context: _scaffoldKey.currentContext!,
       builder: (context) => CupertinoAlertDialog(
             content: Column(
               children: [
@@ -832,19 +871,15 @@ class _ClassScreenState extends State<ClassScreen>
             ],
           ));
 
-  Future joinWithQR(String teacherUID, String roomCode) async{
+  Future joinWithQR(String teacherUID, String roomCode) async {
     String roomType = '';
-    if(roomCode[0] == "C"){
+    if (roomCode[0] == "C") {
       roomType == 'Class';
-    }else{
+    } else {
       roomType == 'Group';
-  }
+    }
     try {
-      roomReference
-          .doc(roomType)
-          .collection(teacherUID)
-          .doc(roomCode)
-          .get();
+      roomReference.doc(roomType).collection(teacherUID).doc(roomCode).get();
     } on FirebaseException {
       showError(roomType);
     } finally {
@@ -857,11 +892,7 @@ class _ClassScreenState extends State<ClassScreen>
         var teacher = value['teacher'];
         var roomName = value['name'];
 
-        joinReference
-            .doc(roomType)
-            .collection(widget.uid)
-            .doc(roomCode)
-            .set({
+        joinReference.doc(roomType).collection(widget.uid).doc(roomCode).set({
           'userID': widget.uid,
           'teacher': teacher,
           'roomName': roomName,
@@ -875,10 +906,9 @@ class _ClassScreenState extends State<ClassScreen>
           groupCodeController.text = '';
           groupNameController.text = '';
           roomType == "Class"
-              ? tabController.animateTo(0,
-              duration: const Duration(seconds: 1))
+              ? tabController.animateTo(0, duration: const Duration(seconds: 1))
               : tabController.animateTo(1,
-              duration: const Duration(seconds: 1));
+                  duration: const Duration(seconds: 1));
         });
       });
     }

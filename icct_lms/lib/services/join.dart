@@ -52,13 +52,23 @@ class Joined {
     }
   }
 
-  Future deleteJoin(String roomType, String roomCode, String userID) async {
+  Future deleteJoin(String roomType, String roomCode, String userID, String
+  teacherUID) async {
+    DocumentReference<Map<String, dynamic>> reference = FirebaseFirestore.instance.collection
+      ('Rooms').doc(roomType).collection(teacherUID).doc(roomCode).collection
+      ('Members').doc(userID);
+    final deleteJoin = joinReference.doc(roomType).collection(userID).doc
+    (roomCode);
     try {
       await joinReference.doc(roomType).collection(uid).doc(roomCode).delete();
+      await reference.delete();
+      await deleteJoin.delete();
     } catch (e) {
       return null;
     }
+
   }
+
 
   Future joinRoomTo(
       roomName, teacher, roomType, roomCode, teacherUID, userID) async {

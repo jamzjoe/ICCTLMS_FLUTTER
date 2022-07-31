@@ -54,6 +54,12 @@ class _QrGeneratorState extends State<QrGenerator> {
             children: [
 
               buildQrImage(widget.teacherUID, widget.roomCode),
+              const SizedBox(
+                width: 250,
+                child: Text('Share or capture this generated QR Code image to '
+                    'your student.', textAlign: TextAlign.center,),
+              ),
+              const SizedBox(height: 20,),
               SizedBox(
                 width: 120,
                 child: ElevatedButton.icon(onPressed: ()async{
@@ -67,7 +73,7 @@ class _QrGeneratorState extends State<QrGenerator> {
                   await saveImage(image);
 
                 }, label: const Text
-                  ('Capture'), icon: const Icon(FontAwesomeIcons.camera), style: ElevatedButton.styleFrom(
+                  ('Capture'), icon: const Icon(Icons.camera), style: ElevatedButton.styleFrom(
                     primary: Colors.blue[900]
                 ),),
               ),
@@ -80,7 +86,7 @@ class _QrGeneratorState extends State<QrGenerator> {
                       widget.roomCode));
                   share(image);
                 }, label: const Text
-                    ('Share'), icon: const Icon(FontAwesomeIcons.share),
+                    ('Share'), icon: const Icon(Icons.share),
                   style: ElevatedButton.styleFrom(
                     primary: Colors.blue[900]
                   ),),

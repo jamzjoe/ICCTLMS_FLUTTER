@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/models/post_model.dart';
 import 'package:icct_lms/room_screens/pages/update_post.dart';
@@ -84,8 +85,9 @@ class _PostState extends State<Post> {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: widget.userType == 'Teacher'? Colors
-                    .blue[900]: Colors.redAccent,
+                backgroundColor: widget.userType == 'Teacher'
+                    ? Colors.blue[900]
+                    : Colors.redAccent,
                 child: Text(
                   widget.userName.substring(0, 2).toUpperCase(),
                   style: const TextStyle(
@@ -140,16 +142,12 @@ class _PostState extends State<Post> {
             children: classes.map(buildPostTiles).toList(),
           );
         } else {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IntrinsicHeight(
-                child: Center(
-                  child: SpinKitFadingCircle(
-                    color: Colors.blue[900],
-                  ),
-                ),
-              ),
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children:const [
+              SpinKitFadingCircle(
+                color: Colors.blue,
+              )
             ],
           );
         }
@@ -160,8 +158,8 @@ class _PostState extends State<Post> {
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: e.userType == 'Teacher'? Colors
-                  .blue[900]: Colors.redAccent,
+              backgroundColor:
+                  e.userType == 'Teacher' ? Colors.blue[900] : Colors.redAccent,
               child: Center(
                 child: Text(
                   e.postName.substring(0, 2).toUpperCase(),

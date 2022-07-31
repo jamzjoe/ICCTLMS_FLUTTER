@@ -31,7 +31,7 @@ class _QRScannerState extends State<QRScanner> {
   MobileScannerController cameraController = MobileScannerController();
   @override
   Widget build(BuildContext context) {
-    return isLoading ?  const QRloading(loadingText: 'Generating QR Scanner',) :
+    return isLoading ?  const QRloading(loadingText: 'Loading QR Scanner',) :
     Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue[900],

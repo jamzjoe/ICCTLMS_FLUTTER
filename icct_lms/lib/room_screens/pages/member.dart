@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:icct_lms/chat_room/chat_main.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/models/members_model.dart';
+import 'package:icct_lms/services/class_service.dart';
+import 'package:icct_lms/services/join.dart';
 
 class Member extends StatefulWidget {
   const Member(
@@ -64,6 +68,7 @@ class _MemberState extends State<Member> {
       .fromJson(e.data())).toList());
 
   Widget buildMemberTiles(MembersModel e) => Card(
+
     color: e.userType == 'Teacher' ? Colors.blue[900] : Colors.white,
     child: ListTile(
       leading: CircleAvatar(
@@ -83,24 +88,56 @@ class _MemberState extends State<Member> {
       subtitle: Text(e.userType, style: TextStyle(
         color: e.userType == 'Teacher' ? Colors.white : Colors.black,
       ),),
-      trailing: IconButton(
-        onPressed: (){
-          if(e.userType == 'Student'){
+      trailing: widget.userType == 'Student' && widget.uid != e.userID ?
+        PopupMenuButton
+        (
+            icon: const Icon(FontAwesomeIcons.message, color: Colors.white,),
+            itemBuilder:
+          (context) =>
+      [
+        PopupMenuItem(
+            onTap: ()async{
+              await Future.delayed( const Duration(milliseconds: 500));
+              startConversation(e.userID, e.userType, e.name);
+            },
+            child: const Text('Chat'))
+      ]
+      ): widget.userType == "Student" ? PopupMenuButton(itemBuilder: (context)
+      => [
+        PopupMenuItem(
+            onTap: ()async{
+            await Future.delayed(const Duration(milliseconds: 500));
             showNotice(e.name, e.userID, e.userType);
-          }else{
-            if(widget.userType == 'Teacher'){
+            },
+            child: const Text('Leave room'))
+
+      ]) : widget.userType == 'Teacher' && widget.uid != e.userID ? PopupMenuButton
+        (itemBuilder:
+        (context)=>
+      [
+        PopupMenuItem(
+            onTap: ()async{
+              await Future.delayed( const Duration(milliseconds: 500));
+              startConversation(e.userID, e.userType, e.name);
+            },
+            child: const Text('Chat')),
+        PopupMenuItem(
+            onTap: ()async{
+              await Future.delayed(const Duration(milliseconds: 500));
+              showNotice(e.name, e.userID, e.userType);
+            },
+            child:const Text('Remove Student'))
+      ]) : PopupMenuButton(
+          icon: const Icon(Icons.exit_to_app, color: Colors.white,),
+          itemBuilder: (context) => [
+        PopupMenuItem(
+            onTap: ()async{
+              await Future.delayed(const Duration(milliseconds: 500));
               showWarning();
-            }
-          }
-        },
-        icon: Icon(e.userType == 'Teacher' ? Icons.delete_forever : Icons.exit_to_app,
-          color: e.userType == 'Teacher' ?
-        Colors
-            .white
-            : Colors
-            .black,),
-      ),
-    ),
+              },
+            child:const Text('Remove Room'))
+      ])
+    )
   );
 
   Future showNotice(String name, String userID,  String userType) => showDialog
@@ -108,9 +145,22 @@ class _MemberState extends State<Member> {
       builder: (context) =>
   AlertDialog(
     title: const Text("Warning"),
-    content: Text('Are you sure you want to remove $name from the ${widget.roomType}'),
+    content: widget.userType == 'Teacher' ? Text('Are you sure you want to '
+        'remove '
+        '$name in this ${widget.roomType}?' )
+        : Text('Are you sure you want to leave in this ${widget.roomType}?'),
     actions: [
-      TextButton(onPressed: (){}, child: const Text('Okay')),
+      TextButton(onPressed: ()async{
+        if(widget.userType == "Teacher"){
+          Navigator.pop(context);
+        }else{
+          Navigator.pop(context);
+          Navigator.pop(context);
+        }
+        final Joined join = Joined(uid: widget.uid);
+        await join.deleteJoin(widget.roomType, widget.roomCode, userID, widget
+            .teacherUID);
+      }, child: const Text('Okay')),
       TextButton(onPressed: (){
         Navigator.pop(context);
       }, child: const Text('Cancel')),
@@ -123,11 +173,15 @@ class _MemberState extends State<Member> {
       builder: (context) =>
           AlertDialog(
             title: const Text("Warning"),
-            content: Text('Are you sure you want to delete this ${widget.roomType}'),
+            content: Text('Are you sure you want to remove this ${widget
+                .roomType}?'),
             actions: [
-              TextButton(onPressed: (){
+              TextButton(onPressed: ()async{
+                final ClassService service = ClassService();
                 Navigator.pop(context);
                 Navigator.pop(context);
+                await service.deleteRoom(widget.roomType, widget.uid,
+                    widget.roomCode);
               }, child: const Text('Okay')),
               TextButton(onPressed: (){
                 Navigator.pop(context);
@@ -135,4 +189,10 @@ class _MemberState extends State<Member> {
             ],
 
           ));
+
+  Future startConversation(String userID, String userType, String name)async {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ChatMain
+      (name: name, userID: widget.uid, receiverID: userID, userType:
+    userType)));
+  }
 }
