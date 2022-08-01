@@ -11,12 +11,13 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('Users');
 
   Future updateUserDetails(String username, String emailAddress, String campus,
-      String userType) async {
+      String userType, String userID) async {
     return await userInformation.doc(uid).set({
       'username': username,
       'emailAddress': emailAddress,
       'campus': campus,
-      'userType': userType
+      'userType': userType,
+      'userID': userID
     });
   }
 
@@ -28,7 +29,8 @@ class DatabaseService {
           name: value['username'] ?? '',
           school: value['campus'] ?? '',
           email: value['emailAddress'] ?? '',
-          userType: value['userType'] ?? '');
+          userType: value['userType'] ?? '',
+          userID: value['userID'] ?? '');
     }).toList();
   }
 

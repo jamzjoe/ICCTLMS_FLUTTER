@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/components/something_wrong.dart';
 import 'package:icct_lms/room_screens/pages/folder.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
 import 'package:icct_lms/room_screens/pages/post.dart';
@@ -57,7 +58,7 @@ class _RoomState extends State<Room> {
         stream: readLinks(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const NoData();
+            return const SomethingWrong();
           }
 
           return DefaultTabController(

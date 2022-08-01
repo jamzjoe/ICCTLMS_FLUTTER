@@ -63,6 +63,7 @@ dependencies:
   path_provider: ^2.0.11
   mobile_scanner: ^2.0.0
   qr_code_scanner: ^1.0.0
+  flutter_chat_bubble: ^2.0.0
 
 flutter_native_splash:
   color: "#ffffff"

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/models/post_model.dart';
 import 'package:icct_lms/room_screens/pages/update_post.dart';
@@ -45,10 +44,49 @@ class _PostState extends State<Post> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
+      body: Column(
         children: [
           buildTextField(widget),
-          SingleChildScrollView(child: buildPost())
+          StreamBuilder<List<PostModel>>(
+            stream: readPost(),
+            builder: (context, snapshot) {
+              if(snapshot.hasData){
+                final data = snapshot.data!;
+                if(data.isEmpty){
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:const [
+                         NoData(noDataText: 'No post yet...'),
+                      ],
+                    ),
+                  );
+                }
+                return Expanded(
+                  child: ListView(
+                    children: data.map(buildPostTiles).toList(),
+                  ),
+                );
+              }else if(snapshot.hasError){
+                return Center(
+                  child: Text('Something went wrong...'),
+                );
+              }else{
+                return Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      SpinKitFadingCircle(
+                        color: Colors.blue,
+                        size: 50,
+                      )
+                    ],
+                  ),
+                );
+              }
+            }
+          )
         ],
       ),
     );
@@ -122,36 +160,7 @@ class _PostState extends State<Post> {
         ),
       );
 
-  Widget buildPost() => StreamBuilder<List<PostModel>?>(
-      stream: readPost(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Something went wrong');
-        } else if (snapshot.hasData) {
-          final classes = snapshot.data!;
 
-          if (classes.isEmpty) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                IntrinsicHeight(child: Center(child: NoData())),
-              ],
-            );
-          }
-          return Column(
-            children: classes.map(buildPostTiles).toList(),
-          );
-        } else {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children:const [
-              SpinKitFadingCircle(
-                color: Colors.blue,
-              )
-            ],
-          );
-        }
-      });
 
   Widget buildPostTiles(PostModel e) => Card(
         child: Padding(

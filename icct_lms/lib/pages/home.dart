@@ -155,7 +155,12 @@ class _HomeState extends State<Home> {
             userEmail: user.email,
             userCampus: user.campus),
         PlannerScreen(uid: uid),
-        MessageScreen(uid: uid),
+        MessageScreen(
+            uid: uid,
+            userType: user.userType,
+            userName: user.name,
+            userEmail: user.email,
+            userCampus: user.campus),
         NotificationScreen(uid: uid),
       ],
     ),

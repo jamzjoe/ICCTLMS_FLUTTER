@@ -16,7 +16,7 @@ class _HelpCenterState extends State<HelpCenter> {
         backgroundColor: Colors.blue[900],
         title: const Text('Help Center'),
       ),
-      body: const NoData(),
+      body: const NoData(noDataText: 'No data yet...',),
     );
   }
 }

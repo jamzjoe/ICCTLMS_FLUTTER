@@ -25,7 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const NoData(),
+      body: const NoData(noDataText: 'No home yet...',),
       floatingActionButton: SpeedDial(
         overlayColor: Colors.black54,
         backgroundColor: Colors.blue[900],

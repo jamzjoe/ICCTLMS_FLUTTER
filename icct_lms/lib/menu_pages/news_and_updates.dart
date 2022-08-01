@@ -16,7 +16,7 @@ class _NewsUpdatesState extends State<NewsUpdates> {
         backgroundColor: Colors.blue[900],
         title: const Text('News and Updates'),
       ),
-      body: const NoData(),
+      body: const NoData(noDataText: 'No data yet...',),
     );
   }
 }
