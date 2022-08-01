@@ -51,7 +51,7 @@ class _FolderState extends State<Folder> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
-          IntrinsicHeight(child: Center(child: NoData())),
+          NoData(noDataText: 'No data yet...',),
         ],
       )
               ],

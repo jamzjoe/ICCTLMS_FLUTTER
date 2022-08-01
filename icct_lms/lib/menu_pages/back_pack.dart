@@ -16,6 +16,6 @@ class _BackPackState extends State<BackPack> {
           backgroundColor: Colors.blue[900],
           title: const Text('BackPack'),
         ),
-        body: const NoData());
+        body: const NoData(noDataText: 'No data yet...',));
   }
 }

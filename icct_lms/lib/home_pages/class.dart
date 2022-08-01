@@ -113,7 +113,8 @@ class _ClassScreenState extends State<ClassScreen>
                             final classes = snapshot.data!;
 
                             if (classes.isEmpty) {
-                              return const NoData();
+                              return  const NoData(noDataText: 'No class yet'
+                                  '...',);
                             }
                             return ListView(
                               children: classes.map(buildUser).toList(),
@@ -136,7 +137,9 @@ class _ClassScreenState extends State<ClassScreen>
                                 final classes = snapshot.data!;
 
                                 if (classes.isEmpty) {
-                                  return const NoData();
+                                  return  const NoData(noDataText: 'No joined '
+                                      'class yet'
+                                      '...',);
                                 }
                                 return ListView(
                                   children:
@@ -150,7 +153,8 @@ class _ClassScreenState extends State<ClassScreen>
                                 );
                               }
                             })
-                        : const NoData(),
+                        :  const NoData(noDataText: 'No room yet'
+    '...',),
                 widget.userType == 'Teacher'
                     ? StreamBuilder<List<Group>?>(
                         stream: readGroup(),
@@ -161,7 +165,8 @@ class _ClassScreenState extends State<ClassScreen>
                             final group = snapshot.data!;
 
                             if (group.isEmpty) {
-                              return const NoData();
+                              return  const NoData(noDataText: 'No group yet'
+                                  '...',);
                             }
                             return ListView(
                               children: group.map(buildGroup).toList(),
@@ -184,7 +189,10 @@ class _ClassScreenState extends State<ClassScreen>
                                 final classes = snapshot.data!;
 
                                 if (classes.isEmpty) {
-                                  return const NoData();
+                                  return  const NoData(noDataText: 'No joined'
+                                      ' group'
+                                      'yet'
+                                      '...',);
                                 }
                                 return ListView(
                                   children:
@@ -198,7 +206,8 @@ class _ClassScreenState extends State<ClassScreen>
                                 );
                               }
                             })
-                        : const NoData(),
+                        : const NoData(noDataText: 'No room yet'
+    '...',),
               ],
             ),
             floatingActionButton: SpeedDial(
@@ -858,7 +867,7 @@ class _ClassScreenState extends State<ClassScreen>
       builder: (context) => CupertinoAlertDialog(
             content: Column(
               children: [
-                Lottie.asset('assets/not.json', width: 150),
+                Lottie.asset('assets/no_room.json', width: 150),
                 Text('$roomType not found or not a valid $roomType ID.')
               ],
             ),

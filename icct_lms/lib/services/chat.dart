@@ -1,13 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatService{
-  String chatID = const Uuid().v4().substring(0, 8);
   final chatReference = FirebaseFirestore.instance.collection('Chat');
   Future sendChat(String teacherUID, String studentID, String name, String
-  userID, String userType, String date, String hour, String message, String
-  sortKey)
+  userID, String userType, String message)
   async{
+    String chatID = const Uuid().v4().substring(0, 8);
+    final now = DateTime.now();
+    String date = DateFormat.yMMMMd('en_US').format(now);
+    String hour = DateFormat.jm().format(now);
+    String sortKey = DateTime.now().millisecondsSinceEpoch.toString();
     final task = chatReference.doc(teacherUID).collection(studentID).doc(chatID);
     await task.set({
       'name': name,
@@ -16,7 +20,13 @@ class ChatService{
       'date': date,
       'chatID': chatID,
       'userID': userID,
-      'message': message
+      'message': message,
+      'userType': userType
     });
+  }
+
+  Future deleteMessage(String teacherUID, String studentID, String chatID)async{
+    final doc = chatReference.doc(teacherUID).collection(studentID).doc(chatID);
+    await doc.delete();
   }
 }

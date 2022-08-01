@@ -219,7 +219,8 @@ class _ProfileState extends State<Profile> {
                       nameController.text.trim(),
                       emailController.text.trim(),
                       schoolController.text.trim(),
-                      userTypeController.text.trim());
+                      userTypeController.text.trim(),
+                      widget.uid);
                   _auth.signOut();
                   if (!mounted) {
                     return;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/chat_room/chat_main.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/components/something_wrong.dart';
 import 'package:icct_lms/models/members_model.dart';
 import 'package:icct_lms/services/class_service.dart';
 import 'package:icct_lms/services/join.dart';
@@ -35,6 +36,9 @@ class _MemberState extends State<Member> {
       builder: (context, snapshot) {
         if(snapshot.hasData){
           final data = snapshot.data!;
+          if(data.isEmpty){
+            return const NoData(noDataText: 'No members yet');
+          }
           return Scaffold(
             body: Padding(
               padding: const EdgeInsets.all(20),
@@ -52,7 +56,7 @@ class _MemberState extends State<Member> {
           return const CircularProgressIndicator();
         }
         else{
-          return const NoData();
+          return const SomethingWrong();
         }
 
       }
@@ -98,7 +102,7 @@ class _MemberState extends State<Member> {
         PopupMenuItem(
             onTap: ()async{
               await Future.delayed( const Duration(milliseconds: 500));
-              startConversation(e.userID, e.userType, e.name);
+              startConversation(e);
             },
             child: const Text('Chat'))
       ]
@@ -118,7 +122,7 @@ class _MemberState extends State<Member> {
         PopupMenuItem(
             onTap: ()async{
               await Future.delayed( const Duration(milliseconds: 500));
-              startConversation(e.userID, e.userType, e.name);
+              startConversation(e);
             },
             child: const Text('Chat')),
         PopupMenuItem(
@@ -190,9 +194,9 @@ class _MemberState extends State<Member> {
 
           ));
 
-  Future startConversation(String userID, String userType, String name)async {
+  Future startConversation(MembersModel e)async {
     Navigator.push(context, MaterialPageRoute(builder: (context) => ChatMain
-      (name: name, userID: widget.uid, receiverID: userID, userType:
-    userType)));
+      (clickName: e.name, userID: widget.uid, clickID: e.userID, userType:
+    widget.userType, clickUserType: e.userType, userName: widget.userName)));
   }
 }

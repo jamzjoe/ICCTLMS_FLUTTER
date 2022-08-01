@@ -2,13 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:icct_lms/chat_room/chat_main.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/models/user_info.dart';
 
 class MessageScreen extends StatefulWidget {
-  const MessageScreen({Key? key, required this.uid}) : super(key: key);
+  const MessageScreen({Key? key, required this.uid, required this.userType, required this.userName, required this.userEmail, required this.userCampus}) : super(key: key);
   final String uid;
+  final String userType;
+  final String userName;
+  final String userEmail;
+  final String userCampus;
   @override
   State<MessageScreen> createState() => _MessageScreenState();
 }
@@ -28,10 +33,18 @@ class _MessageScreenState extends State<MessageScreen> {
             ),
           );
         }else if(snapshot.connectionState == ConnectionState.waiting){
-          return const CircularProgressIndicator();
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              SpinKitFadingCircle(
+              color: Colors.blue,
+                size: 50,
+          )
+            ],
+          );
 
         }else{
-          return const NoData();
+          return const NoData(noDataText: 'No users yet...',);
         }
 
       }
@@ -39,7 +52,8 @@ class _MessageScreenState extends State<MessageScreen> {
   }
 
   Stream <List<UserInfo>> readUser() => FirebaseFirestore.instance.collection
-    ('Users').where('userType', isEqualTo: 'Student')
+    ('Users').where('userType', isEqualTo: widget.userType == 'Teacher' ?
+  'Student' : 'Teacher')
     .snapshots().map((snapshot) => snapshot.docs.map((e) => UserInfo
       .fromJson(e.data())).toList());
 
@@ -49,9 +63,10 @@ class _MessageScreenState extends State<MessageScreen> {
       child: ListTile(
         onTap: (){
           Navigator.push(context, MaterialPageRoute(builder: (context)=>
-              ChatMain(name: e.name, userID: widget.uid, receiverID:
-              widget.uid,
-                  userType: e.userType)));
+            ChatMain(clickName: e.name, userID: widget.uid, clickID:
+            e.userID,
+                clickUserType: e.userType, userName: widget.userName, userType:
+                widget.userType)));
         },
         leading: CircleAvatar(
           backgroundColor: Colors.blue[900],

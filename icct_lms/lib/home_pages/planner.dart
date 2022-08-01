@@ -12,7 +12,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: NoData(),
+      body: NoData(noDataText: 'No planner yet...',),
     );
   }
 }
