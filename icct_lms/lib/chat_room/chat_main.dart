@@ -45,7 +45,7 @@ class _ChatMainState extends State<ChatMain> {
             backgroundColor: Colors.blue[900],
             child: Center(
               child: Text(
-                widget.userName.substring(0, 2).toUpperCase(),
+                widget.clickName.substring(0, 2).toUpperCase(),
                 style: const TextStyle(
                     fontWeight: FontWeight.bold, color: Colors.white),
               ),
@@ -54,7 +54,7 @@ class _ChatMainState extends State<ChatMain> {
         ),
         backgroundColor: Colors.white,
         title: Text(
-          '${widget.userName} - ${widget.userType}',
+          '${widget.clickName} - ${widget.clickUserType}',
           style: const TextStyle(
               color: Colors.black, fontSize: 16, fontWeight: FontWeight.w400),
         ),
