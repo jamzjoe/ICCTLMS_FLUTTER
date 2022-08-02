@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:icct_lms/models/joined_model.dart';
 
 class Joined {
   final String uid;
@@ -66,8 +68,8 @@ class Joined {
     } catch (e) {
       return null;
     }
-
   }
+
 
 
   Future joinRoomTo(

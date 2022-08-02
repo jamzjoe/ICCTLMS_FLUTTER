@@ -190,7 +190,7 @@ class _ClassScreenState extends State<ClassScreen>
 
                                 if (classes.isEmpty) {
                                   return  const NoData(noDataText: 'No joined'
-                                      ' group'
+                                      ' group '
                                       'yet'
                                       '...',);
                                 }
