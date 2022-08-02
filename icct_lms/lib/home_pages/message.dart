@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:icct_lms/chat_room/chat_main.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/components/not_found.dart';
 import 'package:icct_lms/models/user_info.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -26,11 +26,38 @@ class _MessageScreenState extends State<MessageScreen> {
       builder: (context, snapshot) {
         if(snapshot.hasData){
           final data = snapshot.data!;
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView(
-              children: data.map(buildListTileForStudent).toList(),
-            ),
+          if(data.isEmpty){
+            return const NotFound(notFoundText: 'Contacts not found');
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10, left: 10),
+                child: Container(
+                  child: widget.userType == 'Teacher' ? const Text('Student '
+                      'Chat'
+                      ' List', style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2
+                  ),) : const Text('Teacher Chat '
+                      'List', style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2
+                  ),),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView(
+                    children: data.map(buildListTileForStudent).toList(),
+                  ),
+                ),
+              ),
+            ],
           );
         }else if(snapshot.connectionState == ConnectionState.waiting){
           return Column(
@@ -59,7 +86,7 @@ class _MessageScreenState extends State<MessageScreen> {
 
   Widget buildListTileForStudent(UserInfo e) => Card(
     child: Padding(
-      padding: const EdgeInsets.all(2.0),
+      padding: const EdgeInsets.all(10.0),
       child: ListTile(
         onTap: (){
           Navigator.push(context, MaterialPageRoute(builder: (context)=>
@@ -82,8 +109,12 @@ class _MessageScreenState extends State<MessageScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(e.school),
-            Text(e.userType)],
+            Text(e.school, style: const TextStyle(
+              fontWeight: FontWeight.w300
+            ),),
+            Text(e.userType, style: const TextStyle(
+                fontWeight: FontWeight.w300
+            ),)],
         ),
         trailing: const Icon(Icons.message_sharp),
       ),
