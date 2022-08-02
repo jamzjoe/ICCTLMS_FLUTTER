@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/chat_room/chat_main.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/components/not_found.dart';
 import 'package:icct_lms/components/something_wrong.dart';
 import 'package:icct_lms/models/members_model.dart';
 import 'package:icct_lms/services/class_service.dart';
@@ -37,7 +39,7 @@ class _MemberState extends State<Member> {
         if(snapshot.hasData){
           final data = snapshot.data!;
           if(data.isEmpty){
-            return const NoData(noDataText: 'No members yet');
+            return const NotFound(notFoundText: 'This room is deleted');
           }
           return Scaffold(
             body: Padding(
@@ -53,7 +55,14 @@ class _MemberState extends State<Member> {
             ),
           );
         }else if(snapshot.connectionState == ConnectionState.waiting){
-          return const CircularProgressIndicator();
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              SpinKitFadingCircle(
+                color: Colors.blue,
+              )
+            ],
+          );
         }
         else{
           return const SomethingWrong();

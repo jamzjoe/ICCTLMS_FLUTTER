@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/components/not_found.dart';
 import 'package:icct_lms/room_screens/pages/qr_generator.dart';
 import 'package:icct_lms/services/class_service.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -43,15 +45,12 @@ class _RoomSettingsState extends State<RoomSettings> {
           stream: readSettings(),
           builder: (context, snapshot) {
 
-             if(snapshot.connectionState == ConnectionState.waiting ||
-                 snapshot.hasError){
-              return Center(
-                child: SpinKitFadingCircle(
-                  color: Colors.blue[900],
-                ),
-              );
-            }else{
+             if(snapshot.hasData){
                 // ignore: control_flow_in_finally
+               final data = snapshot.data!;
+               if(!data.exists){
+                 return const NotFound(notFoundText: 'This room is deleted');
+               }
                 return Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -80,7 +79,13 @@ class _RoomSettingsState extends State<RoomSettings> {
                     ],
                   ),
                 );
-              }
+              }else{
+            return Center(
+            child: SpinKitFadingCircle(
+            color: Colors.blue[900],
+            ),
+            );
+            }
 
 
           }),
