@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:icct_lms/comment_room/comment.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/models/post_model.dart';
 import 'package:icct_lms/room_screens/pages/update_post.dart';
 import 'package:icct_lms/room_screens/pages/write_post.dart';
 import 'package:icct_lms/services/post.dart';
 import 'package:lottie/lottie.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Post extends StatefulWidget {
@@ -68,7 +70,7 @@ class _PostState extends State<Post> {
                   ),
                 );
               }else if(snapshot.hasError){
-                return Center(
+                return const Center(
                   child: Text('Something went wrong...'),
                 );
               }else{
@@ -93,15 +95,21 @@ class _PostState extends State<Post> {
   }
 
   Stream<List<PostModel>> readPost() => FirebaseFirestore.instance
-      .collection('Rooms')
-      .doc(widget.roomType)
-      .collection(widget.teacherUID)
-      .doc(widget.roomCode)
-      .collection('Post')
-      .orderBy('sortKey', descending: true)
+      .collection('Post').where('roomCode', isEqualTo: widget.roomCode)
       .snapshots()
       .map((snapshot) =>
-          snapshot.docs.map((doc) => PostModel.fromJson(doc.data())).toList());
+      snapshot.docs.map((doc) => PostModel.fromJson(doc.data())).toList());
+
+  // Stream<List<PostModel>> readPost() => FirebaseFirestore.instance
+  //     .collection('Rooms')
+  //     .doc(widget.roomType)
+  //     .collection(widget.teacherUID)
+  //     .doc(widget.roomCode)
+  //     .collection('Post')
+  //     .orderBy('sortKey', descending: true)
+  //     .snapshots()
+  //     .map((snapshot) =>
+  //         snapshot.docs.map((doc) => PostModel.fromJson(doc.data())).toList());
 
   Widget buildTextField(Post widget) => Padding(
         padding: const EdgeInsets.all(20.0),
@@ -165,168 +173,232 @@ class _PostState extends State<Post> {
   Widget buildPostTiles(PostModel e) => Card(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor:
-                  e.userType == 'Teacher' ? Colors.blue[900] : Colors.redAccent,
-              child: Center(
-                child: Text(
-                  e.postName.substring(0, 2).toUpperCase(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${e.postName} - ${e.userType}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          e.date,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w300, fontSize: 12),
-                        ),
-                      ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor:
+                      e.userType == 'Teacher' ? Colors.blue[900] : Colors.redAccent,
+                  child: Center(
+                    child: Text(
+                      e.postName.substring(0, 2).toUpperCase(),
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     ),
-                    PopupMenuButton(
-                      icon: const Icon(
-                        FontAwesomeIcons.ellipsisVertical,
-                        size: 15,
-                      ),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                            onTap: () async {
-                              await Future.delayed(const Duration(seconds: 1));
-                              if (!mounted) {
-                                return;
-                              }
-                              if (e.userID != widget.uid) {
-                                showError("You can't edit someone's post.");
-                              } else {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => UpdatePost(
-                                        uid: e.userID,
-                                        sortKey: e.sortKey,
-                                        date: e.date,
-                                        postID: e.postID,
-                                        message: e.message,
-                                        userType: widget.userType,
-                                        userName: e.postName,
-                                        roomType: widget.roomType,
-                                        roomCode: widget.roomCode,
-                                        roomName: widget.roomName,
-                                        teacherUID: widget.teacherUID)));
-                              }
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: const [
-                                Icon(
-                                  FontAwesomeIcons.edit,
-                                  color: Colors.blue,
+                  ),
+                ),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(e.postName,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Edit post',
-                                  style: TextStyle(color: Colors.blue),
-                                )
+                                Text(e.userType, style: const TextStyle(
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 12
+                                ),),
                               ],
-                            )),
-                        PopupMenuItem(
-                            onTap: () async {
-                              final PostService post = PostService();
-                              print(e.userID);
-                              if (widget.uid != e.userID) {
-                                await Future.delayed(
-                                    const Duration(seconds: 1));
-                                showError("You can't delete someone's post.");
-                              } else {
-                                await post.deletePost(
-                                    widget.roomType,
-                                    widget.teacherUID,
-                                    widget.roomCode,
-                                    e.message,
-                                    e.postName,
-                                    e.userID,
-                                    e.postID);
-                              }
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: const [
-                                Icon(
-                                  FontAwesomeIcons.deleteLeft,
-                                  color: Colors.blue,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Delete post',
-                                  style: TextStyle(color: Colors.blue),
-                                )
-                              ],
-                            )),
-                        PopupMenuItem(
-                            onTap: () async {
-                              final PostService post = PostService();
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: const [
-                                Icon(
-                                  FontAwesomeIcons.thumbtack,
-                                  color: Colors.blue,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Make pin',
-                                  style: TextStyle(color: Colors.blue),
-                                )
-                              ],
-                            ))
+                            ),
+
+                            Text(
+                              '${e.date}, ${e.hour} ',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w300, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        PopupMenuButton(
+                          icon: const Icon(
+                            FontAwesomeIcons.ellipsisVertical,
+                            size: 15,
+                          ),
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                                onTap: () async {
+                                  await Future.delayed(const Duration(seconds: 1));
+                                  if (!mounted) {
+                                    return;
+                                  }
+                                  if (e.userID != widget.uid) {
+                                    showError("You can't edit someone's post.");
+                                  } else {
+                                    Navigator.of(context).push(MaterialPageRoute(
+                                        builder: (context) => UpdatePost(
+                                            uid: e.userID,
+                                            sortKey: e.sortKey,
+                                            date: e.date,
+                                            postID: e.postID,
+                                            message: e.message,
+                                            userType: widget.userType,
+                                            userName: e.postName,
+                                            roomType: widget.roomType,
+                                            roomCode: widget.roomCode,
+                                            roomName: widget.roomName,
+                                            teacherUID: widget.teacherUID)));
+                                  }
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Icon(
+                                      FontAwesomeIcons.edit,
+                                      color: Colors.blue,
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      'Edit post',
+                                      style: TextStyle(color: Colors.blue),
+                                    )
+                                  ],
+                                )),
+                            PopupMenuItem(
+                                onTap: () async {
+                                  final PostService post = PostService();
+                                  if (widget.uid != e.userID) {
+                                    await Future.delayed(
+                                        const Duration(seconds: 1));
+                                    showError("You can't delete someone's post.");
+                                  } else {
+                                    await post.deletePublicPost(e.postID);
+                                    await post.deletePublicPost(e.postID);
+                                    // await post.deletePost(
+                                    //     widget.roomType,
+                                    //     widget.teacherUID,
+                                    //     widget.roomCode,
+                                    //     e.message,
+                                    //     e.postName,
+                                    //     e.userID,
+                                    //     e.postID);
+                                  }
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Icon(
+                                      FontAwesomeIcons.deleteLeft,
+                                      color: Colors.blue,
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      'Delete post',
+                                      style: TextStyle(color: Colors.blue),
+                                    )
+                                  ],
+                                )),
+                            PopupMenuItem(
+                                onTap: () async {
+                                  final PostService post = PostService();
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Icon(
+                                      FontAwesomeIcons.thumbtack,
+                                      color: Colors.blue,
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      'Make pin',
+                                      style: TextStyle(color: Colors.blue),
+                                    )
+                                  ],
+                                ))
+                          ],
+                        ),
                       ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SelectableLinkify(
-                  options: const LinkifyOptions(humanize: true),
-                  onOpen: (link) async {
-                    launch(link.url);
-                  },
-                  text: e.message,
-                  style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12),
-                  linkStyle: const TextStyle(color: Colors.blue),
-                )
-              ],
-            ),
-            isThreeLine: true,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey.withOpacity(0.4)
+                    ),
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: SelectableLinkify(
+                          options: const LinkifyOptions(humanize: true),
+                          onOpen: (link) async {
+                            launch(link.url);
+                          },
+                          text: e.message,
+                          style: const TextStyle(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 12),
+                          linkStyle: const TextStyle(color: Colors.blue),
+                        ),
+                      ),
+
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(FontAwesomeIcons.solidHeart),
+                      color: Colors.grey,
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Comment(
+                                    e: e, username: widget.userName, userType: widget
+                                    .userType, userID:
+                                widget.uid
+                                )));
+                      },
+                      icon: const Icon(FontAwesomeIcons.solidComment),
+                      color: Colors.grey,
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        share(e.message, e.postName);
+                      },
+                      icon: const Icon(FontAwesomeIcons.shareNodes),
+                      color: Colors.grey,
+                    )
+                  ],
+                ),
+              )
+            ],
           ),
         ),
       );
@@ -349,4 +421,8 @@ class _PostState extends State<Post> {
                   child: const Text('Okay'))
             ],
           ));
+
+  Future share(String message, String name) async {
+    await Share.share('Post from $name \n $message');
+  }
 }

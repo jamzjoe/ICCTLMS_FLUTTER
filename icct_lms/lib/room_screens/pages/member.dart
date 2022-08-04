@@ -205,7 +205,9 @@ class _MemberState extends State<Member> {
 
   Future startConversation(MembersModel e)async {
     Navigator.push(context, MaterialPageRoute(builder: (context) => ChatMain
-      (clickName: e.name, userID: widget.uid, clickID: e.userID, userType:
+      (badgeChange: (){}, clickName: e.name, userID: widget.uid, clickID: e
+        .userID,
+        userType:
     widget.userType, clickUserType: e.userType, userName: widget.userName)));
   }
 }
