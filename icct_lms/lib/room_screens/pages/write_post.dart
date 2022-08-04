@@ -63,8 +63,10 @@ class postTextField extends StatefulWidget {
 }
 bool error = false;
 class _postTextFieldState extends State<postTextField> {
+
   @override
   Widget build(BuildContext context) {
+    print(widget.widget.roomCode);
     return StreamBuilder<DocumentSnapshot>(
       stream: readRestrictions(),
       builder: (context, snapshot) {
@@ -118,13 +120,18 @@ class _postTextFieldState extends State<postTextField> {
                         if(data['restriction'] == 'true'){
                           if(widget.widget.userType == "Teacher"){
                             Navigator.pop(context);
-                            await post.createPost(
-                                widget.widget.roomType,
-                                widget.widget.teacherUID,
-                                widget.widget.roomCode,
+                            await post.createPublicPost(widget.widget
+                                .roomType, widget.widget.roomCode,
                                 messageController.text.trim(),
-                                widget.widget.userName,
-                                widget.widget.uid, widget.widget.userType);
+                                widget.widget.userName, widget.widget.uid,
+                                widget.widget.userType, widget.widget.roomName);
+                            // await post.createPost(
+                            //     widget.widget.roomType,
+                            //     widget.widget.teacherUID,
+                            //     widget.widget.roomCode,
+                            //     messageController.text.trim(),
+                            //     widget.widget.userName,
+                            //     widget.widget.uid, widget.widget.userType);
                             messageController.text = '';
                           }else{
                             showError('The ${widget.widget.roomType} post was'
@@ -136,13 +143,11 @@ class _postTextFieldState extends State<postTextField> {
                           }
                         }else{
                           Navigator.pop(context);
-                          await post.createPost(
-                              widget.widget.roomType,
-                              widget.widget.teacherUID,
-                              widget.widget.roomCode,
+                          await post.createPublicPost(widget.widget
+                              .roomType, widget.widget.roomCode,
                               messageController.text.trim(),
-                              widget.widget.userName,
-                              widget.widget.uid, widget.widget.userType);
+                              widget.widget.userName, widget.widget.uid,
+                              widget.widget.userType, widget.widget.roomName);
 
                           messageController.text ='';
                         }

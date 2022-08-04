@@ -735,8 +735,10 @@ class _ClassScreenState extends State<ClassScreen>
               PopupMenuItem(
                 onTap: () async {
                   final ClassService service = ClassService();
+                  final PostService post = PostService();
                   await service.deleteRoom("Group", widget.uid,
                       e.code);
+                  await post.deleteEachRoomPost(e.code);
                 },
                 child: const Text('Delete'),
               )
@@ -775,8 +777,10 @@ class _ClassScreenState extends State<ClassScreen>
                 PopupMenuItem(
                   onTap: () async {
                     final ClassService service = ClassService();
+                    final PostService post = PostService();
                     await service.deleteRoom("Class", widget.uid,
                         e.code);
+                    await post.deleteEachRoomPost(e.code);
                   },
                   child: const Text('Delete'),
                 )

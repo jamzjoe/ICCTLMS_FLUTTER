@@ -103,13 +103,11 @@ class postTextField extends StatelessWidget {
                     final PostService post = PostService();
                    if(_formKey.currentState!.validate()){
                      try {
-                       await post.updatePost(
-                           widget.roomType,
-                           widget.teacherUID,
-                           widget.roomCode,
+                       await post.updatePublicPost(widget
+                           .roomType, widget.roomCode,
                            messageController.text.trim(),
-                           widget.userName,
-                           widget.uid, widget.postID, widget.userType);
+                           widget.userName, widget.uid,
+                           widget.userType, widget.postID, widget.roomName);
                      } catch (e) {
                        Navigator.pop(context);
                      } finally {
