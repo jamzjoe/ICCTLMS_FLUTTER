@@ -548,6 +548,13 @@
             </list>
           </value>
         </entry>
+        <entry key="scrollable_positioned_list">
+          <value>
+            <list>
+              <option value="C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/scrollable_positioned_list-0.3.2/lib" />
+            </list>
+          </value>
+        </entry>
         <entry key="share_plus">
           <value>
             <list>
@@ -906,6 +913,7 @@
       <root url="file://C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/qr_code_scanner-1.0.0/lib" />
       <root url="file://C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/qr_flutter-4.0.0/lib" />
       <root url="file://C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/screenshot-1.2.3/lib" />
+      <root url="file://C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/scrollable_positioned_list-0.3.2/lib" />
       <root url="file://C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/share_plus-4.0.10/lib" />
       <root url="file://C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/share_plus_linux-3.0.0/lib" />
       <root url="file://C:/src/flutter/.pub-cache/hosted/pub.dartlang.org/share_plus_macos-3.0.1/lib" />

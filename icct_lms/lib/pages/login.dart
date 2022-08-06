@@ -106,6 +106,8 @@ class _LoginState extends State<Login> {
                             ),
                             Center(
                                 child: TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               autofillHints: AutofillHints.email.characters,
                               validator: (value) =>
                                   value!.isEmpty && !value.contains('@')
@@ -137,6 +139,8 @@ class _LoginState extends State<Login> {
                             ),
                             Center(
                                 child: TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               autofillHints: AutofillHints.password.characters,
                               validator: (value) => value!.length < 6
                                   ? 'Passwo'
@@ -196,7 +200,6 @@ class _LoginState extends State<Login> {
                                           builder: createDialog);
                                     });
                                   }
-
                                 }
                               },
                               icon: const Icon(CupertinoIcons.forward),

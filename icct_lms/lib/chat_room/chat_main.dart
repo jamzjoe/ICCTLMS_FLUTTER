@@ -73,10 +73,22 @@ class _ChatMainState extends State<ChatMain> {
           ),
         ),
         backgroundColor: Colors.white,
-        title: Text(
-          '${widget.clickName} - ${widget.clickUserType}',
-          style: const TextStyle(
-              color: Colors.black, fontSize: 16, fontWeight: FontWeight.w400),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.clickName,
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400),
+            ),
+            Text(widget.clickUserType,
+                style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w300))
+          ],
         ),
       ),
       body: loading
@@ -133,6 +145,7 @@ class _ChatMainState extends State<ChatMain> {
                           child: Form(
                             key: _formKey,
                             child: TextFormField(
+                              autofocus: true,
                               validator: (value) => value!.isEmpty
                                   ? "Can't send empty "
                                       "message!"
