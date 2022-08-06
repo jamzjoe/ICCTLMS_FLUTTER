@@ -101,6 +101,8 @@ class _RegisterState extends State<Register> {
                         child: Column(
                           children: [
                             TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               autofillHints: AutofillHints.name.characters,
                               validator: (value) =>
                                   value!.length < 5 && value.isEmpty
@@ -130,6 +132,8 @@ class _RegisterState extends State<Register> {
                             ),
                             Center(
                                 child: TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               autofillHints: AutofillHints.email.characters,
                               validator: (value) =>
                                   value!.isEmpty && !value.contains('@')
@@ -161,6 +165,8 @@ class _RegisterState extends State<Register> {
                             ),
                             Center(
                                 child: TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               autofillHints: AutofillHints.password.characters,
                               validator: (value) => value!.length < 6
                                   ? 'Passwo'
@@ -193,6 +199,8 @@ class _RegisterState extends State<Register> {
                             ),
                             Center(
                                 child: TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               validator: (value) => value!.isEmpty
                                   ? 'Choose '
                                       'campus'
@@ -219,6 +227,8 @@ class _RegisterState extends State<Register> {
                             ),
                             Center(
                                 child: TextFormField(
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
                               validator: (value) => value!.isEmpty
                                   ? 'Choose '
                                       'campus'

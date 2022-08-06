@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/comment_room/comment.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/models/heart_model.dart';
 import 'package:icct_lms/models/post_model.dart';
 import 'package:icct_lms/room_screens/pages/update_post.dart';
 import 'package:icct_lms/room_screens/pages/write_post.dart';
+import 'package:icct_lms/services/comment.dart';
 import 'package:icct_lms/services/post.dart';
 import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
@@ -41,6 +42,7 @@ class Post extends StatefulWidget {
 }
 
 final currentUserID = FirebaseAuth.instance.currentUser!.uid;
+final CommentService service = CommentService();
 
 class _PostState extends State<Post> {
   @override
@@ -50,55 +52,56 @@ class _PostState extends State<Post> {
         children: [
           buildTextField(widget),
           StreamBuilder<List<PostModel>>(
-            stream: readPost(),
-            builder: (context, snapshot) {
-              if(snapshot.hasData){
-                final data = snapshot.data!;
-                if(data.isEmpty){
+              stream: readPost(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.data!;
+                  if (data.isEmpty) {
+                    return Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          NoData(noDataText: 'No post yet...'),
+                        ],
+                      ),
+                    );
+                  }
+                  return Expanded(
+                    child: ListView(
+                      children: data.map(buildPostTiles).toList(),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Something went wrong...'),
+                  );
+                } else {
                   return Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children:const [
-                         NoData(noDataText: 'No post yet...'),
+                      children: const [
+                        SpinKitFadingCircle(
+                          color: Colors.blue,
+                          size: 50,
+                        )
                       ],
                     ),
                   );
                 }
-                return Expanded(
-                  child: ListView(
-                    children: data.map(buildPostTiles).toList(),
-                  ),
-                );
-              }else if(snapshot.hasError){
-                return const Center(
-                  child: Text('Something went wrong...'),
-                );
-              }else{
-                return Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      SpinKitFadingCircle(
-                        color: Colors.blue,
-                        size: 50,
-                      )
-                    ],
-                  ),
-                );
-              }
-            }
-          )
+              })
         ],
       ),
     );
   }
 
   Stream<List<PostModel>> readPost() => FirebaseFirestore.instance
-      .collection('Post').where('roomCode', isEqualTo: widget.roomCode)
+      .collection('Post')
+      .where('roomCode', isEqualTo: widget.roomCode)
+      .orderBy('sortKey', descending: true)
       .snapshots()
       .map((snapshot) =>
-      snapshot.docs.map((doc) => PostModel.fromJson(doc.data())).toList());
+          snapshot.docs.map((doc) => PostModel.fromJson(doc.data())).toList());
 
   // Stream<List<PostModel>> readPost() => FirebaseFirestore.instance
   //     .collection('Rooms')
@@ -168,8 +171,6 @@ class _PostState extends State<Post> {
         ),
       );
 
-
-
   Widget buildPostTiles(PostModel e) => Card(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
@@ -178,8 +179,9 @@ class _PostState extends State<Post> {
             children: [
               ListTile(
                 leading: CircleAvatar(
-                  backgroundColor:
-                      e.userType == 'Teacher' ? Colors.blue[900] : Colors.redAccent,
+                  backgroundColor: e.userType == 'Teacher'
+                      ? Colors.blue[900]
+                      : Colors.redAccent,
                   child: Center(
                     child: Text(
                       e.postName.substring(0, 2).toUpperCase(),
@@ -202,16 +204,19 @@ class _PostState extends State<Post> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(e.postName,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                Text(
+                                  e.postName,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                Text(e.userType, style: const TextStyle(
-                                  fontWeight: FontWeight.w300,
-                                  fontSize: 12
-                                ),),
+                                Text(
+                                  e.userType,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 12),
+                                ),
                               ],
                             ),
-
                             Text(
                               '${e.date}, ${e.hour} ',
                               style: const TextStyle(
@@ -227,26 +232,29 @@ class _PostState extends State<Post> {
                           itemBuilder: (context) => [
                             PopupMenuItem(
                                 onTap: () async {
-                                  await Future.delayed(const Duration(seconds: 1));
+                                  await Future.delayed(
+                                      const Duration(seconds: 1));
                                   if (!mounted) {
                                     return;
                                   }
                                   if (e.userID != widget.uid) {
                                     showError("You can't edit someone's post.");
                                   } else {
-                                    Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => UpdatePost(
-                                            uid: e.userID,
-                                            sortKey: e.sortKey,
-                                            date: e.date,
-                                            postID: e.postID,
-                                            message: e.message,
-                                            userType: widget.userType,
-                                            userName: e.postName,
-                                            roomType: widget.roomType,
-                                            roomCode: widget.roomCode,
-                                            roomName: widget.roomName,
-                                            teacherUID: widget.teacherUID)));
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) => UpdatePost(
+                                                uid: e.userID,
+                                                sortKey: e.sortKey,
+                                                date: e.date,
+                                                postID: e.postID,
+                                                message: e.message,
+                                                userType: widget.userType,
+                                                userName: e.postName,
+                                                roomType: widget.roomType,
+                                                roomCode: widget.roomCode,
+                                                roomName: widget.roomName,
+                                                teacherUID:
+                                                    widget.teacherUID)));
                                   }
                                 },
                                 child: Row(
@@ -272,9 +280,9 @@ class _PostState extends State<Post> {
                                   if (widget.uid != e.userID) {
                                     await Future.delayed(
                                         const Duration(seconds: 1));
-                                    showError("You can't delete someone's post.");
+                                    showError(
+                                        "You can't delete someone's post.");
                                   } else {
-                                    await post.deletePublicPost(e.postID);
                                     await post.deletePublicPost(e.postID);
                                     // await post.deletePost(
                                     //     widget.roomType,
@@ -336,11 +344,8 @@ class _PostState extends State<Post> {
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey.withOpacity(0.4)
-                    ),
-                    borderRadius: BorderRadius.circular(10)
-                  ),
+                      border: Border.all(color: Colors.grey.withOpacity(0.4)),
+                      borderRadius: BorderRadius.circular(10)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -353,47 +358,188 @@ class _PostState extends State<Post> {
                           },
                           text: e.message,
                           style: const TextStyle(
-                              color: Colors.black54,
+                              color: Colors.black,
                               fontWeight: FontWeight.w400,
                               fontSize: 12),
                           linkStyle: const TextStyle(color: Colors.blue),
                         ),
                       ),
-
                     ],
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(5.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(FontAwesomeIcons.solidHeart),
-                      color: Colors.grey,
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Comment(
-                                    e: e, username: widget.userName, userType: widget
-                                    .userType, userID:
-                                widget.uid
-                                )));
-                      },
-                      icon: const Icon(FontAwesomeIcons.solidComment),
-                      color: Colors.grey,
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        share(e.message, e.postName);
-                      },
-                      icon: const Icon(FontAwesomeIcons.shareNodes),
-                      color: Colors.grey,
+                    StreamBuilder<List<HeartModel>>(
+                        stream: FirebaseFirestore.instance
+                            .collection('Post')
+                            .doc(e.postID)
+                            .collection('Heart')
+                            .snapshots()
+                            .map((event) => event.docs
+                                .map((e) => HeartModel.fromJson(e.data()))
+                                .toList()),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final data = snapshot.data!;
+                            final heartCount = data.length;
+                            return Flexible(
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    focusColor: Colors.transparent,
+                                    splashColor: Colors.transparent,
+                                    canRequestFocus: false,
+                                    onLongPress: () async {
+                                      await service.decrementHeart(
+                                          e.postID, widget.uid);
+                                    },
+                                    child: StreamBuilder<List<HeartModel>>(
+                                        stream: FirebaseFirestore.instance
+                                            .collection('Post')
+                                            .doc(e.postID)
+                                            .collection('Heart')
+                                            .where('userID',
+                                                whereIn: [widget.uid])
+                                            .snapshots()
+                                            .map((event) => event.docs
+                                                .map((e) => HeartModel.fromJson(
+                                                    e.data()))
+                                                .toList()),
+                                        builder: (context, joe) {
+                                          if (joe.hasData) {
+                                            final data = joe.data!;
+
+                                            if (data.isEmpty) {
+                                              return IconButton(
+                                                focusColor: Colors.transparent,
+                                                splashColor: Colors.transparent,
+                                                onPressed: () {
+                                                  service.incrementHeart(
+                                                      e.postID,
+                                                      widget.userName,
+                                                      widget.uid,
+                                                      widget.userType,
+                                                      'true');
+                                                },
+                                                icon: const Icon(
+                                                    FontAwesomeIcons.solidHeart,
+                                                    color: Colors.grey),
+                                              );
+                                            }
+                                            return IconButton(
+                                              focusColor: Colors.transparent,
+                                              splashColor: Colors.transparent,
+                                              onPressed: () {
+                                                service.incrementHeart(
+                                                    e.postID,
+                                                    widget.userName,
+                                                    widget.uid,
+                                                    widget.userType,
+                                                    'true');
+                                              },
+                                              icon: const Icon(
+                                                  FontAwesomeIcons.solidHeart,
+                                                  color: Colors.red),
+                                            );
+                                          } else {
+                                            return IconButton(
+                                              focusColor: Colors.transparent,
+                                              splashColor: Colors.transparent,
+                                              onPressed: () {
+                                                service.incrementHeart(
+                                                    e.postID,
+                                                    widget.userName,
+                                                    widget.uid,
+                                                    widget.userType,
+                                                    'true');
+                                              },
+                                              icon: const Icon(
+                                                  FontAwesomeIcons.solidHeart,
+                                                  color: Colors.grey),
+                                            );
+                                          }
+                                        }),
+                                  ),
+                                  Text(heartCount.toString())
+                                ],
+                              ),
+                            );
+                          }
+                          return Flexible(
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    service.incrementHeart(
+                                        e.postID,
+                                        widget.userName,
+                                        widget.uid,
+                                        widget.userType,
+                                        'true');
+                                  },
+                                  icon: const Icon(FontAwesomeIcons.solidHeart),
+                                  color: Colors.grey,
+                                ),
+                                const Text('0')
+                              ],
+                            ),
+                          );
+                        }),
+                    StreamBuilder<QuerySnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection('Post')
+                            .doc(e.postID)
+                            .collection('Comment')
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final commentCount = snapshot.data!.docs.length;
+                            return Flexible(
+                                child: Row(
+                              children: [
+                                IconButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Comment(
+                                                  e: e,
+                                                  username: widget.userName,
+                                                  userID: widget.uid,
+                                                  userType: widget.userType)));
+                                    },
+                                    icon: const Icon(
+                                        FontAwesomeIcons.solidComment,
+                                        color: Colors.grey)),
+                                Text(commentCount.toString())
+                              ],
+                            ));
+                          }
+                          return Flexible(
+                              child: Row(
+                            children: [
+                              IconButton(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    FontAwesomeIcons.comment,
+                                    color: Colors.grey.withOpacity(0.4),
+                                  )),
+                              const Text('0')
+                            ],
+                          ));
+                        }),
+                    Flexible(
+                      child: IconButton(
+                        onPressed: () {
+                          share(e.message, e.postName);
+                        },
+                        icon: const Icon(FontAwesomeIcons.shareNodes),
+                        color: Colors.grey,
+                      ),
                     )
                   ],
                 ),
