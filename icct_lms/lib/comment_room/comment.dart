@@ -55,314 +55,328 @@ class _CommentState extends State<Comment> {
         backgroundColor: Colors.blue[900],
         title: const Text('Comment'),
       ),
-      body: Column(
-        children: [
-          Card(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: CircleAvatar(
-                    child: Center(
-                      child:
-                          Text(widget.e.postName.substring(0, 2).toUpperCase()),
-                    ),
-                  ),
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      RichText(
-                          text: TextSpan(
-                              style: const TextStyle(color: Colors.black),
-                              children: [
-                            TextSpan(text: widget.e.postName),
-                            const TextSpan(
-                                text: ' posted from ',
-                                style: TextStyle(fontWeight: FontWeight.w300)),
-                            TextSpan(
-                                text: widget.e.roomName,
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {})
-                          ])),
-                      Text(
-                        widget.e.userType,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w300, fontSize: 12),
-                      ),
-                      Text(
-                        '${widget.e.date} ${widget.e.hour}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w300, fontSize: 12),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                        borderRadius: BorderRadius.circular(5)),
-                    padding: const EdgeInsets.all(15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.e.message,
-                          style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.w300),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(14.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      StreamBuilder<List<HeartModel>>(
-                          stream: FirebaseFirestore.instance
-                              .collection('Post')
-                              .doc(widget.e.postID)
-                              .collection('Heart')
-                              .snapshots()
-                              .map((event) => event.docs
-                                  .map((e) => HeartModel.fromJson(e.data()))
-                                  .toList()),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              final data = snapshot.data!;
-                              final heartCount = data.length;
-                              return Flexible(
-                                child: Row(
-                                  children: [
-                                    InkWell(
-                                      focusColor: Colors.transparent,
-                                      splashColor: Colors.transparent,
-                                      canRequestFocus: false,
-                                      onLongPress: () async {
-                                        await service.decrementHeart(
-                                            widget.e.postID, widget.userID);
-                                      },
-                                      child: StreamBuilder<List<HeartModel>>(
-                                          stream: FirebaseFirestore.instance
-                                              .collection('Post')
-                                              .doc(widget.e.postID)
-                                              .collection('Heart')
-                                              .where('userID',
-                                                  whereIn: [widget.userID])
-                                              .snapshots()
-                                              .map((event) => event.docs
-                                                  .map((e) =>
-                                                      HeartModel.fromJson(
-                                                          e.data()))
-                                                  .toList()),
-                                          builder: (context, joe) {
-                                            if (joe.hasData) {
-                                              final data = joe.data!;
+      bottomSheet: SizedBox(
+        width: double.infinity,
+        child: Card(
+          child: Form(
+            key: _formKey,
+            child: TextFormField(
+              autofocus: true,
+              validator: (value) => value!.isEmpty
+                  ? "Can't send empty "
+                      "comment"
+                  : null,
+              controller: commentController,
+              decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          FocusScope.of(context).unfocus();
+                          setState(() {
+                            WidgetsBinding.instance.addPostFrameCallback(
+                                (timeStamp) => scrollToIndex(0));
+                          });
 
-                                              if (data.isEmpty) {
-                                                return IconButton(
-                                                  focusColor:
-                                                      Colors.transparent,
-                                                  splashColor:
-                                                      Colors.transparent,
-                                                  onPressed: () {
-                                                    service.incrementHeart(
-                                                        widget.e.postID,
-                                                        widget.username,
-                                                        widget.userID,
-                                                        widget.userType,
-                                                        'true');
-                                                  },
-                                                  icon: const Icon(
-                                                      FontAwesomeIcons
-                                                          .solidHeart,
-                                                      color: Colors.grey),
-                                                );
-                                              }
-                                              return IconButton(
-                                                focusColor: Colors.transparent,
-                                                splashColor: Colors.transparent,
-                                                onPressed: () {
-                                                  service.incrementHeart(
-                                                      widget.e.postID,
-                                                      widget.username,
-                                                      widget.userID,
-                                                      widget.userType,
-                                                      'true');
-                                                },
-                                                icon: const Icon(
-                                                    FontAwesomeIcons.solidHeart,
-                                                    color: Colors.red),
-                                              );
-                                            } else {
-                                              return IconButton(
-                                                focusColor: Colors.transparent,
-                                                splashColor: Colors.transparent,
-                                                onPressed: () {
-                                                  service.incrementHeart(
-                                                      widget.e.postID,
-                                                      widget.username,
-                                                      widget.userID,
-                                                      widget.userType,
-                                                      'true');
-                                                },
-                                                icon: const Icon(
-                                                    FontAwesomeIcons.solidHeart,
-                                                    color: Colors.grey),
-                                              );
-                                            }
-                                          }),
-                                    ),
-                                    Text(heartCount.toString())
-                                  ],
-                                ),
-                              );
-                            }
-                            return Flexible(
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      service.incrementHeart(
-                                          widget.e.postID,
-                                          widget.username,
-                                          widget.userID,
-                                          widget.userType,
-                                          'true');
-                                    },
-                                    icon:
-                                        const Icon(FontAwesomeIcons.solidHeart),
-                                    color: Colors.grey,
-                                  ),
-                                  const Text('0')
-                                ],
-                              ),
-                            );
-                          }),
-                      StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection('Post')
-                              .doc(widget.e.postID)
-                              .collection('Comment')
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              final commentCount = snapshot.data!.docs.length;
-                              return Flexible(
-                                  child: Row(
-                                children: [
-                                  IconButton(
-                                      onPressed: () {
-                                        myFocusNode.requestFocus();
-                                      },
-                                      icon: const Icon(
-                                          FontAwesomeIcons.solidComment,
-                                          color: Colors.grey)),
-                                  Text(commentCount.toString())
-                                ],
-                              ));
-                            }
-                            return Flexible(
-                                child: Row(
-                              children: [
-                                IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(
-                                      FontAwesomeIcons.comment,
-                                      color: Colors.grey.withOpacity(0.4),
-                                    )),
-                                const Text('0')
-                              ],
-                            ));
-                          }),
-                      Flexible(
-                        child: IconButton(
-                          onPressed: () {
-                            share(widget.e.message, widget.e.postName);
-                          },
-                          icon: const Icon(FontAwesomeIcons.shareNodes),
-                          color: Colors.grey,
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
+                          final CommentService service = CommentService();
+                          await service.createComment(
+                              widget.e.postID,
+                              commentController.text.trim(),
+                              widget.username,
+                              widget.userID,
+                              widget.userType);
+                          commentController.text = '';
+                        }
+                      },
+                      icon: const Icon(FontAwesomeIcons.paperPlane)),
+                  label: const Text('Comment'),
+                  hintText: 'Type your comment...',
+                  border: const OutlineInputBorder()),
             ),
           ),
-          StreamBuilder<List<CommentModel>>(
-              stream: readComments(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final data = snapshot.data!;
-                  if (data.length < 2) {
-                    return Expanded(
-                        child: ListView(
-                      children: data.map(createCommentTiles).toList(),
-                    ));
-                  }
-                  return Expanded(
-                    child: ScrollablePositionedList.builder(
-                      itemScrollController: itemController,
-                      itemBuilder: (BuildContext context, int index) {
-                        return data.map(createCommentTiles).toList()[index];
-                      },
-                      itemCount: data.length,
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: 60),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Card(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: CircleAvatar(
+                        child: Center(
+                          child: Text(
+                              widget.e.postName.substring(0, 2).toUpperCase()),
+                        ),
+                      ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                              text: TextSpan(
+                                  style: const TextStyle(color: Colors.black),
+                                  children: [
+                                TextSpan(text: widget.e.postName),
+                                const TextSpan(
+                                    text: ' posted from ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w300)),
+                                TextSpan(
+                                    text: widget.e.roomName,
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {})
+                              ])),
+                          Text(
+                            widget.e.userType,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w300, fontSize: 12),
+                          ),
+                          Text(
+                            '${widget.e.date} ${widget.e.hour}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w300, fontSize: 12),
+                          )
+                        ],
+                      ),
                     ),
-                  );
-                } else if (snapshot.hasError) {
-                  return const NotFound(notFoundText: 'Something went wrong');
-                } else {
-                  return const Center(
-                    child: CupertinoActivityIndicator(),
-                  );
-                }
-              }),
-          SizedBox(
-            width: double.infinity,
-            child: Card(
-              child: Form(
-                key: _formKey,
-                child: TextFormField(
-                  autofocus: true,
-                  validator: (value) => value!.isEmpty
-                      ? "Can't send empty "
-                          "comment"
-                      : null,
-                  controller: commentController,
-                  decoration: InputDecoration(
-                      suffixIcon: IconButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              FocusScope.of(context).unfocus();
-                              setState(() {
-                                WidgetsBinding.instance.addPostFrameCallback(
-                                    (timeStamp) => scrollToIndex(0));
-                              });
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            border:
+                                Border.all(color: Colors.grey.withOpacity(0.2)),
+                            borderRadius: BorderRadius.circular(5)),
+                        padding: const EdgeInsets.all(15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.e.message,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          StreamBuilder<List<HeartModel>>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Post')
+                                  .doc(widget.e.postID)
+                                  .collection('Heart')
+                                  .snapshots()
+                                  .map((event) => event.docs
+                                      .map((e) => HeartModel.fromJson(e.data()))
+                                      .toList()),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  final data = snapshot.data!;
+                                  final heartCount = data.length;
+                                  return Flexible(
+                                    child: Row(
+                                      children: [
+                                        InkWell(
+                                          focusColor: Colors.transparent,
+                                          splashColor: Colors.transparent,
+                                          canRequestFocus: false,
+                                          onLongPress: () async {
+                                            await service.decrementHeart(
+                                                widget.e.postID, widget.userID);
+                                          },
+                                          child: StreamBuilder<
+                                                  List<HeartModel>>(
+                                              stream: FirebaseFirestore.instance
+                                                  .collection('Post')
+                                                  .doc(widget.e.postID)
+                                                  .collection('Heart')
+                                                  .where('userID',
+                                                      whereIn: [widget.userID])
+                                                  .snapshots()
+                                                  .map((event) => event.docs
+                                                      .map((e) =>
+                                                          HeartModel.fromJson(
+                                                              e.data()))
+                                                      .toList()),
+                                              builder: (context, joe) {
+                                                if (joe.hasData) {
+                                                  final data = joe.data!;
 
-                              final CommentService service = CommentService();
-                              await service.createComment(
-                                  widget.e.postID,
-                                  commentController.text.trim(),
-                                  widget.username,
-                                  widget.userID,
-                                  widget.userType);
-                              commentController.text = '';
-                            }
-                          },
-                          icon: const Icon(FontAwesomeIcons.paperPlane)),
-                      label: const Text('Comment'),
-                      hintText: 'Type your comment...',
-                      border: const OutlineInputBorder()),
+                                                  if (data.isEmpty) {
+                                                    return IconButton(
+                                                      focusColor:
+                                                          Colors.transparent,
+                                                      splashColor:
+                                                          Colors.transparent,
+                                                      onPressed: () {
+                                                        service.incrementHeart(
+                                                            widget.e.postID,
+                                                            widget.username,
+                                                            widget.userID,
+                                                            widget.userType,
+                                                            'true');
+                                                      },
+                                                      icon: const Icon(
+                                                          FontAwesomeIcons
+                                                              .solidHeart,
+                                                          color: Colors.grey),
+                                                    );
+                                                  }
+                                                  return IconButton(
+                                                    focusColor:
+                                                        Colors.transparent,
+                                                    splashColor:
+                                                        Colors.transparent,
+                                                    onPressed: () {
+                                                      service.incrementHeart(
+                                                          widget.e.postID,
+                                                          widget.username,
+                                                          widget.userID,
+                                                          widget.userType,
+                                                          'true');
+                                                    },
+                                                    icon: const Icon(
+                                                        FontAwesomeIcons
+                                                            .solidHeart,
+                                                        color: Colors.red),
+                                                  );
+                                                } else {
+                                                  return IconButton(
+                                                    focusColor:
+                                                        Colors.transparent,
+                                                    splashColor:
+                                                        Colors.transparent,
+                                                    onPressed: () {
+                                                      service.incrementHeart(
+                                                          widget.e.postID,
+                                                          widget.username,
+                                                          widget.userID,
+                                                          widget.userType,
+                                                          'true');
+                                                    },
+                                                    icon: const Icon(
+                                                        FontAwesomeIcons
+                                                            .solidHeart,
+                                                        color: Colors.grey),
+                                                  );
+                                                }
+                                              }),
+                                        ),
+                                        Text(heartCount.toString())
+                                      ],
+                                    ),
+                                  );
+                                }
+                                return Flexible(
+                                  child: Row(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          service.incrementHeart(
+                                              widget.e.postID,
+                                              widget.username,
+                                              widget.userID,
+                                              widget.userType,
+                                              'true');
+                                        },
+                                        icon: const Icon(
+                                            FontAwesomeIcons.solidHeart),
+                                        color: Colors.grey,
+                                      ),
+                                      const Text('0')
+                                    ],
+                                  ),
+                                );
+                              }),
+                          StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection('Post')
+                                  .doc(widget.e.postID)
+                                  .collection('Comment')
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  final commentCount =
+                                      snapshot.data!.docs.length;
+                                  return Flexible(
+                                      child: Row(
+                                    children: [
+                                      IconButton(
+                                          onPressed: () {
+                                            myFocusNode.requestFocus();
+                                          },
+                                          icon: const Icon(
+                                              FontAwesomeIcons.solidComment,
+                                              color: Colors.grey)),
+                                      Text(commentCount.toString())
+                                    ],
+                                  ));
+                                }
+                                return Flexible(
+                                    child: Row(
+                                  children: [
+                                    IconButton(
+                                        onPressed: () {},
+                                        icon: Icon(
+                                          FontAwesomeIcons.comment,
+                                          color: Colors.grey.withOpacity(0.4),
+                                        )),
+                                    const Text('0')
+                                  ],
+                                ));
+                              }),
+                          Flexible(
+                            child: IconButton(
+                              onPressed: () {
+                                share(widget.e.message, widget.e.postName);
+                              },
+                              icon: const Icon(FontAwesomeIcons.shareNodes),
+                              color: Colors.grey,
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
                 ),
               ),
-            ),
+              StreamBuilder<List<CommentModel>>(
+                  stream: readComments(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final data = snapshot.data!;
+                      if (data.isEmpty) {
+                        return const Text('No comment yet...');
+                      }
+                      return ScrollablePositionedList.builder(
+                        shrinkWrap: true,
+                        itemScrollController: itemController,
+                        itemBuilder: (BuildContext context, int index) {
+                          return data.map(createCommentTiles).toList()[index];
+                        },
+                        itemCount: data.length,
+                      );
+                    } else if (snapshot.hasError) {
+                      return const NotFound(
+                          notFoundText: 'Something went wrong');
+                    } else {
+                      return const Center(
+                        child: CupertinoActivityIndicator(),
+                      );
+                    }
+                  }),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -375,7 +389,7 @@ class _CommentState extends State<Comment> {
       .collection('Post')
       .doc(widget.e.postID)
       .collection('Comment')
-      .orderBy('sortKey', descending: true)
+      .orderBy('sortKey', descending: false)
       .snapshots()
       .map((event) =>
           event.docs.map((e) => CommentModel.fromJson(e.data())).toList());

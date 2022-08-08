@@ -8,7 +8,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:icct_lms/components/copy.dart';
 import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/components/nodata.dart';
-import 'package:icct_lms/components/shimmer_loading.dart';
 import 'package:icct_lms/home_pages/qr_scanner.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
@@ -52,11 +51,9 @@ final CollectionReference joinReference =
     FirebaseFirestore.instance.collection('Joined');
 final CollectionReference roomReference =
     FirebaseFirestore.instance.collection('Rooms');
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-final _formKey = GlobalKey<FormState>();
+GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+GlobalKey<FormState> _qrKey = GlobalKey<FormState>();
 final Copy copy = Copy();
-final _classKey = GlobalKey<FormState>();
-final _groupKey = GlobalKey<FormState>();
 
 class _ClassScreenState extends State<ClassScreen>
     with SingleTickerProviderStateMixin {
@@ -113,8 +110,10 @@ class _ClassScreenState extends State<ClassScreen>
                             final classes = snapshot.data!;
 
                             if (classes.isEmpty) {
-                              return  const NoData(noDataText: 'No class yet'
-                                  '...',);
+                              return const NoData(
+                                noDataText: 'No class yet'
+                                    '...',
+                              );
                             }
                             return ListView(
                               children: classes.map(buildUser).toList(),
@@ -137,9 +136,11 @@ class _ClassScreenState extends State<ClassScreen>
                                 final classes = snapshot.data!;
 
                                 if (classes.isEmpty) {
-                                  return  const NoData(noDataText: 'No joined '
-                                      'class yet'
-                                      '...',);
+                                  return const NoData(
+                                    noDataText: 'No joined '
+                                        'class yet'
+                                        '...',
+                                  );
                                 }
                                 return ListView(
                                   children:
@@ -153,8 +154,10 @@ class _ClassScreenState extends State<ClassScreen>
                                 );
                               }
                             })
-                        :  const NoData(noDataText: 'No room yet'
-    '...',),
+                        : const NoData(
+                            noDataText: 'No room yet'
+                                '...',
+                          ),
                 widget.userType == 'Teacher'
                     ? StreamBuilder<List<Group>?>(
                         stream: readGroup(),
@@ -165,8 +168,10 @@ class _ClassScreenState extends State<ClassScreen>
                             final group = snapshot.data!;
 
                             if (group.isEmpty) {
-                              return  const NoData(noDataText: 'No group yet'
-                                  '...',);
+                              return const NoData(
+                                noDataText: 'No group yet'
+                                    '...',
+                              );
                             }
                             return ListView(
                               children: group.map(buildGroup).toList(),
@@ -189,10 +194,12 @@ class _ClassScreenState extends State<ClassScreen>
                                 final classes = snapshot.data!;
 
                                 if (classes.isEmpty) {
-                                  return  const NoData(noDataText: 'No joined'
-                                      ' group '
-                                      'yet'
-                                      '...',);
+                                  return const NoData(
+                                    noDataText: 'No joined'
+                                        ' group '
+                                        'yet'
+                                        '...',
+                                  );
                                 }
                                 return ListView(
                                   children:
@@ -206,8 +213,10 @@ class _ClassScreenState extends State<ClassScreen>
                                 );
                               }
                             })
-                        : const NoData(noDataText: 'No room yet'
-    '...',),
+                        : const NoData(
+                            noDataText: 'No room yet'
+                                '...',
+                          ),
               ],
             ),
             floatingActionButton: SpeedDial(
@@ -283,7 +292,7 @@ class _ClassScreenState extends State<ClassScreen>
                     ],
                   ),
                   content: Form(
-                    key: _formKey,
+                    key: _qrKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -315,9 +324,11 @@ class _ClassScreenState extends State<ClassScreen>
                           controller: teacherUIDController,
                           keyboardType: TextInputType.visiblePassword,
                         ),
-                        const SizedBox(height: 10,),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         TextButton.icon(
-                            onPressed: () async{
+                            onPressed: () async {
                               final data = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -338,98 +349,93 @@ class _ClassScreenState extends State<ClassScreen>
                               } else {
                                 roomType = "Group";
                               }
-                              openJoinDialog(
-                                  roomType, codeController, teacherUIDController);
+                              openJoinDialog(roomType, codeController,
+                                  teacherUIDController);
                             },
-                            icon: const Icon(Icons.qr_code, color: Colors
-                                .black87,),
-                            label: const Text('Join with QR Code', style:
-                             TextStyle(
-                              color: Colors.black54
-                            ),))
+                            icon: const Icon(
+                              Icons.qr_code,
+                              color: Colors.black87,
+                            ),
+                            label: const Text(
+                              'Join with QR Code',
+                              style: TextStyle(color: Colors.black54),
+                            ))
                       ],
                     ),
                   ),
                   actions: [
                     ElevatedButton.icon(
-                        onPressed: () {
-                          codeController.text = '';
-                          teacherUIDController.text = '';
-                          Navigator.pop(context);
-                        },
-                icon: const Icon(Icons.class_), label: const Text
-                ('Cancel'), style: ElevatedButton.styleFrom(
-                primary: Colors.red
-                ),
+                      onPressed: () {
+                        codeController.text = '';
+                        teacherUIDController.text = '';
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.class_),
+                      label: const Text('Cancel'),
+                      style: ElevatedButton.styleFrom(primary: Colors.red),
                     ),
-
                     ElevatedButton.icon(
-                        onPressed: () async {
-
-                          showError(roomType);
-                          if (_formKey.currentState!.validate()) {
-                            setState(() {
-                              isLoading = true;
-                            });
+                      onPressed: () async {
+                        showError(roomType);
+                        if (_qrKey.currentState!.validate()) {
+                          setState(() {
+                            isLoading = true;
+                          });
+                          Navigator.pop(context);
+                          final snapshot = roomReference
+                              .doc(roomType)
+                              .collection(teacherUIDController.text.trim())
+                              .doc(codeController.text.trim());
+                          await snapshot.get().then((value) {
+                            var teacher = value['teacher'];
+                            var roomName = value['name'];
+                            joinReference
+                                .doc(roomType)
+                                .collection(widget.uid)
+                                .doc(codeController.text.trim())
+                                .set({
+                              'userID': widget.uid,
+                              'teacher': teacher,
+                              'roomName': roomName,
+                              'roomType': roomType,
+                              'roomCode': codeController.text.trim(),
+                              'teacherUID': teacherUIDController.text.trim()
+                            }).whenComplete(() async {
                               Navigator.pop(context);
-                              final snapshot = roomReference
-                                  .doc(roomType)
-                                  .collection(teacherUIDController.text.trim())
-                                  .doc(codeController.text.trim());
-                              await snapshot.get()
-                                      .then((value) {
-                                var teacher = value['teacher'];
-                                var roomName = value['name'];
-                                joinReference
-                                    .doc(roomType)
-                                    .collection(widget.uid)
-                                    .doc(codeController.text.trim())
-                                    .set({
-                                  'userID': widget.uid,
-                                  'teacher': teacher,
-                                  'roomName': roomName,
-                                  'roomType': roomType,
-                                  'roomCode': codeController.text.trim(),
-                                  'teacherUID': teacherUIDController.text.trim()
-                                }).whenComplete(() async {
-                                  Navigator.pop(context);
-                                  setState(() {
-                                    isLoading = false;
-                                  });
-                                  final PostService service = PostService();
-                                  await service.addToMember(
-                                      roomType,
-                                      teacherUIDController.text.trim(),
-                                      codeController.text.trim(),
-                                      widget.userName,
-                                      widget.uid,
-                                      widget.userType);
-                                  codeController.text = '';
-                                  teacherUIDController.text = '';
-                                  roomType == "Class"
-                                      ? tabController.animateTo(0,
-                                          duration: const Duration(seconds: 1))
-                                      : tabController.animateTo(1,
-                                          duration: const Duration(seconds: 1));
-                                });
-                              })
-                              .catchError((e)async{
-                                    setState(() {
-                                      isLoading = false;
-                                    });
-                                Navigator.pop(context);
-                                await Future.delayed(const Duration(milliseconds:
-                                500));
-                                showError(roomType);
-                                  });
-
-                          }
-                        },
-                icon: const Icon(Icons.group),
-                label: Text('Join $roomType'), style:
-                ElevatedButton.styleFrom(
-                primary: Colors.blue[900]
-                ),
+                              setState(() {
+                                isLoading = false;
+                              });
+                              final PostService service = PostService();
+                              await service.addToMember(
+                                  roomType,
+                                  teacherUIDController.text.trim(),
+                                  codeController.text.trim(),
+                                  widget.userName,
+                                  widget.uid,
+                                  widget.userType);
+                              codeController.text = '';
+                              teacherUIDController.text = '';
+                              roomType == "Class"
+                                  ? tabController.animateTo(0,
+                                      duration: const Duration(seconds: 1))
+                                  : tabController.animateTo(1,
+                                      duration: const Duration(seconds: 1));
+                            });
+                          }).catchError((e) async {
+                            setState(() {
+                              isLoading = false;
+                            });
+                            Navigator.pop(context);
+                            await Future.delayed(
+                                const Duration(milliseconds: 500));
+                            showError(roomType);
+                          });
+                        }
+                      },
+                      icon: const Icon(Icons.group),
+                      label: Text('Join $roomType'),
+                      style:
+                          ElevatedButton.styleFrom(primary: Colors.blue[900]),
                     ),
                   ],
                 );
@@ -441,7 +447,7 @@ class _ClassScreenState extends State<ClassScreen>
       builder: (context) => AlertDialog(
             title: const Text('Create Class'),
             content: Form(
-              key: _classKey,
+              key: _qrKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -488,59 +494,56 @@ class _ClassScreenState extends State<ClassScreen>
             ),
             actions: [
               ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.red
-                  ),
+                  style: ElevatedButton.styleFrom(primary: Colors.red),
                   icon: const Icon(Icons.exit_to_app),
                   label: const Text('Cancel'),
                   onPressed: () {
                     Navigator.pop(context);
                   }),
               ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                      primary: Colors.blue[900]
-                  ),
-                  icon: const Icon(Icons.class_),
-                  label: const Text('Create Class'),
-                  onPressed: () async {
-                    final classInfo = Class(
-                      classNameController.text.trim(),
-                      classCodeController.text.trim(),
-                      widget.userName,
-                    );
-                    if (_classKey.currentState!.validate()) {
-                      Navigator.pop(context);
-                      setState(() {
-                        isLoading = true;
-                      });
-                      createClass(classInfo);
-                      final ClassService service = ClassService();
-                      await service.switchRestriction("Class", widget.uid,
-                          classCodeController.text.trim(), 'false');
-                      final PostService add = PostService();
-                      await add.addToMember(
-                          'Class',
-                          widget.uid,
-                          classCodeController.text.trim(),
-                          widget.userName,
-                          widget.uid,
-                          widget.userType);
-                      if (!mounted) {
-                        return;
-                      }
-                      copy.showAndCopy(
-                          'You copied ${classCodeController.text.trim()}',
-                          classCodeController.text.trim(),
-                          context,
-                          mounted);
-                      setState(() {
-                        isLoading = false;
-                        classNameController.text = '';
-                        tabController.animateTo(0,
-                            duration: const Duration(seconds: 1));
-                      });
+                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                icon: const Icon(Icons.class_),
+                label: const Text('Create Class'),
+                onPressed: () async {
+                  final classInfo = Class(
+                    classNameController.text.trim(),
+                    classCodeController.text.trim(),
+                    widget.userName,
+                  );
+                  if (_qrKey.currentState!.validate()) {
+                    Navigator.pop(context);
+                    setState(() {
+                      isLoading = true;
+                    });
+                    createClass(classInfo);
+                    final ClassService service = ClassService();
+                    await service.switchRestriction("Class", widget.uid,
+                        classCodeController.text.trim(), 'false');
+                    final PostService add = PostService();
+                    await add.addToMember(
+                        'Class',
+                        widget.uid,
+                        classCodeController.text.trim(),
+                        widget.userName,
+                        widget.uid,
+                        widget.userType);
+                    if (!mounted) {
+                      return;
                     }
-                  },)
+                    copy.showAndCopy(
+                        'You copied ${classCodeController.text.trim()}',
+                        classCodeController.text.trim(),
+                        context,
+                        mounted);
+                    setState(() {
+                      isLoading = false;
+                      classNameController.text = '';
+                      tabController.animateTo(0,
+                          duration: const Duration(seconds: 1));
+                    });
+                  }
+                },
+              )
             ],
           ));
   Future<void> openCreateGroup() => showDialog(
@@ -549,7 +552,7 @@ class _ClassScreenState extends State<ClassScreen>
       builder: (context) => AlertDialog(
             title: const Text('Create Group'),
             content: Form(
-              key: _groupKey,
+              key: _qrKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -594,60 +597,57 @@ class _ClassScreenState extends State<ClassScreen>
             ),
             actions: [
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                    primary: Colors.red
-                ),
+                style: ElevatedButton.styleFrom(primary: Colors.red),
                 icon: const Icon(Icons.exit_to_app),
                 label: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
               ElevatedButton.icon(
-
-                  style: ElevatedButton.styleFrom(
-                      primary: Colors.blue[900]
-                  ),
-                  icon: const Icon(Icons.class_),
-                  label: const Text('Create Group'),
-                  onPressed: () async {
-                    final groupInfo = Group(
-                      groupNameController.text.trim(),
-                      groupCodeController.text.trim(),
-                      widget.userName,
-                    );
-                    if (_groupKey.currentState!.validate()) {
-                      Navigator.pop(context);
-                      setState(() {
-                        isLoading = true;
-                      });
-                      createGroup(groupInfo);
-                      final ClassService service = ClassService();
-                      await service.switchRestriction("Group", widget.uid,
-                          groupCodeController.text.trim(), 'false');
-                      final PostService add = PostService();
-                      await add.addToMember(
-                          'Group',
-                          widget.uid,
-                          groupCodeController.text.trim(),
-                          widget.userName,
-                          widget.uid,
-                          widget.userType);
-                      if (!mounted) {
-                        return;
-                      }
-                      copy.showAndCopy(
-                          'You copied ${groupCodeController.text.trim()}',
-                          groupCodeController.text.trim(),
-                          context,
-                          mounted);
-                      setState(() {
-                        isLoading = false;
-                        groupNameController.text = '';
-                        tabController.animateTo(1,
-                            duration: const Duration(seconds: 1));
-                      });
+                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                icon: const Icon(Icons.class_),
+                label: const Text('Create Group'),
+                onPressed: () async {
+                  final groupInfo = Group(
+                    groupNameController.text.trim(),
+                    groupCodeController.text.trim(),
+                    widget.userName,
+                  );
+                  if (_qrKey.currentState!.validate()) {
+                    Navigator.pop(context);
+                    setState(() {
+                      isLoading = true;
+                    });
+                    createGroup(groupInfo);
+                    final ClassService service = ClassService();
+                    await service.switchRestriction("Group", widget.uid,
+                        groupCodeController.text.trim(), 'false');
+                    final PostService add = PostService();
+                    await add.addToMember(
+                        'Group',
+                        widget.uid,
+                        groupCodeController.text.trim(),
+                        widget.userName,
+                        widget.uid,
+                        widget.userType);
+                    if (!mounted) {
+                      return;
                     }
-                  },)
+                    copy.showAndCopy(
+                        'You copied ${groupCodeController.text.trim()}',
+                        groupCodeController.text.trim(),
+                        context,
+                        mounted);
+                    setState(() {
+                      isLoading = false;
+                      groupNameController.text = '';
+                      tabController.animateTo(1,
+                          duration: const Duration(seconds: 1));
+                    });
+                  }
+                },
+              )
             ],
           ));
 
@@ -736,8 +736,7 @@ class _ClassScreenState extends State<ClassScreen>
                 onTap: () async {
                   final ClassService service = ClassService();
                   final PostService post = PostService();
-                  await service.deleteRoom("Group", widget.uid,
-                      e.code);
+                  await service.deleteRoom("Group", widget.uid, e.code);
                   await post.deleteEachRoomPost(e.code);
                 },
                 child: const Text('Delete'),
@@ -778,8 +777,7 @@ class _ClassScreenState extends State<ClassScreen>
                   onTap: () async {
                     final ClassService service = ClassService();
                     final PostService post = PostService();
-                    await service.deleteRoom("Class", widget.uid,
-                        e.code);
+                    await service.deleteRoom("Class", widget.uid, e.code);
                     await post.deleteEachRoomPost(e.code);
                   },
                   child: const Text('Delete'),
@@ -819,7 +817,8 @@ class _ClassScreenState extends State<ClassScreen>
                 PopupMenuItem(
                   onTap: () {
                     final Joined join = Joined(uid: widget.uid);
-                    join.deleteJoin(e.roomType, e.roomCode, e.userID, e.teacherUID);
+                    join.deleteJoin(
+                        e.roomType, e.roomCode, e.userID, e.teacherUID);
                   },
                   child: Text('Leave ${e.roomType}'),
                 )
@@ -858,7 +857,8 @@ class _ClassScreenState extends State<ClassScreen>
                 PopupMenuItem(
                   onTap: () {
                     final Joined join = Joined(uid: widget.uid);
-                    join.deleteJoin(e.roomType, e.roomCode, e.userID, e.teacherUID);
+                    join.deleteJoin(
+                        e.roomType, e.roomCode, e.userID, e.teacherUID);
                   },
                   child: Text('Leave ${e.roomType}'),
                 )
