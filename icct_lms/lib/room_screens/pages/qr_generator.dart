@@ -74,7 +74,7 @@ class _QrGeneratorState extends State<QrGenerator> {
 
                 }, label: const Text
                   ('Capture'), icon: const Icon(Icons.camera), style: ElevatedButton.styleFrom(
-                    primary: Colors.blue[900]
+                    backgroundColor: Colors.blue[900]
                 ),),
               ),
               SizedBox(
@@ -88,7 +88,7 @@ class _QrGeneratorState extends State<QrGenerator> {
                 }, label: const Text
                     ('Share'), icon: const Icon(Icons.share),
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.blue[900]
+                    backgroundColor: Colors.blue[900]
                   ),),
               )
             ],

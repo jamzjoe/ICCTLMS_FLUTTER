@@ -169,7 +169,7 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               TextButton(
                   onPressed: () async {
                     await _auth.signOut();
-                    if(!mounted){
+                    if (!mounted) {
                       return;
                     }
                     Navigator.pop(context);

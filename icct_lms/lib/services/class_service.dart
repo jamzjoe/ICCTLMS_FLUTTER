@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
 
-class ClassService{
+class ClassService {
   Future createClass(Class classInfo, String userID, String roomCode) async {
     final docUser = FirebaseFirestore.instance
         .collection('Rooms')
@@ -23,7 +23,7 @@ class ClassService{
     await docUser.set(json);
   }
 
-  Future deleteRoom(String roomType, String userID, String roomCode)async{
+  Future deleteRoom(String roomType, String userID, String roomCode) async {
     final docUser = FirebaseFirestore.instance
         .collection('Rooms')
         .doc(roomType)
@@ -43,21 +43,23 @@ class ClassService{
     });
   }
 
-  Future switchRestriction(String roomType, String userID, String roomCode,
-      String restrict)
-  async {
+  Future switchRestriction(
+      String roomType, String userID, String roomCode, String restrict) async {
     final docUser = FirebaseFirestore.instance
         .collection('Rooms')
         .doc(roomType)
         .collection(userID)
         .doc(roomCode);
-    await docUser.update({'restriction': restrict, 'virtual': '', 'attendance': ''
-        ''});
+    await docUser.update({
+      'restriction': restrict,
+      'virtual': '',
+      'attendance': ''
+          ''
+    });
   }
 
   Future updateLinks(String roomType, String userID, String roomCode,
-      String virtual, String attendance)
-  async {
+      String virtual, String attendance) async {
     final docUser = FirebaseFirestore.instance
         .collection('Rooms')
         .doc(roomType)

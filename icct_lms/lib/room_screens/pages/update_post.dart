@@ -81,8 +81,10 @@ class postTextField extends StatelessWidget {
           Form(
             key: _formKey,
             child: TextFormField(
-              validator: (value) => value!.length < 5 ? 'Cannot post less '
-                  'thank 5 chars long.' : null,
+              validator: (value) => value!.length < 5
+                  ? 'Cannot post less '
+                      'thank 5 chars long.'
+                  : null,
               maxLines: null,
               controller: messageController,
               decoration: const InputDecoration(
@@ -98,23 +100,28 @@ class postTextField extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ElevatedButton(
-                  style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[900]),
                   onPressed: () async {
                     final PostService post = PostService();
-                   if(_formKey.currentState!.validate()){
-                     try {
-                       await post.updatePublicPost(widget
-                           .roomType, widget.roomCode,
-                           messageController.text.trim(),
-                           widget.userName, widget.uid,
-                           widget.userType, widget.postID, widget.roomName);
-                     } catch (e) {
-                       Navigator.pop(context);
-                     } finally {
-                       messageController.text = '';
-                       Navigator.pop(context);
-                     }
-                   }
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        await post.updatePublicPost(
+                            widget.roomType,
+                            widget.roomCode,
+                            messageController.text.trim(),
+                            widget.userName,
+                            widget.uid,
+                            widget.userType,
+                            widget.postID,
+                            widget.roomName);
+                      } catch (e) {
+                        Navigator.pop(context);
+                      } finally {
+                        messageController.text = '';
+                        Navigator.pop(context);
+                      }
+                    }
                   },
                   child: const Text('Post'))
             ],

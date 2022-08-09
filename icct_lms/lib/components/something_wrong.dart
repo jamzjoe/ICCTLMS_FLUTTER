@@ -8,9 +8,7 @@ class SomethingWrong extends StatelessWidget {
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Lottie.asset('assets/something_wrong.json', width: 200)
-        ],
+        children: [Lottie.asset('assets/something_wrong.json', width: 200)],
       ),
     );
   }

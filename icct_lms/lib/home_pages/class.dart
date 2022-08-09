@@ -1,20 +1,19 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:icct_lms/components/copy.dart';
 import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/home_pages/qr_scanner.dart';
+import 'package:icct_lms/home_pages/streams/studentJoinedClassStream.dart';
+import 'package:icct_lms/home_pages/streams/studentJoinedGroupStream.dart';
+import 'package:icct_lms/home_pages/streams/teacherClassStream.dart';
+import 'package:icct_lms/home_pages/streams/teacherGroupStream.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/group_model.dart';
-import 'package:icct_lms/models/joined_model.dart';
-import 'package:icct_lms/room_screens/room.dart';
 import 'package:icct_lms/services/class_service.dart';
-import 'package:icct_lms/services/join.dart';
 import 'package:icct_lms/services/post.dart';
 import 'package:lottie/lottie.dart';
 import 'package:uuid/uuid.dart';
@@ -101,118 +100,19 @@ class _ClassScreenState extends State<ClassScreen>
               controller: tabController,
               children: [
                 widget.userType == 'Teacher'
-                    ? StreamBuilder<List<Class>?>(
-                        stream: readClass(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return const Text('Something went wrong');
-                          } else if (snapshot.hasData) {
-                            final classes = snapshot.data!;
-
-                            if (classes.isEmpty) {
-                              return const NoData(
-                                noDataText: 'No class yet'
-                                    '...',
-                              );
-                            }
-                            return ListView(
-                              children: classes.map(buildUser).toList(),
-                            );
-                          } else {
-                            return Center(
-                              child: SpinKitFadingCircle(
-                                color: Colors.blue[900],
-                              ),
-                            );
-                          }
-                        })
+                    ? TeacherClassStream(widget: widget, context: context)
                     : widget.userType == 'Student'
-                        ? StreamBuilder<List<JoinedModel>?>(
-                            stream: readJoinedClass(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return const Text('Something went wrong');
-                              } else if (snapshot.hasData) {
-                                final classes = snapshot.data!;
-
-                                if (classes.isEmpty) {
-                                  return const NoData(
-                                    noDataText: 'No joined '
-                                        'class yet'
-                                        '...',
-                                  );
-                                }
-                                return ListView(
-                                  children:
-                                      classes.map(buildClassList).toList(),
-                                );
-                              } else {
-                                return Center(
-                                  child: SpinKitFadingCircle(
-                                    color: Colors.blue[900],
-                                  ),
-                                );
-                              }
-                            })
+                        ? StudentJoinedClassStream(
+                            widget: widget, context: context)
                         : const NoData(
                             noDataText: 'No room yet'
                                 '...',
                           ),
                 widget.userType == 'Teacher'
-                    ? StreamBuilder<List<Group>?>(
-                        stream: readGroup(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) {
-                            return const Text('Something went wrong');
-                          } else if (snapshot.hasData) {
-                            final group = snapshot.data!;
-
-                            if (group.isEmpty) {
-                              return const NoData(
-                                noDataText: 'No group yet'
-                                    '...',
-                              );
-                            }
-                            return ListView(
-                              children: group.map(buildGroup).toList(),
-                            );
-                          } else {
-                            return Center(
-                              child: SpinKitFadingCircle(
-                                color: Colors.blue[900],
-                              ),
-                            );
-                          }
-                        })
+                    ? TeacherGroupStream(widget: widget, context: context)
                     : widget.userType == 'Student'
-                        ? StreamBuilder<List<JoinedModel>?>(
-                            stream: readJoinGroup(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return const Text('Something went wrong');
-                              } else if (snapshot.hasData) {
-                                final classes = snapshot.data!;
-
-                                if (classes.isEmpty) {
-                                  return const NoData(
-                                    noDataText: 'No joined'
-                                        ' group '
-                                        'yet'
-                                        '...',
-                                  );
-                                }
-                                return ListView(
-                                  children:
-                                      classes.map(buildGroupList).toList(),
-                                );
-                              } else {
-                                return Center(
-                                  child: SpinKitFadingCircle(
-                                    color: Colors.blue[900],
-                                  ),
-                                );
-                              }
-                            })
+                        ? StudentJoinedGroupStream(
+                            context: context, widget: widget)
                         : const NoData(
                             noDataText: 'No room yet'
                                 '...',
@@ -372,7 +272,8 @@ class _ClassScreenState extends State<ClassScreen>
                       },
                       icon: const Icon(Icons.class_),
                       label: const Text('Cancel'),
-                      style: ElevatedButton.styleFrom(primary: Colors.red),
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     ),
                     ElevatedButton.icon(
                       onPressed: () async {
@@ -434,8 +335,8 @@ class _ClassScreenState extends State<ClassScreen>
                       },
                       icon: const Icon(Icons.group),
                       label: Text('Join $roomType'),
-                      style:
-                          ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[900]),
                     ),
                   ],
                 );
@@ -494,14 +395,15 @@ class _ClassScreenState extends State<ClassScreen>
             ),
             actions: [
               ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(primary: Colors.red),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   icon: const Icon(Icons.exit_to_app),
                   label: const Text('Cancel'),
                   onPressed: () {
                     Navigator.pop(context);
                   }),
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: Colors.blue[900]),
                 icon: const Icon(Icons.class_),
                 label: const Text('Create Class'),
                 onPressed: () async {
@@ -597,7 +499,7 @@ class _ClassScreenState extends State<ClassScreen>
             ),
             actions: [
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(primary: Colors.red),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 icon: const Icon(Icons.exit_to_app),
                 label: const Text('Cancel'),
                 onPressed: () {
@@ -605,7 +507,8 @@ class _ClassScreenState extends State<ClassScreen>
                 },
               ),
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: Colors.blue[900]),
                 icon: const Icon(Icons.class_),
                 label: const Text('Create Group'),
                 onPressed: () async {
@@ -651,38 +554,6 @@ class _ClassScreenState extends State<ClassScreen>
             ],
           ));
 
-  //streams
-  Stream<List<Class>> readClass() => FirebaseFirestore.instance
-      .collection('Rooms')
-      .doc('Class')
-      .collection(widget.uid)
-      .snapshots()
-      .map((snapshot) =>
-          snapshot.docs.map((doc) => Class.fromJson(doc.data())).toList());
-  Stream<List<Group>> readGroup() => FirebaseFirestore.instance
-      .collection('Rooms')
-      .doc('Group')
-      .collection(widget.uid)
-      .snapshots()
-      .map((snapshot) =>
-          snapshot.docs.map((doc) => Group.fromJson(doc.data())).toList());
-  Stream<List<JoinedModel>> readJoinedClass() => FirebaseFirestore.instance
-      .collection('Joined')
-      .doc('Class')
-      .collection(widget.uid)
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => JoinedModel.fromJson(doc.data()))
-          .toList());
-  Stream<List<JoinedModel>> readJoinGroup() => FirebaseFirestore.instance
-      .collection('Joined')
-      .doc('Group')
-      .collection(widget.uid)
-      .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => JoinedModel.fromJson(doc.data()))
-          .toList());
-
   //create
   Future createClass(Class classInfo) async {
     final docUser = FirebaseFirestore.instance
@@ -703,168 +574,6 @@ class _ClassScreenState extends State<ClassScreen>
     final json = groupInfo.toJson();
     await docUser.set(json);
   }
-
-  Widget buildGroup(Group e) => Card(
-        child: ListTile(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => Room(
-                      uid: widget.uid,
-                      teacherUID: widget.uid,
-                      userName: widget.userName,
-                      teacher: e.teacher,
-                      roomCode: e.code,
-                      roomName: e.name,
-                      roomType: 'Group',
-                      userType: 'Teacher',
-                    )));
-          },
-          leading: CircleAvatar(
-            radius: 25,
-            backgroundColor: Colors.redAccent,
-            child: Text(
-              e.name.substring(0, 2).toUpperCase(),
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700, color: Colors.white),
-            ),
-          ),
-          title: Text(e.name),
-          subtitle: Text('Teacher: ${e.teacher}'),
-          trailing: PopupMenuButton(
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                onTap: () async {
-                  final ClassService service = ClassService();
-                  final PostService post = PostService();
-                  await service.deleteRoom("Group", widget.uid, e.code);
-                  await post.deleteEachRoomPost(e.code);
-                },
-                child: const Text('Delete'),
-              )
-            ],
-          ),
-        ),
-      );
-  Widget buildUser(Class e) => Card(
-        child: ListTile(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Room(
-                        uid: widget.uid,
-                        userName: widget.userName,
-                        teacherUID: widget.uid,
-                        teacher: e.teacher,
-                        roomName: e.name,
-                        roomType: 'Class',
-                        roomCode: e.code,
-                        userType: 'Teacher',
-                      )));
-            },
-            leading: CircleAvatar(
-              radius: 25,
-              backgroundColor: Colors.blue[900],
-              child: Text(
-                e.name.substring(0, 2).toUpperCase(),
-                style: const TextStyle(
-                    fontWeight: FontWeight.w700, color: Colors.white),
-              ),
-            ),
-            title: Text(e.name),
-            subtitle: Text('Teacher: ${e.teacher}'),
-            trailing: PopupMenuButton(
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  onTap: () async {
-                    final ClassService service = ClassService();
-                    final PostService post = PostService();
-                    await service.deleteRoom("Class", widget.uid, e.code);
-                    await post.deleteEachRoomPost(e.code);
-                  },
-                  child: const Text('Delete'),
-                )
-              ],
-            )),
-      );
-
-  Widget buildClassList(JoinedModel e) => Card(
-        child: ListTile(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Room(
-                        uid: widget.uid,
-                        userName: widget.userName,
-                        teacherUID: e.teacherUID,
-                        teacher: e.teacher,
-                        roomName: e.roomName,
-                        roomType: e.roomType,
-                        roomCode: e.roomCode,
-                        userType: 'Student',
-                      )));
-            },
-            leading: CircleAvatar(
-              radius: 25,
-              backgroundColor: Colors.blue[900],
-              child: Text(
-                e.roomName.substring(0, 2).toUpperCase(),
-                style: const TextStyle(
-                    fontWeight: FontWeight.w700, color: Colors.white),
-              ),
-            ),
-            title: Text(e.roomName),
-            subtitle: Text('Teacher: ${e.teacher}'),
-            trailing: PopupMenuButton(
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  onTap: () {
-                    final Joined join = Joined(uid: widget.uid);
-                    join.deleteJoin(
-                        e.roomType, e.roomCode, e.userID, e.teacherUID);
-                  },
-                  child: Text('Leave ${e.roomType}'),
-                )
-              ],
-            )),
-      );
-
-  Widget buildGroupList(JoinedModel e) => Card(
-        child: ListTile(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Room(
-                        uid: widget.uid,
-                        userName: widget.userName,
-                        teacherUID: e.teacherUID,
-                        teacher: e.teacher,
-                        roomName: e.roomName,
-                        roomType: e.roomType,
-                        roomCode: e.roomCode,
-                        userType: 'Student',
-                      )));
-            },
-            leading: CircleAvatar(
-              radius: 25,
-              backgroundColor: Colors.redAccent,
-              child: Text(
-                e.roomName.substring(0, 2).toUpperCase(),
-                style: const TextStyle(
-                    fontWeight: FontWeight.w700, color: Colors.white),
-              ),
-            ),
-            title: Text(e.roomName),
-            subtitle: Text('Teacher: ${e.teacher}'),
-            trailing: PopupMenuButton(
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  onTap: () {
-                    final Joined join = Joined(uid: widget.uid);
-                    join.deleteJoin(
-                        e.roomType, e.roomCode, e.userID, e.teacherUID);
-                  },
-                  child: Text('Leave ${e.roomType}'),
-                )
-              ],
-            )),
-      );
 
   Future showError(String roomType) => showDialog(
       context: _scaffoldKey.currentContext!,
