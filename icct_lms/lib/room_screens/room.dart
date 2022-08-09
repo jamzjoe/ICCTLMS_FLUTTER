@@ -1,10 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/components/something_wrong.dart';
 import 'package:icct_lms/room_screens/pages/folder.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
@@ -79,8 +76,9 @@ class _RoomState extends State<Room> {
                           onPressed: () async {
                             final data = snapshot.data!;
 
-                            final attendance = data['attendance'] ?? "Empty "
-                                "attendance";
+                            final attendance = data['attendance'] ??
+                                "Empty "
+                                    "attendance";
                             attendanceController.text = attendance;
                             await buildDialogForUpdates(
                                 widget.roomType,
@@ -105,22 +103,21 @@ class _RoomState extends State<Room> {
                       return IconButton(
                           onPressed: () async {
                             final data = snapshot.data!;
-                            final virtual = data['virtual'] ?? "Empty "
-                                "virtual meeting link";
+                            final virtual = data['virtual'] ??
+                                "Empty "
+                                    "virtual meeting link";
                             virtualController.text = virtual;
 
-
-                             await buildDialogForUpdates(
-                                  widget.roomType,
-                                  widget.roomName,
-                                  currentUserID,
-                                  currentUserID,
-                                  widget.teacher,
-                                  "Virtual Meeting",
-                                  widget.roomCode,
-                                  virtualController,
-                                  virtual);
-
+                            await buildDialogForUpdates(
+                                widget.roomType,
+                                widget.roomName,
+                                currentUserID,
+                                currentUserID,
+                                widget.teacher,
+                                "Virtual Meeting",
+                                widget.roomCode,
+                                virtualController,
+                                virtual);
                           },
                           icon: const Icon(
                             FontAwesomeIcons.video,
@@ -182,17 +179,15 @@ class _RoomState extends State<Room> {
                       roomType: widget.roomType,
                       userName: widget.userName),
                   RoomSettings(
-                          uid: widget.uid,
-                          roomCode: widget.roomCode,
-                          roomName: widget.roomName,
-                          teacherUID: widget.teacherUID,
-                          teacher: widget.teacher,
-                          userType: widget.userType,
-                          roomType: widget.roomType,
-                          userName: widget.userName,
-                        )
-                      ,
-
+                    uid: widget.uid,
+                    roomCode: widget.roomCode,
+                    roomName: widget.roomName,
+                    teacherUID: widget.teacherUID,
+                    teacher: widget.teacher,
+                    userType: widget.userType,
+                    roomType: widget.roomType,
+                    userName: widget.userName,
+                  ),
                 ],
               ),
             ),
@@ -270,14 +265,14 @@ class _RoomState extends State<Room> {
                     visible: widget.userType == 'Teacher',
                     child: TextButton(
                         onPressed: () async {
-                         final ClassService service = ClassService();
-                         Navigator.pop(context);
-                         await service.updateLinks(roomType, widget.teacherUID,
-                             roomCode,
-                             virtualController.text.trim(), attendanceController
-                                 .text
-                                 .trim());
-
+                          final ClassService service = ClassService();
+                          Navigator.pop(context);
+                          await service.updateLinks(
+                              roomType,
+                              widget.teacherUID,
+                              roomCode,
+                              virtualController.text.trim(),
+                              attendanceController.text.trim());
                         },
                         child: controller.text.isEmpty
                             ? const Text('Add Link')
@@ -307,7 +302,11 @@ class _RoomState extends State<Room> {
       String attendance,
       String roomType,
       String teacherUID) async {
-    await addLinks.doc(roomType).collection(widget.teacherUID).doc(roomCode).set({
+    await addLinks
+        .doc(roomType)
+        .collection(widget.teacherUID)
+        .doc(roomCode)
+        .set({
       'code': roomCode,
       'name': roomName,
       'teacher': teacher,

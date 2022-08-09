@@ -115,8 +115,8 @@ class _postTextFieldState extends State<postTextField> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                        style:
-                            ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[900]),
                         onPressed: () async {
                           final PostService post = PostService();
                           final data = snapshot.data!;

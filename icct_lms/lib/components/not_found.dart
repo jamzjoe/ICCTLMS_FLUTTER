@@ -11,7 +11,8 @@ class NotFound extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Lottie.asset('assets/404.json', width: 200),
-          Text(notFoundText,
+          Text(
+            notFoundText,
             style: const TextStyle(fontSize: 15),
           )
         ],

@@ -3,11 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/components/not_found.dart';
 import 'package:icct_lms/room_screens/pages/qr_generator.dart';
 import 'package:icct_lms/services/class_service.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 class RoomSettings extends StatefulWidget {
   const RoomSettings(
@@ -44,50 +42,49 @@ class _RoomSettingsState extends State<RoomSettings> {
       body: StreamBuilder<DocumentSnapshot>(
           stream: readSettings(),
           builder: (context, snapshot) {
-
-             if(snapshot.hasData){
-                // ignore: control_flow_in_finally
-               final data = snapshot.data!;
-               if(!data.exists){
-                 return const NotFound(notFoundText: 'This room is deleted');
-               }
-                return Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ListView(
-                          children: [
-                            Visibility(
-                              visible: widget.userType == 'Teacher',
-                              child: buildSettingsTile(
-                                  'Allow student to post',
-                                  snapshot.data!['restriction'] == 'false'
-                                      ? true
-                                      : false),
-                            ),
-                            buildCopy(widget.roomCode, 'Copy room code', 'Roo'
-                                'm Code'),
-                            buildCopy(widget.teacherUID, 'Copy teacher UID',
-                                "Teacher UID"),
-                            buildQRGenerator(widget.roomCode, widget
-                                .teacherUID)
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              }else{
-            return Center(
-            child: SpinKitFadingCircle(
-            color: Colors.blue[900],
-            ),
-            );
+            if (snapshot.hasData) {
+              // ignore: control_flow_in_finally
+              final data = snapshot.data!;
+              if (!data.exists) {
+                return const NotFound(notFoundText: 'This room is deleted');
+              }
+              return Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          Visibility(
+                            visible: widget.userType == 'Teacher',
+                            child: buildSettingsTile(
+                                'Allow student to post',
+                                snapshot.data!['restriction'] == 'false'
+                                    ? true
+                                    : false),
+                          ),
+                          buildCopy(
+                              widget.roomCode,
+                              'Copy room code',
+                              'Roo'
+                                  'm Code'),
+                          buildCopy(widget.teacherUID, 'Copy teacher UID',
+                              "Teacher UID"),
+                          buildQRGenerator(widget.roomCode, widget.teacherUID)
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              );
+            } else {
+              return Center(
+                child: SpinKitFadingCircle(
+                  color: Colors.blue[900],
+                ),
+              );
             }
-
-
           }),
     );
   }
@@ -113,37 +110,38 @@ class _RoomSettingsState extends State<RoomSettings> {
           .snapshots();
 
   Widget buildCopy(String copy, String title, String subtitle) => Card(
-    child: ListTile(
-      subtitle: Text(copy),
-      title: Text(title),
-      trailing: IconButton(
-          onPressed: () async {
-            await FlutterClipboard.copy(copy);
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('You copied ID:$copy'),
-                duration: const Duration(milliseconds: 1000),
-              ),
-            );
-          },
-          icon: const Icon(
-            Icons.copy_outlined,
-            size: 20,
-            color: Colors.black54,
-          ))
-    ),
-  );
+        child: ListTile(
+            subtitle: Text(copy),
+            title: Text(title),
+            trailing: IconButton(
+                onPressed: () async {
+                  await FlutterClipboard.copy(copy);
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('You copied ID:$copy'),
+                      duration: const Duration(milliseconds: 1000),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.copy_outlined,
+                  size: 20,
+                  color: Colors.black54,
+                ))),
+      );
 
   Widget buildQRGenerator(String roomCode, String teacherUID) => Card(
-    child: ListTile(
-      onTap: (){
-        Navigator.push(context, MaterialPageRoute(builder: (context) => QrGenerator(roomCode: roomCode, teacherUID: teacherUID)));
-      },
-      title: const Text('Generate QR Code'),
-      trailing: const Icon(Icons.qr_code),
-    ),
-  );
-
-
+        child: ListTile(
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => QrGenerator(
+                        roomCode: roomCode, teacherUID: teacherUID)));
+          },
+          title: const Text('Generate QR Code'),
+          trailing: const Icon(Icons.qr_code),
+        ),
+      );
 }

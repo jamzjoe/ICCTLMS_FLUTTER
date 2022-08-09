@@ -1,6 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:icct_lms/home_pages/profile.dart';
 import 'package:icct_lms/models/user_model.dart';
 import 'package:icct_lms/services/database.dart';
 
@@ -63,8 +61,8 @@ class AuthService {
       User? user = result.user;
 
       //update user info for new user
-      await DatabaseService(uid: user!.uid)
-          .updateUserDetails(username, emailAddress, campus, userType, user.uid);
+      await DatabaseService(uid: user!.uid).updateUserDetails(
+          username, emailAddress, campus, userType, user.uid);
       return _userFromFirebaseUser(user);
     } on FirebaseAuthException catch (e) {
       error = e.message.toString();

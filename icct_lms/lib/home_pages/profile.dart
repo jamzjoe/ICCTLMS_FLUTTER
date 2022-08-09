@@ -105,7 +105,6 @@ class _ProfileState extends State<Profile> {
           const SizedBox(
             height: 10,
           ),
-
           Visibility(
               visible: showTextField,
               child: Form(
@@ -164,7 +163,8 @@ class _ProfileState extends State<Profile> {
           Visibility(
             visible: updateButton,
             child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: Colors.blue[900]),
                 onPressed: () {
                   setState(() {
                     showTextField = true;
@@ -181,7 +181,8 @@ class _ProfileState extends State<Profile> {
           Visibility(
             visible: submitButton,
             child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(primary: Colors.blue[900]),
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: Colors.blue[900]),
                 onPressed: () {
                   showAlert();
                 },
@@ -248,16 +249,11 @@ class _ProfileState extends State<Profile> {
             ],
           ));
 
-  Future openBrowserUrl(String url, bool inApp) async{
-    try{
-      await launch(
-        url,
-        forceWebView: inApp,
-        forceSafariVC: true,
-        enableJavaScript: true
-
-      );
-    }catch(e){
+  Future openBrowserUrl(String url, bool inApp) async {
+    try {
+      await launch(url,
+          forceWebView: inApp, forceSafariVC: true, enableJavaScript: true);
+    } catch (e) {
       return;
     }
   }

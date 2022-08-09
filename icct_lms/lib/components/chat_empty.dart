@@ -7,13 +7,13 @@ class ChatLoad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Lottie.asset('assets/chat.json', width: 200),
-            const Text('No messages yet...')
-          ],
-        ),
-      );
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset('assets/chat.json', width: 200),
+          const Text('No messages yet...')
+        ],
+      ),
+    );
   }
 }

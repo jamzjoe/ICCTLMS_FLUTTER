@@ -11,7 +11,8 @@ class NoData extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Lottie.asset('assets/no_room.json', width: 200),
-           Text(noDataText,
+          Text(
+            noDataText,
             style: const TextStyle(fontSize: 15),
           )
         ],
