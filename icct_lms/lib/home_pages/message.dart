@@ -25,8 +25,11 @@ class MessageScreen extends StatefulWidget {
   State<MessageScreen> createState() => _MessageScreenState();
 }
 
+final _searchController = TextEditingController();
+
 class _MessageScreenState extends State<MessageScreen> {
   int badgeCount = 0;
+  List<UserInfo> userData = [];
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +39,27 @@ class _MessageScreenState extends State<MessageScreen> {
           if (snapshot.hasData) {
             final data = snapshot.data!;
             if (data.isEmpty) {
-              return const NotFound(notFoundText: 'Contacts not found');
+              return Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    child: TextField(
+                      onChanged: (value) {
+                        searchUser(value, data);
+                      },
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search),
+                          hintText: 'Search User',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide:
+                                  const BorderSide(color: Colors.blue))),
+                    ),
+                  ),
+                  const NotFound(notFoundText: 'Contacts not found'),
+                ],
+              );
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,11 +87,28 @@ class _MessageScreenState extends State<MessageScreen> {
                           ),
                   ),
                 ),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  child: TextField(
+                    onChanged: (value) {
+                      searchUser(value, data);
+                    },
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search),
+                        hintText: 'Search User',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: Colors.blue))),
+                  ),
+                ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ListView(
-                      children: data.map(buildListTileForStudent).toList(),
+                      children: userData.isEmpty
+                          ? data.map(buildListTileForStudent).toList()
+                          : userData.map(buildListTileForStudent).toList(),
                     ),
                   ),
                 ),
@@ -151,4 +191,22 @@ class _MessageScreenState extends State<MessageScreen> {
           ),
         ),
       );
+
+  void searchUser(String query, List<UserInfo> data) {
+    final suggestions = data.where(((value) {
+      final name = value.name.toLowerCase();
+      final input = query.toLowerCase();
+
+      return name.contains(input);
+    })).toList();
+    if (query.isEmpty) {
+      setState(() {
+        userData = [];
+      });
+    } else {
+      setState(() {
+        userData = suggestions;
+      });
+    }
+  }
 }
