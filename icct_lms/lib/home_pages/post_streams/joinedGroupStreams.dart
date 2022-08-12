@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/components/not_found.dart';
 import 'package:icct_lms/home_pages/home.dart';
@@ -7,12 +8,21 @@ import 'package:icct_lms/home_pages/post_streams/tiles/post_tiles.dart';
 import 'package:icct_lms/models/joined_model.dart';
 import 'package:icct_lms/models/post_model.dart';
 
-class JoinedGroupStreams extends StatelessWidget {
+class JoinedGroupStreams extends StatefulWidget {
   const JoinedGroupStreams(
       {Key? key, required this.widget, required this.context})
       : super(key: key);
   final HomeScreen widget;
   final BuildContext context;
+
+  @override
+  State<JoinedGroupStreams> createState() => _JoinedGroupStreamsState();
+}
+
+List<PostModel> searchQuery = [];
+final _searchController = TextEditingController();
+
+class _JoinedGroupStreamsState extends State<JoinedGroupStreams> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<JoinedModel>>(
@@ -36,10 +46,37 @@ class JoinedGroupStreams extends StatelessWidget {
                               '...');
                     }
                     return ListView(
-                      children: post
-                          .map((e) => createTiles(
-                              e: e, context: context, widget: widget))
-                          .toList(),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          child: TextField(
+                            onChanged: (value) {
+                              searchPost(value, post);
+                            },
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.search),
+                                hintText: 'Search post',
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide:
+                                        const BorderSide(color: Colors.blue))),
+                          ),
+                        ),
+                        ...searchQuery.isEmpty
+                            ? post
+                                .map((e) => createTiles(
+                                    e: e,
+                                    context: context,
+                                    widget: widget.widget))
+                                .toList()
+                            : searchQuery
+                                .map((e) => createTiles(
+                                    e: e,
+                                    context: context,
+                                    widget: widget.widget))
+                                .toList()
+                      ],
                     );
                   } else if (snapshot.hasError) {
                     return const NotFound(notFoundText: 'Something went wrong');
@@ -63,7 +100,7 @@ class JoinedGroupStreams extends StatelessWidget {
     return FirebaseFirestore.instance
         .collection('Joined')
         .doc('Group')
-        .collection(widget.uid)
+        .collection(widget.widget.uid)
         .snapshots()
         .map((event) =>
             event.docs.map((e) => JoinedModel.fromJson(e.data())).toList());
@@ -78,5 +115,23 @@ class JoinedGroupStreams extends StatelessWidget {
         .map((snapshot) => snapshot.docs
             .map((doc) => PostModel.fromJson(doc.data()))
             .toList());
+  }
+
+  void searchPost(String query, List<PostModel> data) {
+    final suggestions = data.where(((value) {
+      final name = value.message.toLowerCase();
+      final input = query.toLowerCase();
+
+      return name.contains(input);
+    })).toList();
+    if (query.isEmpty) {
+      setState(() {
+        searchQuery = data;
+      });
+    } else {
+      setState(() {
+        searchQuery = suggestions;
+      });
+    }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/components/not_found.dart';
 import 'package:icct_lms/home_pages/home.dart';
@@ -7,9 +8,18 @@ import 'package:icct_lms/home_pages/post_streams/tiles/post_tiles.dart';
 import 'package:icct_lms/models/class_model.dart';
 import 'package:icct_lms/models/post_model.dart';
 
-class PostStreams extends StatelessWidget {
+class PostStreams extends StatefulWidget {
   const PostStreams({Key? key, required this.widget}) : super(key: key);
   final HomeScreen widget;
+
+  @override
+  State<PostStreams> createState() => _PostStreamsState();
+}
+
+List<PostModel> searchQuery = [];
+final _searchController = TextEditingController();
+
+class _PostStreamsState extends State<PostStreams> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Class>>(
@@ -33,10 +43,37 @@ class PostStreams extends StatelessWidget {
                               '...');
                     }
                     return ListView(
-                      children: post
-                          .map((e) => createTiles(
-                              e: e, context: context, widget: widget))
-                          .toList(),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          child: TextField(
+                            onChanged: (value) {
+                              searchPost(value, post);
+                            },
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.search),
+                                hintText: 'Search post',
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide:
+                                        const BorderSide(color: Colors.blue))),
+                          ),
+                        ),
+                        ...searchQuery.isEmpty
+                            ? post
+                                .map((e) => createTiles(
+                                    e: e,
+                                    context: context,
+                                    widget: widget.widget))
+                                .toList()
+                            : searchQuery
+                                .map((e) => createTiles(
+                                    e: e,
+                                    context: context,
+                                    widget: widget.widget))
+                                .toList()
+                      ],
                     );
                   } else if (snapshot.hasError) {
                     return const NotFound(notFoundText: 'Something went wrong');
@@ -60,10 +97,28 @@ class PostStreams extends StatelessWidget {
     return FirebaseFirestore.instance
         .collection('Rooms')
         .doc('Class')
-        .collection(widget.uid)
+        .collection(widget.widget.uid)
         .snapshots()
         .map((event) =>
             event.docs.map((e) => Class.fromJson(e.data())).toList());
+  }
+
+  void searchPost(String query, List<PostModel> data) {
+    final suggestions = data.where(((value) {
+      final name = value.message.toLowerCase();
+      final input = query.toLowerCase();
+
+      return name.contains(input);
+    })).toList();
+    if (query.isEmpty) {
+      setState(() {
+        searchQuery = data;
+      });
+    } else {
+      setState(() {
+        searchQuery = suggestions;
+      });
+    }
   }
 }
 

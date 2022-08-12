@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:icct_lms/pages/choose_type_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,8 +16,6 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) {
       return;
     }
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const ChooseUser()));
   }
 
   @override
