@@ -46,12 +46,10 @@ var campus = [
   'Antipolo Campus',
   'Binangonan Campus',
 ];
-var usertype = [
-  'Teacher',
-  'Student'
-];
+var usertype = ['Teacher', 'Student'];
 
 String? selectedUserType = '';
+String? finalName = '';
 
 class _ProfileState extends State<Profile> {
   @override
@@ -59,12 +57,13 @@ class _ProfileState extends State<Profile> {
     // TODO: implement initState
     selectedCampus = widget.school;
     selectedUserType = widget.userType;
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
     nameController.text = widget.name;
     emailController.text = widget.email;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -189,7 +188,7 @@ class _ProfileState extends State<Profile> {
                           decoration: BoxDecoration(
                               border: Border.all(width: 1, color: Colors.grey),
                               borderRadius:
-                              const BorderRadius.all(Radius.circular(5))),
+                                  const BorderRadius.all(Radius.circular(5))),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               onChanged: (String? value) {
@@ -278,9 +277,7 @@ class _ProfileState extends State<Profile> {
                   await user.updateUserDetails(
                       nameController.text.trim(),
                       emailController.text.trim(),
-                      selectedCampus.toString().trim()
-
-                      ,
+                      selectedCampus.toString().trim(),
                       selectedUserType.toString().trim(),
                       widget.uid);
                   _auth.signOut();

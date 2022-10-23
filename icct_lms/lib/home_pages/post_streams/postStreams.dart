@@ -44,35 +44,10 @@ class _PostStreamsState extends State<PostStreams> {
                     }
                     return ListView(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          child: TextField(
-                            onChanged: (value) {
-                              searchPost(value, post);
-                            },
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.search),
-                                hintText: 'Search post',
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide:
-                                        const BorderSide(color: Colors.blue))),
-                          ),
-                        ),
-                        ...searchQuery.isEmpty
-                            ? searchQuery
+                        ...post
                             .map((e) => createTiles(
-                            e: e,
-                            context: context,
-                            widget: widget.widget))
+                                e: e, context: context, widget: widget.widget))
                             .toList()
-                            : searchQuery
-                                .map((e) => createTiles(
-                                    e: e,
-                                    context: context,
-                                    widget: widget.widget))
-                                .toList()
                       ],
                     );
                   } else if (snapshot.hasError) {
