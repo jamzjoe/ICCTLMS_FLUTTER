@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:icct_lms/models/user_model.dart';
+import 'package:icct_lms/pages/forgot_password.dart';
 import 'package:icct_lms/pages/intro_slider.dart';
 import 'package:icct_lms/services/auth.dart';
 import 'package:icct_lms/wrapper/wrapper.dart';
@@ -40,6 +41,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         routes: {
           '/wrap': (context) => const Wrapper(),
+          '/forgot_password': (context) => const ForgotPassword()
         },
         title: 'ICCT LMS',
         home: widget.showHome ? const Wrapper() : const IntroSlider(),

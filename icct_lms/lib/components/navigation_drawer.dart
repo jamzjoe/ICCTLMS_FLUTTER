@@ -52,6 +52,11 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
               userType: widget.userType,
             ),
             buildMenuItem(
+              onClicked: () => selectedItem(context, 10),
+              text: 'Update Profile',
+              icon: Icons.edit
+            ),
+            buildMenuItem(
               onClicked: () => selectedItem(context, 0),
               text: 'Backpack',
               icon: Icons.shopping_bag,
@@ -75,7 +80,8 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
             buildMenuItem(
                 onClicked: () async => await selectedItem(context, 4),
                 text: 'Delete Account',
-                icon: Icons.delete)
+                icon: Icons.delete),
+
           ],
         ),
       ),
@@ -105,6 +111,17 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
 
   selectedItem(BuildContext context, int index) {
     switch (index) {
+      case 10:
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => Profile(
+            name: widget.name,
+            userType: widget.userType,
+            uid: widget.uid,
+            school: widget.school,
+            email: widget.email,
+          ),
+        ));
+        break;
       case 0:
         Navigator.of(context).push(MaterialPageRoute(
           builder: (context) => const BackPack(),

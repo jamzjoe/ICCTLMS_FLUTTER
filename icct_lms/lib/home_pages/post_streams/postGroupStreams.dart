@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/components/not_found.dart';
 import 'package:icct_lms/home_pages/home.dart';
@@ -44,31 +43,7 @@ class _PostGroupStreamsState extends State<PostGroupStreams> {
                     }
                     return ListView(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          child: TextField(
-                            onChanged: (value) {
-                              searchPost(value, post);
-                            },
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.search),
-                                hintText: 'Search post',
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide:
-                                        const BorderSide(color: Colors.blue))),
-                          ),
-                        ),
-                        ...searchQuery.isEmpty
-                            ? post
-                                .map((e) => createTiles(
-                                    e: e,
-                                    context: context,
-                                    widget: widget.widget))
-                                .toList()
-                            : searchQuery
-                                .map((e) => createTiles(
+                        ...post.map((e) => createTiles(
                                     e: e,
                                     context: context,
                                     widget: widget.widget))

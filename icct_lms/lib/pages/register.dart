@@ -55,7 +55,7 @@ class _RegisterState extends State<Register> {
     SchoolList('Taytay Campus', 'assets/logo_plain.png'),
   ];
   String? userType = 'Student';
-  final option = ['Student', 'Teacher', 'Parent'];
+  final option = ['Student', 'Teacher'];
 
   @override
   Widget build(BuildContext context) {
