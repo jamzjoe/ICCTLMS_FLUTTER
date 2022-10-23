@@ -63,14 +63,23 @@ class _QrGeneratorState extends State<QrGenerator> {
               SizedBox(
                 width: 120,
                 child: ElevatedButton.icon(onPressed: ()async{
-                  final image = await screenShotController.captureFromWidget
-                  (buildQrImage
-                    (widget.teacherUID,
-                      widget.roomCode));
+                  try{
+                    final image = await screenShotController.captureFromWidget
+                      (buildQrImage
+                      (widget.teacherUID,
+                        widget.roomCode));
+                    if(image == null) return;
+                    await saveImage(image);
 
-                  if(image == null) return;
-
-                  await saveImage(image);
+                    if(!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar
+                      (content: Text('Saved Successfully!'), backgroundColor:
+                    Colors.green,));
+                  }catch(e){
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar
+                      (content: Text('Something went wrong!'),
+                      backgroundColor: Colors.red,));
+                  }
 
                 }, label: const Text
                   ('Capture'), icon: const Icon(Icons.camera), style: ElevatedButton.styleFrom(
