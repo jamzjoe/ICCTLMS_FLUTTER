@@ -55,7 +55,6 @@ class AuthService {
     String emailAddress,
     String userType,
   ) async {
-    try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User? user = result.user;
@@ -64,10 +63,7 @@ class AuthService {
       await DatabaseService(uid: user!.uid).updateUserDetails(
           username, emailAddress, campus, userType, user.uid);
       return _userFromFirebaseUser(user);
-    } on FirebaseAuthException catch (e) {
-      error = e.message.toString();
-      return null;
-    }
+
   }
 
   //Sign out

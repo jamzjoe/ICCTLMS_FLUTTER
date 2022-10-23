@@ -37,13 +37,34 @@ final instagramController = TextEditingController();
 final DatabaseService user = DatabaseService(uid: uid);
 final AuthService _auth = AuthService();
 
+String? selectedCampus = '';
+var campus = [
+  'Cainta Main Campus',
+  'San Mateo Campus',
+  'Sumulong Campus',
+  'Agono Campus',
+  'Antipolo Campus',
+  'Binangonan Campus',
+];
+var usertype = [
+  'Teacher',
+  'Student'
+];
+
+String? selectedUserType = '';
+
 class _ProfileState extends State<Profile> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    selectedCampus = widget.school;
+    selectedUserType = widget.userType;
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     nameController.text = widget.name;
     emailController.text = widget.email;
-    schoolController.text = widget.school;
-    userTypeController.text = widget.userType;
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -133,21 +154,59 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(
                         height: 10,
                       ),
-                      TextFormField(
-                        controller: schoolController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          label: Text('School Campus'),
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
+                          decoration: BoxDecoration(
+                              border: Border.all(width: 1, color: Colors.grey),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(5))),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              onChanged: (String? value) {
+                                setState(() {
+                                  selectedCampus = value!;
+                                });
+                              },
+                              value: selectedCampus,
+                              isExpanded: true,
+                              icon: const Icon(
+                                  Icons.keyboard_arrow_down_outlined),
+                              items: campus.map((String each) {
+                                return DropdownMenuItem(
+                                    value: each, child: Text(each));
+                              }).toList(),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      TextFormField(
-                        controller: userTypeController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          label: Text('User Type'),
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
+                          decoration: BoxDecoration(
+                              border: Border.all(width: 1, color: Colors.grey),
+                              borderRadius:
+                              const BorderRadius.all(Radius.circular(5))),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              onChanged: (String? value) {
+                                setState(() {
+                                  selectedUserType = value!;
+                                });
+                              },
+                              value: selectedUserType,
+                              isExpanded: true,
+                              icon: const Icon(
+                                  Icons.keyboard_arrow_down_outlined),
+                              items: usertype.map((String each) {
+                                return DropdownMenuItem(
+                                    value: each, child: Text(each));
+                              }).toList(),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(
@@ -219,8 +278,10 @@ class _ProfileState extends State<Profile> {
                   await user.updateUserDetails(
                       nameController.text.trim(),
                       emailController.text.trim(),
-                      schoolController.text.trim(),
-                      userTypeController.text.trim(),
+                      selectedCampus.toString().trim()
+
+                      ,
+                      selectedUserType.toString().trim(),
                       widget.uid);
                   _auth.signOut();
                   if (!mounted) {

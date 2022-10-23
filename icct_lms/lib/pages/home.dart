@@ -178,7 +178,6 @@ class CustomSearchDelegate extends SearchDelegate {
   ];
   @override
   List<Widget>? buildActions(BuildContext context) {
-    // TODO: implement buildActions
     return [
       IconButton(
           onPressed: () {
@@ -190,7 +189,6 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget? buildLeading(BuildContext context) {
-    // TODO: implement buildLeading
     return IconButton(
         onPressed: () {
           close(context, null);
@@ -200,7 +198,6 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    // TODO: implement buildResults
     List<String> matchQuery = [];
     for (var each in searchItems) {
       if (each.toLowerCase().contains(query.toLowerCase())) {
@@ -221,7 +218,6 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    // TODO: implement buildSuggestions
     List<String> matchQuery = [];
     for (var each in searchItems) {
       if (each.toLowerCase().contains(query.toLowerCase())) {

@@ -61,12 +61,12 @@ class _PostStreamsState extends State<PostStreams> {
                           ),
                         ),
                         ...searchQuery.isEmpty
-                            ? post
-                                .map((e) => createTiles(
-                                    e: e,
-                                    context: context,
-                                    widget: widget.widget))
-                                .toList()
+                            ? searchQuery
+                            .map((e) => createTiles(
+                            e: e,
+                            context: context,
+                            widget: widget.widget))
+                            .toList()
                             : searchQuery
                                 .map((e) => createTiles(
                                     e: e,
