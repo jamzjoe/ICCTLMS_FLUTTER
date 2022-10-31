@@ -156,6 +156,7 @@ class _ClassScreenState extends State<ClassScreen>
                           });
                           openCreateGroup();
                         },
+
                         child: const Icon(CupertinoIcons.person_add_solid),
                         label: 'Create Group',
                         labelBackgroundColor: Colors.yellow,

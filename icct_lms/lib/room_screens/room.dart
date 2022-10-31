@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/components/something_wrong.dart';
-import 'package:icct_lms/room_screens/pages/folder.dart';
+import 'package:icct_lms/room_screens/pages/task.dart';
 import 'package:icct_lms/room_screens/pages/member.dart';
 import 'package:icct_lms/room_screens/pages/post.dart';
 import 'package:icct_lms/room_screens/pages/room_settings.dart';
@@ -138,8 +138,8 @@ class _RoomState extends State<Room> {
                       icon: Icon(Icons.post_add),
                     ),
                     Tab(
-                      text: 'Sources',
-                      icon: Icon(Icons.folder),
+                      text: 'Task',
+                      icon: Icon(Icons.task),
                     ),
                     Tab(
                       text: 'Members',
@@ -164,11 +164,7 @@ class _RoomState extends State<Room> {
                     roomType: widget.roomType,
                     userName: widget.userName,
                   ),
-                  Folder(
-                      uid: widget.uid,
-                      userType: widget.userType,
-                      userName: widget.teacher,
-                      roomType: widget.roomType),
+                  const Task(),
                   Member(
                       uid: widget.uid,
                       roomCode: widget.roomCode,

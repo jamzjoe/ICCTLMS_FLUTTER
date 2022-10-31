@@ -6,6 +6,7 @@ import 'package:icct_lms/home_pages/home.dart';
 import 'package:icct_lms/home_pages/post_streams/tiles/post_tiles.dart';
 import 'package:icct_lms/models/joined_model.dart';
 import 'package:icct_lms/models/post_model.dart';
+import 'package:icct_lms/models/quiz_list_model.dart';
 
 class JoinedStreams extends StatefulWidget {
   const JoinedStreams({Key? key, required this.widget, required this.context})

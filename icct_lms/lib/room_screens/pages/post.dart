@@ -2,12 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:icct_lms/comment_room/comment.dart';
 import 'package:icct_lms/components/nodata.dart';
 import 'package:icct_lms/models/heart_model.dart';
 import 'package:icct_lms/models/post_model.dart';
+import 'package:icct_lms/quiz/create_quiz.dart';
 import 'package:icct_lms/room_screens/pages/update_post.dart';
 import 'package:icct_lms/room_screens/pages/write_post.dart';
 import 'package:icct_lms/services/comment.dart';
@@ -92,6 +94,58 @@ class _PostState extends State<Post> {
               })
         ],
       ),
+      floatingActionButton: Visibility(
+        visible: widget.userType == 'Teacher',
+        child: SpeedDial(
+          onPress: () {
+            showModalBottomSheet(
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(20),
+                        topLeft: Radius.circular(20))),
+                enableDrag: true,
+                context: context,
+                builder: (context) => ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 250),
+                      child: Container(
+                        child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              children: [
+                                const Text('Create',
+                                    style: TextStyle(fontSize: 20)),
+                                ListTile(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      createPost(context);
+                                    },
+                                    leading: const Icon(Icons.task),
+                                    title: const Text('Assignment')),
+                                ListTile(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      createPost(context);
+                                    },
+                                    leading: const Icon(Icons.create),
+                                    title: const Text('Post')),
+                                ListTile(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      createQuiz();
+                                    },
+                                    leading: const Icon(Icons.quiz),
+                                    title: const Text('Quiz')),
+                              ],
+                            )),
+                      ),
+                    ));
+          },
+          overlayColor: Colors.black54,
+          backgroundColor: Colors.blue[900],
+          spaceBetweenChildren: 10,
+          animatedIcon: AnimatedIcons.add_event,
+        ),
+      ),
     );
   }
 
@@ -118,18 +172,7 @@ class _PostState extends State<Post> {
         padding: const EdgeInsets.all(20.0),
         child: GestureDetector(
           onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => WritePost(
-                          uid: widget.uid,
-                          userType: widget.userType,
-                          roomType: widget.roomType,
-                          userName: widget.userName,
-                          roomCode: widget.roomCode,
-                          roomName: widget.roomName,
-                          teacherUID: widget.teacherUID,
-                        )));
+            createPost(context);
           },
           child: Row(
             children: [
@@ -570,5 +613,29 @@ class _PostState extends State<Post> {
 
   Future share(String message, String name) async {
     await Share.share('Post from $name \n $message');
+  }
+
+  Future createPost(BuildContext context) async {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => WritePost(
+                  uid: widget.uid,
+                  userType: widget.userType,
+                  roomType: widget.roomType,
+                  userName: widget.userName,
+                  roomCode: widget.roomCode,
+                  roomName: widget.roomName,
+                  teacherUID: widget.teacherUID,
+                )));
+  }
+
+  void createQuiz() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CreateQuiz(
+                  roomID: widget.roomCode,
+                )));
   }
 }
