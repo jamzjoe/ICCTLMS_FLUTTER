@@ -1,15 +1,28 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:icct_lms/bloc/quiz/quiz_bloc.dart';
+import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/models/question_models.dart';
-import 'package:icct_lms/quiz/quiz_play_widgets.dart';
 import 'package:icct_lms/room_screens/pages/score_display.dart';
 import 'package:icct_lms/services/quizzes.dart';
+import '../../quiz/quiz_play_widgets.dart';
 
 class QuizPlay extends StatefulWidget {
   final String quizId;
-  final String title;
-  const QuizPlay(this.quizId, this.title, {super.key});
+  final String quizTitle;
+  final List<String> duration;
+  final String quizDescription;
+  final String professor;
+  const QuizPlay(this.quizId, this.quizTitle,
+      {super.key,
+      required this.quizDescription,
+      required this.duration,
+      required this.professor});
 
   @override
   _QuizPlayState createState() => _QuizPlayState();
@@ -25,13 +38,50 @@ Stream? infoStream;
 
 class _QuizPlayState extends State<QuizPlay> {
   QuerySnapshot? questionSnaphot;
-  QuizServices databaseService = QuizServices();
+  QuizServices? databaseService = QuizServices();
 
   bool isLoading = true;
+  String counText = '';
 
   @override
   void initState() {
-    databaseService.getQuestionData(widget.quizId).then((value) {
+    Timer.run(() async {
+      BlocProvider.of<QuizBloc>(context).add(LoadQuiz());
+      showDialog(
+          barrierDismissible: false,
+          context: (context),
+          builder: (context) => CupertinoAlertDialog(
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Title: ${widget.quizTitle}'),
+                    const SizedBox(
+                      height: 3,
+                    ),
+                    Text('Description: ${widget.quizDescription}'),
+                    Text(
+                        'Duration: ${widget.duration[0]}:${widget.duration[1]}')
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancel')),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        BlocProvider.of<QuizBloc>(context)
+                            .add(const StartQuiz(0));
+                      },
+                      child: const Text('Start')),
+                ],
+              ));
+    });
+
+    databaseService!.getQuestionData(widget.quizId).then((value) {
       questionSnaphot = value;
       _notAttempted = questionSnaphot!.docs.length;
       _correct = 0;
@@ -39,13 +89,35 @@ class _QuizPlayState extends State<QuizPlay> {
       isLoading = false;
       total = questionSnaphot!.docs.length;
       setState(() {});
-
       print("init don $total ${widget.quizId} ");
     });
 
-    infoStream ??=
-        Stream<List<int>>.periodic(const Duration(milliseconds: 100), (x) {
+    final secHour = int.parse(widget.duration[0]) * 3600;
+    final minHour = int.parse(widget.duration[1]) * 60;
+    final seconds = secHour + minHour;
+    print(seconds);
+    infoStream ??= Stream<List<int>>.periodic(const Duration(seconds: 1), (x) {
       print("this is x $x");
+      counText = x.toString();
+      if (x == seconds) {
+        infoStream!.timeout(Duration(seconds: seconds));
+        showDialog(
+            barrierDismissible: false,
+            context: (context),
+            builder: (context) => CupertinoAlertDialog(
+                  content: const Text(
+                    'Time is end! I hope you answer it all'
+                    '.',
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Exit'))
+                  ],
+                )).then((value) => Navigator.pop(context));
+      }
       return [_correct, _incorrect];
     });
 
@@ -56,14 +128,14 @@ class _QuizPlayState extends State<QuizPlay> {
       DocumentSnapshot questionSnapshot) {
     QuestionModel questionModel = QuestionModel();
 
-    questionModel.question = questionSnapshot.get('question');
+    questionModel.question = questionSnapshot.get("question");
 
     /// shuffling the options
     List<String> options = [
-      questionSnapshot.get('option1'),
-      questionSnapshot.get('option2'),
-      questionSnapshot.get('option3'),
-      questionSnapshot.get('option4'),
+      questionSnapshot.get("option1"),
+      questionSnapshot.get("option2"),
+      questionSnapshot.get("option3"),
+      questionSnapshot.get("option4"),
     ];
     options.shuffle();
 
@@ -71,7 +143,7 @@ class _QuizPlayState extends State<QuizPlay> {
     questionModel.option2 = options[1];
     questionModel.option3 = options[2];
     questionModel.option4 = options[3];
-    questionModel.correctOption = questionSnapshot.get('option1');
+    questionModel.correctOption = questionSnapshot.get("option1");
     questionModel.answered = false;
 
     print(questionModel.correctOption.toLowerCase());
@@ -87,81 +159,126 @@ class _QuizPlayState extends State<QuizPlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          ElevatedButton(
-              autofocus: false,
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          title: const Text('Warning'),
-                          content: const Text(
-                              'Before you send, please make sure the quiz is completed!.'),
-                          actions: [
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ScoreDisplay(
-                                              score: _correct.toString(),
-                                              total: total.toString())));
-                                },
-                                child: const Text('Submit')),
-                            TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('Cancel'))
-                          ],
-                        ));
-              },
-              child: const Text('Submit'))
-        ],
-        title: Text(widget.title),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        elevation: 0.0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-      ),
-      body: isLoading
-          ? Container(
-              child: const Center(child: CircularProgressIndicator()),
-            )
-          : SingleChildScrollView(
-              child: Container(
-                child: Column(
-                  children: [
-                    InfoHeader(
-                      length: questionSnaphot!.docs.length,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    questionSnaphot!.docs == null
-                        ? Container(
-                            child: const Center(
-                              child: Text("No Data"),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: questionSnaphot!.docs.length,
-                            shrinkWrap: true,
-                            physics: const ClampingScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              return QuizPlayTile(
-                                questionModel: getQuestionModelFromDatasnapshot(
-                                    questionSnaphot!.docs[index]),
-                                index: index,
-                              );
-                            })
+    return WillPopScope(
+      onWillPop: () async {
+        final result = await showCupertinoDialog(
+            context: (context),
+            builder: (context) => CupertinoAlertDialog(
+                  content:
+                      const Text('This will exit the quiz, please make sure you'
+                          ' have already answered the quiz.'),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Cancel')),
+                    TextButton(
+                        onPressed: () {
+                          BlocProvider.of<QuizBloc>(context)
+                              .add(EndQuiz('0', total.toString()));
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Understood')),
                   ],
-                ),
-              ),
+                ));
+        if (result == null) {
+          return false;
+        }
+        return true;
+      },
+      child: BlocBuilder<QuizBloc, QuizState>(builder: (context, state) {
+        print(state);
+        if (state is QuizStartState) {
+          return Scaffold(
+            appBar: AppBar(
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      showCupertinoDialog(
+                          context: (context),
+                          builder: (context) => CupertinoAlertDialog(
+                                content: const Text(
+                                    'This will exit the quiz, please make sure you'
+                                    ' have already answered the quiz.'),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Cancel')),
+                                  TextButton(
+                                      onPressed: () {
+                                        BlocProvider.of<QuizBloc>(context).add(
+                                            EndQuiz('0', total.toString()));
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Understood')),
+                                ],
+                              ));
+                    },
+                    child: const Text(
+                      'Submit',
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
+              title: Text(widget.quizTitle),
+              centerTitle: true,
+              backgroundColor: Colors.blue,
+              elevation: 0.0,
+              systemOverlayStyle: SystemUiOverlayStyle.dark,
             ),
+            body: isLoading
+                ? Container(
+                    child: const Center(child: CircularProgressIndicator()),
+                  )
+                : SingleChildScrollView(
+                    child: Container(
+                      child: Column(
+                        children: [
+                          InfoHeader(
+                            length: questionSnaphot!.docs.length,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          questionSnaphot!.docs == null
+                              ? Container(
+                                  child: const Center(
+                                    child: Text("No Data"),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  itemCount: questionSnaphot!.docs.length,
+                                  shrinkWrap: true,
+                                  physics: const ClampingScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    return QuizPlayTile(
+                                      questionModel:
+                                          getQuestionModelFromDatasnapshot(
+                                              questionSnaphot!.docs[index]),
+                                      index: index,
+                                    );
+                                  })
+                        ],
+                      ),
+                    ),
+                  ),
+          );
+        } else if (state is QuizLoading) {
+          return const Loading();
+        } else if (state is QuizEndState) {
+          return ScoreDisplay(
+            score: _correct.toString(),
+            total: total.toString(),
+            title: widget.quizTitle,
+            description: widget.quizDescription,
+            professor: widget.professor,
+            duration: widget.duration,
+          );
+        }
+        return const Loading();
+      }),
     );
   }
 }
@@ -217,8 +334,7 @@ class QuizPlayTile extends StatefulWidget {
   final QuestionModel questionModel;
   final int index;
 
-  const QuizPlayTile(
-      {super.key, required this.questionModel, required this.index});
+  const QuizPlayTile({required this.questionModel, required this.index});
 
   @override
   _QuizPlayTileState createState() => _QuizPlayTileState();
@@ -237,8 +353,11 @@ class _QuizPlayTileState extends State<QuizPlayTile> {
             margin: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               "Q${widget.index + 1} ${widget.questionModel.question}",
-              style:
-                  TextStyle(fontSize: 18, color: Colors.black.withOpacity(0.8)),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black.withOpacity(0.8),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           const SizedBox(

@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:icct_lms/models/answer_preview.dart';
+import 'package:icct_lms/models/joined_model.dart';
+import 'package:icct_lms/models/questions_and_answers.dart';
 import 'package:icct_lms/models/quiz_list_model.dart';
+import 'package:icct_lms/models/quiz_model.dart';
 
 class QuizServices{
   Future<void> addQuizData(Map<String, dynamic> quizData, String quizId)
@@ -11,6 +15,32 @@ class QuizServices{
         .catchError((e) {
       print(e);
     });
+  }
+
+  Future<void> addQuizPreview(Map<String, dynamic> quizData,
+  String quizID, String userID, String questionID)
+  async{
+    await FirebaseFirestore.instance
+        .collection('Quiz Preview')
+        .doc(userID)
+        .collection(quizID)
+        .doc(questionID)
+        .set(quizData)
+        .catchError((e) {
+      print(e);
+    });
+  }
+
+  Stream<List<AnswerPreviewModel>> readAnswerPreview(String userID, String
+  quizID, String questionID){
+    return FirebaseFirestore.instance
+        .collection('Quiz Preview')
+        .doc(userID)
+        .collection(quizID)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((doc) => AnswerPreviewModel.fromJson(doc.data()))
+        .toList());
   }
 
   Future<void> addQuestionData(quizData, String quizId) async {
@@ -25,6 +55,8 @@ class QuizServices{
   }
 
 
+
+
   Stream<List<QuizModel>> readQuiz() {
     return FirebaseFirestore.instance
         .collection('Quiz')
@@ -34,11 +66,63 @@ class QuizServices{
         .toList());
   }
 
+  Stream<List<QuizModel>> readRoomsQuiz(List<String> room) {
+    return FirebaseFirestore.instance
+        .collection('Quiz')
+        .where('roomID', whereIn: room)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((doc) => QuizModel.fromJson(doc.data()))
+        .toList());
+  }
+
+  Stream<List<JoinedModel>> readJoinedGroup(String userID) {
+    return FirebaseFirestore.instance
+        .collection('Joined')
+        .doc('Group')
+        .collection(userID)
+        .snapshots()
+        .map((event) =>
+        event.docs.map((e) => JoinedModel.fromJson(e.data())).toList());
+  }
+
   getQuestionData(String quizId) async{
-    return await FirebaseFirestore.instance
+    return FirebaseFirestore.instance
         .collection("Quiz")
         .doc(quizId)
         .collection("QNA")
         .get();
   }
+
+  Stream<List<Quiz>> getQuizzes(String quizID){
+    return FirebaseFirestore.instance
+        .collection("Quiz")
+        .doc(quizID)
+        .collection("QNA")
+        .snapshots()
+        .map((event) => event.docs.map((e) => Quiz.fromJson(e.data()))
+        .toList());
+  }
+
+  // Stream<List<QandAModel>> streamQuestions(String quizID){
+  //   return FirebaseFirestore.instance
+  //       .collection("Quiz")
+  //       .doc(quizID)
+  //       .collection("QNA")
+  //       .snapshots()
+  //       .map((event) => event.docs.map((e) => QandAModel.fromJson(e.data()))
+  //       .toList());
+  // }
+  // Stream<List<QandAModel>> streamAnswers(String quizID){
+  //   return FirebaseFirestore.instance
+  //       .collection("Quiz")
+  //       .doc(quizID)
+  //       .collection("QNA")
+  //       .snapshots()
+  //       .map((event) => event.docs.map((e) => QandAModel.fromJson(e.data()))
+  //       .toList());
+  // }
+  
+
+
 }

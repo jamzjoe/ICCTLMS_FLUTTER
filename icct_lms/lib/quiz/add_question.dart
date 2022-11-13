@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/services.dart';
 import 'package:icct_lms/services/quizzes.dart';
+import 'package:uuid/uuid.dart';
 
 class AddQuestion extends StatefulWidget {
   final String quizId;
@@ -20,20 +20,21 @@ class _AddQuestionState extends State<AddQuestion> {
   String question = "", option1 = "", option2 = "", option3 = "", option4 = "";
 
   uploadQuizData() {
+    String questionID = const Uuid().v1().toString();
     if (_formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
       });
 
-      Map<String, String> questionMap = {
+      var questionMap = {
         "question": question,
         "option1": option1,
         "option2": option2,
         "option3": option3,
-        "option4": option4
+        "option4": option4,
+        "questionID": questionID
       };
 
-      print(widget.quizId);
       databaseService.addQuestionData(questionMap, widget.quizId).then((value) {
         question = "";
         option1 = "";

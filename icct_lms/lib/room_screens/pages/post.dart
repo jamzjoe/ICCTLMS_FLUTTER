@@ -636,6 +636,7 @@ class _PostState extends State<Post> {
         MaterialPageRoute(
             builder: (context) => CreateQuiz(
                   roomID: widget.roomCode,
+                  professor: widget.teacher,
                 )));
   }
 }

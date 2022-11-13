@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Choices extends StatelessWidget {
-  const Choices({Key? key, required this.choices, required this.answered})
+  const Choices({Key? key, required this.answers})
       : super(key: key);
-  final String choices;
-  final VoidCallback answered;
+  final List<String> answers;
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -13,17 +12,20 @@ class Choices extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
         ),
-        onPressed: answered,
+        onPressed: (){},
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(
-            choices,
-            style: TextStyle(
-                fontWeight: FontWeight.w400,
-                color: Colors.black.withOpacity(0.8)),
-          ),
+          child: ListView(
+            children: [
+              builTiles(answers)
+            ],
+          )
         ),
       ),
     );
   }
+
+  Widget builTiles(List options) => Card(
+    child: Text(options[0]),
+  );
 }

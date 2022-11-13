@@ -1,26 +1,33 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:icct_lms/quiz/add_question.dart';
 import 'package:icct_lms/services/quizzes.dart';
+import 'package:numberpicker/numberpicker.dart';
+
 import 'package:uuid/uuid.dart';
 
 class CreateQuiz extends StatefulWidget {
-  const CreateQuiz({super.key, required this.roomID});
+  const CreateQuiz({super.key, required this.roomID, required this.professor});
   final String roomID;
+  final String professor;
   @override
   _CreateQuizState createState() => _CreateQuizState();
 }
 
-class _CreateQuizState extends State<CreateQuiz> {
+class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
   QuizServices databaseService = QuizServices();
   final _formKey = GlobalKey<FormState>();
-
+  TimeOfDay time = const TimeOfDay(hour: 01, minute: 30);
   String quizTitle = '';
   String quizDesc = '';
 
   bool isLoading = false;
+  int hours = 1;
+  int minutes = 0;
   String quizId = '';
-
+  late DateTime selectedDate;
+  final _countController = TextEditingController();
   createQuiz() {
     quizId = const Uuid().v4().toString();
     if (_formKey.currentState!.validate()) {
@@ -32,11 +39,13 @@ class _CreateQuizState extends State<CreateQuiz> {
         "quizTitle": quizTitle.toString(),
         "quizDesc": quizDesc.toString(),
         "roomID": widget.roomID,
-        'quizID': quizId
+        'quizID': quizId,
+        "time_duration": '$hours:$minutes',
+        "due_date": selectedDate.toString().substring(0, 10),
+        "professor": widget.professor
       };
 
-      databaseService.addQuizData(quizData, quizId.toString()).then(
-              (value) {
+      databaseService.addQuizData(quizData, quizId.toString()).then((value) {
         setState(() {
           isLoading = false;
         });
@@ -47,6 +56,14 @@ class _CreateQuizState extends State<CreateQuiz> {
   }
 
   @override
+  void initState() {
+    selectedDate = DateTime.now();
+
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -54,7 +71,10 @@ class _CreateQuizState extends State<CreateQuiz> {
         leading: const BackButton(
           color: Colors.black54,
         ),
-        title: const Text('Create Quiz'),
+        title: const Text(
+          'Create Quiz',
+          style: TextStyle(color: Colors.black54),
+        ),
         elevation: 0.0,
         backgroundColor: Colors.transparent,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -66,28 +86,94 @@ class _CreateQuizState extends State<CreateQuiz> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(
-                height: 5,
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    TextFormField(
+                      validator: (val) =>
+                          val!.isEmpty ? "Enter Quiz Title" : null,
+                      decoration: const InputDecoration(hintText: "Quiz Title"),
+                      onChanged: (val) {
+                        quizTitle = val;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    TextFormField(
+                      validator: (val) =>
+                          val!.isEmpty ? "Enter Quiz Description" : null,
+                      decoration:
+                          const InputDecoration(hintText: "Quiz Description"),
+                      onChanged: (val) {
+                        quizDesc = val;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.black12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text('Duration: $hours:$minutes'),
+                                Text(
+                                    'Date: ${selectedDate.toString().substring(0, 10)}')
+                              ],
+                            )),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Column(
+                          children: [
+                            const Text('Hour/s'),
+                            NumberPicker(
+                                axis: Axis.horizontal,
+                                minValue: 0,
+                                maxValue: 24,
+                                value: hours,
+                                onChanged: (value) => setState(() {
+                                      hours = value;
+                                    })),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            const Text('Minute/s'),
+                            NumberPicker(
+                                axis: Axis.horizontal,
+                                minValue: 0,
+                                maxValue: 60,
+                                value: minutes,
+                                onChanged: (value) => setState(() {
+                                      minutes = value;
+                                    })),
+                          ],
+                        ),
+                      ],
+                    ),
+                    CalendarDatePicker(
+                        initialDate: selectedDate,
+                        firstDate: DateTime(2021),
+                        lastDate: DateTime(2050, 20, 19),
+                        onDateChanged: (value) => setState(() {
+                              selectedDate = value;
+                            })),
+                  ],
+                ),
               ),
-              TextFormField(
-                validator: (val) => val!.isEmpty ? "Enter Quiz Title" : null,
-                decoration: const InputDecoration(hintText: "Quiz Title"),
-                onChanged: (val) {
-                  quizTitle = val;
-                },
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              TextFormField(
-                validator: (val) =>
-                    val!.isEmpty ? "Enter Quiz Description" : null,
-                decoration: const InputDecoration(hintText: "Quiz Description"),
-                onChanged: (val) {
-                  quizDesc = val;
-                },
-              ),
-              const Spacer(),
               GestureDetector(
                 onTap: () {
                   createQuiz();
@@ -114,5 +200,14 @@ class _CreateQuizState extends State<CreateQuiz> {
         ),
       ),
     );
+  }
+
+  void show() async {
+    final result = await showTimePicker(
+        context: context, initialTime: const TimeOfDay(hour: 1, minute: 10));
+    setState(() {
+      _countController.text =
+          '${result!.hour.toString()}:${result.minute.toString()}';
+    });
   }
 }

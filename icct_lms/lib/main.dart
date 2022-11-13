@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:icct_lms/bloc/quiz/quiz_bloc.dart';
 import 'package:icct_lms/models/user_model.dart';
 import 'package:icct_lms/pages/forgot_password.dart';
 import 'package:icct_lms/pages/intro_slider.dart';
@@ -14,9 +17,10 @@ Future main() async {
   await Firebase.initializeApp();
   final prefs = await SharedPreferences.getInstance();
   final showHome = prefs.getBool('showHome') ?? false;
-
   FlutterNativeSplash.removeAfter(initialize);
-  runApp(MyApp(showHome: showHome));
+  runApp(MyApp(
+    showHome: showHome,
+  ));
 }
 
 Future initialize(BuildContext? context) async {
@@ -24,9 +28,11 @@ Future initialize(BuildContext? context) async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key, required this.showHome});
+  const MyApp({
+    super.key,
+    required this.showHome,
+  });
   final bool showHome;
-
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -38,13 +44,19 @@ class _MyAppState extends State<MyApp> {
       value: AuthService().user,
       catchError: (_, __) => null,
       initialData: null,
-      child: MaterialApp(
-        routes: {
-          '/wrap': (context) => const Wrapper(),
-          '/forgot_password': (context) => const ForgotPassword()
-        },
-        title: 'ICCT LMS',
-        home: widget.showHome ? const Wrapper() : const IntroSlider(),
+      child: BlocProvider<QuizBloc>(
+        create: (_) => QuizBloc(),
+        child: MaterialApp(
+          theme: ThemeData(
+              textTheme:
+                  GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme)),
+          routes: {
+            '/wrap': (_) => const Wrapper(),
+            '/forgot_password': (_) => const ForgotPassword()
+          },
+          title: 'ICCT LMS',
+          home: widget.showHome ? const Wrapper() : const IntroSlider(),
+        ),
       ),
     );
   }

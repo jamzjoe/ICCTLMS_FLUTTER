@@ -132,20 +132,24 @@ class _RoomState extends State<Room> {
                   unselectedLabelColor: Colors.grey,
                   indicatorColor: Colors.blue[900],
                   indicatorWeight: 2,
-                  tabs: const [
-                    Tab(
+                  tabs: [
+                    const Tab(
                       text: 'Timeline',
                       icon: Icon(Icons.post_add),
                     ),
-                    Tab(
+                    widget.roomType == 'Class' ? const Tab(
+                      text: 'Sources',
+                      icon: Icon(Icons.folder),
+                    ) :
+                    const Tab(
                       text: 'Task',
                       icon: Icon(Icons.task),
                     ),
-                    Tab(
+                    const Tab(
                       text: 'Members',
                       icon: Icon(Icons.group),
                     ),
-                    Tab(
+                    const Tab(
                       text: "Settings",
                       icon: Icon(Icons.settings),
                     )
@@ -164,7 +168,9 @@ class _RoomState extends State<Room> {
                     roomType: widget.roomType,
                     userName: widget.userName,
                   ),
-                  const Task(),
+                   Task(
+                    roomID: widget.roomCode,
+                  ),
                   Member(
                       uid: widget.uid,
                       roomCode: widget.roomCode,
