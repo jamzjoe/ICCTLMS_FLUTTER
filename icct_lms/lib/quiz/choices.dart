@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Answers extends StatelessWidget {
-  const Answers({Key? key, required this.choices, required this.answered})
+class Choices extends StatelessWidget {
+  const Choices({Key? key, required this.choices, required this.answered})
       : super(key: key);
   final String choices;
   final VoidCallback answered;
