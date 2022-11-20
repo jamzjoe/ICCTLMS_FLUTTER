@@ -1,14 +1,19 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:icct_lms/bloc/quiz/quiz_bloc.dart';
 import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/models/question_models.dart';
+import 'package:icct_lms/models/quiz_list_model.dart';
 import 'package:icct_lms/room_screens/pages/score_display.dart';
+import 'package:icct_lms/services/notification_service.dart';
+import 'package:icct_lms/services/push_notification.dart';
 import 'package:icct_lms/services/quizzes.dart';
 import '../../quiz/quiz_play_widgets.dart';
 
@@ -18,11 +23,12 @@ class QuizPlay extends StatefulWidget {
   final List<String> duration;
   final String quizDescription;
   final String professor;
+  final QuizModel e;
   const QuizPlay(this.quizId, this.quizTitle,
       {super.key,
       required this.quizDescription,
       required this.duration,
-      required this.professor});
+      required this.professor, required this.e});
 
   @override
   _QuizPlayState createState() => _QuizPlayState();
@@ -31,7 +37,10 @@ class QuizPlay extends StatefulWidget {
 int _correct = 0;
 int _incorrect = 0;
 int _notAttempted = 0;
+final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 int total = 0;
+DateTime? due;
 
 /// Stream
 Stream? infoStream;
@@ -41,10 +50,13 @@ class _QuizPlayState extends State<QuizPlay> {
   QuizServices? databaseService = QuizServices();
 
   bool isLoading = true;
+
+  PushNotification _pushNotification = PushNotification();
   String counText = '';
 
   @override
   void initState() {
+    due = widget.e.due_date.toDate();
     Timer.run(() async {
       BlocProvider.of<QuizBloc>(context).add(LoadQuiz());
       showDialog(
@@ -60,7 +72,9 @@ class _QuizPlayState extends State<QuizPlay> {
                     ),
                     Text('Description: ${widget.quizDescription}'),
                     Text(
-                        'Duration: ${widget.duration[0]}:${widget.duration[1]}')
+                        'Duration: ${widget.duration[0]}:${widget
+                            .duration[1]}'),
+                    Text('Due date: ${due!.month}/${due!.day}/${due!.year}')
                   ],
                 ),
                 actions: [
@@ -91,7 +105,6 @@ class _QuizPlayState extends State<QuizPlay> {
       setState(() {});
       print("init don $total ${widget.quizId} ");
     });
-
     final secHour = int.parse(widget.duration[0]) * 3600;
     final minHour = int.parse(widget.duration[1]) * 60;
     final seconds = secHour + minHour;
@@ -208,10 +221,15 @@ class _QuizPlayState extends State<QuizPlay> {
                                       },
                                       child: const Text('Cancel')),
                                   TextButton(
-                                      onPressed: () {
-                                        BlocProvider.of<QuizBloc>(context).add(
-                                            EndQuiz('0', total.toString()));
-                                        Navigator.pop(context);
+                                      onPressed: () async{
+                                        NotificationService.showNotification
+                                          (title: '${widget.quizTitle}',
+                                            body: 'Score: ${_correct}/${total}',
+                                            flutterLocalNotificationsPlugin:
+                                            _localNotificationsPlugin);
+                                            BlocProvider.of<QuizBloc>(context).add(
+                                                EndQuiz('0', total.toString()));
+                                            Navigator.pop(context);
                                       },
                                       child: const Text('Understood')),
                                 ],

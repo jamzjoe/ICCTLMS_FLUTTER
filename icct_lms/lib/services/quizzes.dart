@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:icct_lms/models/answer_preview.dart';
 import 'package:icct_lms/models/joined_model.dart';
-import 'package:icct_lms/models/questions_and_answers.dart';
 import 'package:icct_lms/models/quiz_list_model.dart';
 import 'package:icct_lms/models/quiz_model.dart';
 
@@ -70,6 +69,7 @@ class QuizServices{
     return FirebaseFirestore.instance
         .collection('Quiz')
         .where('roomID', whereIn: room)
+        .orderBy('due_date', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
         .map((doc) => QuizModel.fromJson(doc.data()))

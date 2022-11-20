@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,13 @@ class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
   int hours = 1;
   int minutes = 0;
   String quizId = '';
+  var QuizType = [
+    'Multiple Choice',
+    'Fill in the Blanks',
+    'Essay Writing',
+    'Question and Answer'
+  ];
+  String? selectedType = '';
   late DateTime selectedDate;
   final _countController = TextEditingController();
   createQuiz() {
@@ -35,14 +43,15 @@ class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
         isLoading = true;
       });
 
-      Map<String, String> quizData = {
+      Map<String, dynamic> quizData = {
         "quizTitle": quizTitle.toString(),
         "quizDesc": quizDesc.toString(),
         "roomID": widget.roomID,
         'quizID': quizId,
         "time_duration": '$hours:$minutes',
-        "due_date": selectedDate.toString().substring(0, 10),
-        "professor": widget.professor
+        "due_date": selectedDate,
+        "professor": widget.professor,
+        "created": FieldValue.serverTimestamp()
       };
 
       databaseService.addQuizData(quizData, quizId.toString()).then((value) {
@@ -58,7 +67,7 @@ class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
   @override
   void initState() {
     selectedDate = DateTime.now();
-
+    selectedType = QuizType[0];
     // TODO: implement initState
     super.initState();
   }
@@ -116,6 +125,33 @@ class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
                     const SizedBox(
                       height: 20,
                     ),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(15, 5, 15, 5),
+                        decoration: BoxDecoration(
+                            border: Border.all(width: 1, color: Colors.grey),
+                            borderRadius:
+                            const BorderRadius.all(Radius.circular(5))),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            onChanged: (String? value) {
+                              setState(() {
+                                selectedType = value!;
+                              });
+                            },
+                            value: selectedType,
+                            isExpanded: true,
+                            icon: const Icon(
+                                Icons.keyboard_arrow_down_outlined),
+                            items: QuizType.map((String each) {
+                              return DropdownMenuItem(
+                                  value: each, child: Text(each));
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10,),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

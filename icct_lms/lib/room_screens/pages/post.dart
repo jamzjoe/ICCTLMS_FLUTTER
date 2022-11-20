@@ -119,13 +119,6 @@ class _PostState extends State<Post> {
                                       Navigator.pop(context);
                                       createPost(context);
                                     },
-                                    leading: const Icon(Icons.task),
-                                    title: const Text('Assignment')),
-                                ListTile(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      createPost(context);
-                                    },
                                     leading: const Icon(Icons.create),
                                     title: const Text('Post')),
                                 ListTile(
