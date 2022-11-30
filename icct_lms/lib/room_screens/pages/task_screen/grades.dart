@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Grades extends StatefulWidget {
-  const Grades({Key? key}) : super(key: key);
-
+  const Grades({Key? key, required this.roomID}) : super(key: key);
+  final String roomID;
   @override
   State<Grades> createState() => _GradesState();
 }

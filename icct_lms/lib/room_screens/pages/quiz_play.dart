@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -53,7 +55,7 @@ class _QuizPlayState extends State<QuizPlay> {
 
   PushNotification _pushNotification = PushNotification();
   String counText = '';
-
+  final userID = FirebaseAuth.instance.currentUser!.uid;
   @override
   void initState() {
     due = widget.e.due_date.toDate();
@@ -187,7 +189,24 @@ class _QuizPlayState extends State<QuizPlay> {
                         },
                         child: const Text('Cancel')),
                     TextButton(
-                        onPressed: () {
+                        onPressed: ()async {
+                          NotificationService.showNotification
+                            (title: '${widget.quizTitle}',
+                              body: 'Score: ${_correct}/${total}',
+                              flutterLocalNotificationsPlugin:
+                              _localNotificationsPlugin);
+                          var gradesData = {
+                            'score': '${_correct}',
+                            'total': '${total}',
+                            'quizID': '${widget.e.quizID}',
+                            'quizDesc': '${widget.e.quizDesc}',
+                            'quizTitle': '${widget.e.quizTitle}',
+                            'roomID': '${widget.e.roomID}',
+                            'answered': true,
+                            'submitted': FieldValue.serverTimestamp()
+                          };
+                          await databaseService!.addGradesStatus
+                            (widget.quizId, gradesData, userID);
                           BlocProvider.of<QuizBloc>(context)
                               .add(EndQuiz('0', total.toString()));
                           Navigator.pop(context);
@@ -227,6 +246,18 @@ class _QuizPlayState extends State<QuizPlay> {
                                             body: 'Score: ${_correct}/${total}',
                                             flutterLocalNotificationsPlugin:
                                             _localNotificationsPlugin);
+                                        var gradesData = {
+                                          'score': '${_correct}',
+                                          'total': '${total}',
+                                          'quizID': '${widget.e.quizID}',
+                                          'quizDesc': '${widget.e.quizDesc}',
+                                          'quizTitle': '${widget.e.quizTitle}',
+                                          'roomID': '${widget.e.roomID}',
+                                          'answered': true,
+                                          'submitted': FieldValue.serverTimestamp()
+                                        };
+                                        await databaseService!.addGradesStatus
+                                          (widget.e.quizID, gradesData, userID);
                                             BlocProvider.of<QuizBloc>(context).add(
                                                 EndQuiz('0', total.toString()));
                                             Navigator.pop(context);

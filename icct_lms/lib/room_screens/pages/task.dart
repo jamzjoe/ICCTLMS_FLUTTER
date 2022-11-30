@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:icct_lms/components/loading.dart';
 import 'package:icct_lms/components/nodata.dart';
+import 'package:icct_lms/home_pages/profile.dart';
 import 'package:icct_lms/models/quiz_list_model.dart';
 import 'package:icct_lms/room_screens/pages/quiz_play.dart';
 import 'package:icct_lms/room_screens/pages/task_screen/completed.dart';
@@ -19,12 +21,13 @@ class Task extends StatefulWidget {
 }
 
 final QuizServices _quizServices = QuizServices();
+String userID = FirebaseAuth.instance.currentUser.toString();
 
 class _TaskState extends State<Task> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<QuizModel>>(
-        stream: _quizServices.readRoomsQuiz([widget.roomID]),
+        stream: _quizServices.readRoomsQuiz([widget.roomID], userID),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final data = snapshot.data;
@@ -34,7 +37,7 @@ class _TaskState extends State<Task> {
             }
             return  Column(
               children: [
-            TaskHeader(),
+            TaskHeader(roomID: widget.roomID,),
                 QuizList(data: data),
               ],
             );
@@ -120,8 +123,9 @@ class QuizList extends StatelessWidget {
 
 class TaskHeader extends StatelessWidget {
   const TaskHeader({
-    Key? key,
+    Key? key, required this.roomID,
   }) : super(key: key);
+  final String roomID;
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +177,7 @@ class TaskHeader extends StatelessWidget {
                   label: Text('Grades')),
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder:
-                    (context) => Grades()));
+                    (context) => Grades(roomID: roomID,)));
               },
             )
           ],

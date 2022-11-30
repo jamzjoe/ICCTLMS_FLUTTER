@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:icct_lms/quiz/add_QandA.dart';
 import 'package:icct_lms/quiz/add_question.dart';
 import 'package:icct_lms/services/quizzes.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -29,11 +30,9 @@ class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
   String quizId = '';
   var QuizType = [
     'Multiple Choice',
-    'Fill in the Blanks',
-    'Essay Writing',
     'Question and Answer'
   ];
-  String? selectedType = '';
+  String? selectedType = 'Multiple Choice';
   late DateTime selectedDate;
   final _countController = TextEditingController();
   createQuiz() {
@@ -47,6 +46,7 @@ class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
         "quizTitle": quizTitle.toString(),
         "quizDesc": quizDesc.toString(),
         "roomID": widget.roomID,
+        "quizType": selectedType,
         'quizID': quizId,
         "time_duration": '$hours:$minutes',
         "due_date": selectedDate,
@@ -58,8 +58,16 @@ class _CreateQuizState extends State<CreateQuiz> with TickerProviderStateMixin {
         setState(() {
           isLoading = false;
         });
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => AddQuestion(quizId)));
+        if(selectedType == 'Multiple Choice'){
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => AddQuestion(quizId)));
+        }else{
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => QuestionAndAnswer
+                (quizID: quizId,)));
+        }
+
+
       });
     }
   }

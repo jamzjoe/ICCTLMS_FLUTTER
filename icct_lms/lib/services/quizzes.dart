@@ -3,6 +3,7 @@ import 'package:icct_lms/models/answer_preview.dart';
 import 'package:icct_lms/models/joined_model.dart';
 import 'package:icct_lms/models/quiz_list_model.dart';
 import 'package:icct_lms/models/quiz_model.dart';
+import 'package:icct_lms/models/quiz_status.dart';
 
 class QuizServices{
   Future<void> addQuizData(Map<String, dynamic> quizData, String quizId)
@@ -53,6 +54,28 @@ class QuizServices{
     });
   }
 
+Future<void> addGradesStatus(String quizID, gradesData, String userID)async{
+  await FirebaseFirestore.instance
+      .collection("Quiz")
+      .doc(userID)
+      .collection('Status')
+      .doc(quizID)
+      .set(gradesData).catchError((e){});
+}
+
+Stream<List<QuizStatus>> readStatus(String userID){
+    return FirebaseFirestore.instance
+        .collection("Quiz")
+        .doc(userID)
+        .collection('Status')
+        .orderBy('submitted', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((e) => QuizStatus.fromJson(e.data()))
+        .toList()
+    );
+}
+
 
 
 
@@ -65,15 +88,18 @@ class QuizServices{
         .toList());
   }
 
-  Stream<List<QuizModel>> readRoomsQuiz(List<String> room) {
-    return FirebaseFirestore.instance
+  Stream<List<QuizModel>> readRoomsQuiz(List<String> room, String userID) {
+    final status = readStatus(userID);
+    final data = FirebaseFirestore.instance
         .collection('Quiz')
         .where('roomID', whereIn: room)
-        .orderBy('due_date', descending: true)
+        .orderBy('due_date', descending: false)
         .snapshots()
         .map((snapshot) => snapshot.docs
         .map((doc) => QuizModel.fromJson(doc.data()))
-        .toList());
+        .toList().toList());
+
+    return data;
   }
 
   Stream<List<JoinedModel>> readJoinedGroup(String userID) {
